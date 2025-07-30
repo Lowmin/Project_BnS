@@ -7,15 +7,19 @@
 #include "InputAction.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	WalkSpeed = 300.0f;
+	RunSpeed = 600.0f;
 }
 
 void AMyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
 void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -37,6 +41,9 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedPlayerInputComponent->BindAction(IA_Movement, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
 		EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
 		EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
+		EnhancedPlayerInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
+		EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::BeginWalking);
+		EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Completed, this, &AMyPlayer::StopWalking);
 	}
 }
 
@@ -61,3 +68,34 @@ void AMyPlayer::Move(const FInputActionValue& Value)
 		}
 	}
 }
+
+void AMyPlayer::Look(const FInputActionValue& Value)
+{
+	FVector2D InputValue = Value.Get<FVector2D>();
+
+	if (InputValue.X != 0.0f)
+	{
+		AddControllerYawInput(InputValue.X);
+	}
+	if (InputValue.Y != 0.0f)
+	{
+		AddControllerPitchInput(InputValue.Y);
+	}
+}
+
+void AMyPlayer::BeginWalking()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
+}
+
+void AMyPlayer::StopWalking()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	}
+}
+
