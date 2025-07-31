@@ -13,7 +13,7 @@ class PROJECT_BNS_API ACharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
-	// ƒ´∏ﬁ∂Û ∞¸∑√ //
+	// Ïπ¥Î©îÎùº Í¥ÄÎ†® //
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyTPS_Cam, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
@@ -27,6 +27,15 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+public:
+	void Attack();
+	bool IsDead() const;
+	
 
-public:	
+	// Stat Component
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	class UStatComponent* status = nullptr;
+
 };
