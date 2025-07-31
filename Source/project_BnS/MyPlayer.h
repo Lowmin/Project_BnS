@@ -51,4 +51,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float RunSpeed;
+	float JumpP;
 };
