@@ -38,4 +38,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	class UStatComponent* status = nullptr;
 
+public:
+	int GetLevel() const;
+
 };

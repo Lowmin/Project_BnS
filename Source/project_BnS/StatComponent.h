@@ -34,7 +34,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	int maxMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int level = 0;
+	int level = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float atk = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")

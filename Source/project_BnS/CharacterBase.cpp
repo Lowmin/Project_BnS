@@ -50,3 +50,8 @@ bool ACharacterBase::IsDead() const
 {
 	return status->GetCurHp() <= 0.0f;
 }
+
+int ACharacterBase::GetLevel() const
+{
+	return status->GetLevel();
+}

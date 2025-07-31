@@ -28,7 +28,10 @@ void ABnsController::BeginPlay()
 		mainUi->AddToViewport();
 	}
 	
-	//auto presenter = new MainUIPresenter(mainUi, GetPawn<ACharacterBase>());
+	auto character = GetPawn<ACharacterBase>();
+	auto presenter = new MainUIPresenter(mainUi, character);
+
+	presenter->OnLevelChange(character->GetLevel());
 }
 
 void ABnsController::OnPossess(APawn* pawn)
