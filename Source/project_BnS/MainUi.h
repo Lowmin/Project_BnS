@@ -16,16 +16,16 @@ class PROJECT_BNS_API UMainUi : public UUserWidget
 	
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetHp(int current, int max);
+	void SetHp(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetMp(int current);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetStamina(int current, int max);
+	void SetStamina(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetExp(int current, int max);
+	void SetExp(float current, float max);
 
 	//UFUNCTION(BlueprintImplementableEvent)
 	//void SetNickname(FString& nickname);
