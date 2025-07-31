@@ -10,9 +10,6 @@ MainUIPresenter::MainUIPresenter(UMainUi* ui, ACharacterBase* character)
 {
 	mainUI = ui;
 	this->character = character;
-
-	
-	UE_LOG(LogActor, Warning, TEXT("name : %d"), character->IsDead());
 }
 
 MainUIPresenter::~MainUIPresenter()
