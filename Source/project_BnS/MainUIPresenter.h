@@ -11,12 +11,12 @@
 class PROJECT_BNS_API MainUIPresenter
 {
 public:
-	MainUIPresenter(class UMainUi* ui, class ACharacterBase* character);
+	MainUIPresenter(class UMainUi* ui, class AMyPlayer* character);
 	~MainUIPresenter();
 
 	// variable
 	UMainUi* mainUI = nullptr;
-	ACharacterBase* character = nullptr;
+	AMyPlayer* character = nullptr;
 
 	// Status
 public:
@@ -24,6 +24,7 @@ public:
 	void OnMpChange(float current) const;
 	void OnStanimaChange(float current, float max) const;
 
+	void OnNicknameChange(const FString& nickname) const;
 	void OnLevelChange(int level) const;
 	void OnExpChange(float current, float max) const;
 };

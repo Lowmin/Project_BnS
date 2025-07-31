@@ -14,7 +14,6 @@ AMyPlayer::AMyPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 	WalkSpeed = 300.0f;
 	RunSpeed = 600.0f;
-	JumpP = 10.f;
 }
 
 void AMyPlayer::BeginPlay()

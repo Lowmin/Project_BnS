@@ -39,6 +39,9 @@ private:
 	class UStatComponent* status = nullptr;
 
 public:
-	int GetLevel() const;
+	float GetCurHp() const;
+	float GetMaxHp() const;
+	int GetCurMp() const;
+	int GetCharacterLevel() const;
 
 };

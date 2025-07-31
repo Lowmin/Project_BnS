@@ -27,8 +27,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetExp(float current, float max);
 
-	//UFUNCTION(BlueprintImplementableEvent)
-	//void SetNickname(FString& nickname);
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetNickname(const FString& nickname);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetLevel(int level);

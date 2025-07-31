@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MainUi.h"
 #include "MainUIPresenter.h"
-#include "CharacterBase.h"
+#include "MyPlayer.h"
 
 ABnsController::ABnsController()
 {
@@ -28,10 +28,13 @@ void ABnsController::BeginPlay()
 		mainUi->AddToViewport();
 	}
 	
-	auto character = GetPawn<ACharacterBase>();
+	auto character = GetPawn<AMyPlayer>();
 	auto presenter = new MainUIPresenter(mainUi, character);
 
-	presenter->OnLevelChange(character->GetLevel());
+	presenter->OnLevelChange(character->GetCharacterLevel());
+	presenter->OnHpChange(character->GetCurHp(), character->GetMaxHp());
+	presenter->OnMpChange(character->GetCurMp());
+	presenter->OnNicknameChange(TEXT("BNSUser"));
 }
 
 void ABnsController::OnPossess(APawn* pawn)
