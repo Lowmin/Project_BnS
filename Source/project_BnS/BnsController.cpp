@@ -5,10 +5,11 @@
 
 #include "Blueprint/UserWidget.h"
 #include "MainUi.h"
+#include "MainUIPresenter.h"
+#include "CharacterBase.h"
 
 ABnsController::ABnsController()
 {
-
 	ConstructorHelpers::FClassFinder<UMainUi> res(TEXT("/Game/UI/WBP_Ingame.WBP_Ingame_C"));
 	if (res.Succeeded())
 	{
@@ -16,14 +17,21 @@ ABnsController::ABnsController()
 	}
 }
 
-void ABnsController::OnPossess(APawn* pawn)
+void ABnsController::BeginPlay()
 {
-	Super::OnPossess(pawn);
-	
+	Super::BeginPlay();
+
 	// UI 생성 
 	if (mainUiClass != nullptr)
 	{
 		mainUi = CreateWidget<UMainUi>(this, mainUiClass);
 		mainUi->AddToViewport();
 	}
+	
+	//auto presenter = new MainUIPresenter(mainUi, GetPawn<ACharacterBase>());
+}
+
+void ABnsController::OnPossess(APawn* pawn)
+{
+	Super::OnPossess(pawn);
 }

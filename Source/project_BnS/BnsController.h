@@ -20,6 +20,10 @@ public:
 	ABnsController();
 
 private:
+	virtual void BeginPlay() override;
+
+	// UI
+private:
 	TSubclassOf<class UMainUi> mainUiClass = nullptr;
 	UMainUi* mainUi = nullptr;
 

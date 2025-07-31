@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "StatComponent.h"
+
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
@@ -27,6 +29,9 @@ ACharacterBase::ACharacterBase()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	// statComponent 생성 
+	status = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -36,3 +41,12 @@ void ACharacterBase::BeginPlay()
 	
 }
 
+void ACharacterBase::Attack()
+{
+	
+}
+
+bool ACharacterBase::IsDead() const
+{
+	return status->GetCurHp() <= 0.0f;
+}
