@@ -4,9 +4,9 @@
 #include "MainUIPresenter.h"
 
 #include "MainUi.h"
-#include "CharacterBase.h"
+#include "MyPlayer.h"
 
-MainUIPresenter::MainUIPresenter(UMainUi* ui, ACharacterBase* character)
+MainUIPresenter::MainUIPresenter(UMainUi* ui, AMyPlayer* character)
 {
 	mainUI = ui;
 	this->character = character;
@@ -20,7 +20,6 @@ void MainUIPresenter::OnHpChange(float current, float max) const
 {
 	if (mainUI == nullptr)
 		return;
-
 	mainUI->SetHp(current, max);
 }
 
@@ -38,6 +37,14 @@ void MainUIPresenter::OnStanimaChange(float current, float max) const
 		return;
 
 	mainUI->SetStamina(current, max);
+}
+
+void MainUIPresenter::OnNicknameChange(const FString& nickname) const
+{
+	if (mainUI == nullptr)
+		return;
+
+	mainUI->SetNickname(nickname);
 }
 
 void MainUIPresenter::OnLevelChange(int level) const

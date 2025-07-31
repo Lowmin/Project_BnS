@@ -51,7 +51,22 @@ bool ACharacterBase::IsDead() const
 	return status->GetCurHp() <= 0.0f;
 }
 
-int ACharacterBase::GetLevel() const
+float ACharacterBase::GetCurHp() const
+{
+	return status->GetCurHp();
+}
+
+float ACharacterBase::GetMaxHp() const
+{
+	return status->GetMaxHp();
+}
+
+int ACharacterBase::GetCurMp() const
+{
+	return status->GetCurMp();
+}
+
+int ACharacterBase::GetCharacterLevel() const
 {
 	return status->GetLevel();
 }
