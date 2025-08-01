@@ -28,4 +28,6 @@ public:
 	void OnNicknameChange(const FString& nickname) const;
 	void OnLevelChange(int level) const;
 	void OnExpChange(float current, float max) const;
+
+	void OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const;
 };

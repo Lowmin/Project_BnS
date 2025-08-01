@@ -35,4 +35,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetLevel(int level);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetTarget(bool isTarget, FVector2D center, FVector2D size);
 };

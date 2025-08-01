@@ -71,3 +71,7 @@ void MainUIPresenter::OnExpChange(float current, float max) const
 
 	MainUI->SetExp(current, max);
 }
+
+void MainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const
+{
+}
