@@ -26,19 +26,19 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float curHp = 10.0f;
+	float CurHp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float maxHp = 10.0f;
+	float MaxHp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int curMp = 10.0f;
+	int CurMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int maxMp = 10.0f;
+	int MaxMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int level = 1;
+	int Level = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float atk = 10.0f;
+	float Atk = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float def = 10.0f;
+	float Def = 10.0f;
 
 public:
 	// HP

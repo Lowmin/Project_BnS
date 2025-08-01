@@ -6,10 +6,10 @@
 #include "MainUi.h"
 #include "MyPlayer.h"
 
-MainUIPresenter::MainUIPresenter(UMainUi* ui, AMyPlayer* character)
+MainUIPresenter::MainUIPresenter(UMainUi* ui, AMyPlayer* player)
 {
-	mainUI = ui;
-	this->character = character;
+	MainUI = ui;
+	this->MyPlayer = player;
 }
 
 MainUIPresenter::~MainUIPresenter()
@@ -18,55 +18,56 @@ MainUIPresenter::~MainUIPresenter()
 
 void MainUIPresenter::OnHpChange(float current, float max) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
-	mainUI->SetHp(current, max);
+
+	MainUI->SetHp(current, max);
 }
 
 void MainUIPresenter::OnMpChange(float current) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetMp(current);
+	MainUI->SetMp(current);
 }
 
 void MainUIPresenter::OnStanimaChange(float current, float max) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetStamina(current, max);
+	MainUI->SetStamina(current, max);
 }
 
 void MainUIPresenter::OnBattleChange(bool battle) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetStaminaEnable(!battle);
+	MainUI->SetStaminaEnable(!battle);
 }
 
 void MainUIPresenter::OnNicknameChange(const FString& nickname) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetNickname(nickname);
+	MainUI->SetNickname(nickname);
 }
 
 void MainUIPresenter::OnLevelChange(int level) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetLevel(level);
+	MainUI->SetLevel(level);
 }
 
 void MainUIPresenter::OnExpChange(float current, float max) const
 {
-	if (mainUI == nullptr)
+	if (MainUI == nullptr)
 		return;
 
-	mainUI->SetExp(current, max);
+	MainUI->SetExp(current, max);
 }

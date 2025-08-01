@@ -24,8 +24,8 @@ private:
 
 	// UI
 private:
-	TSubclassOf<class UMainUi> mainUiClass = nullptr;
-	UMainUi* mainUi = nullptr;
+	TSubclassOf<class UMainUi> MainUiClass = nullptr;
+	UMainUi* MainUi = nullptr;
 
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;

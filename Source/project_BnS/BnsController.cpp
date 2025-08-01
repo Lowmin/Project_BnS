@@ -13,7 +13,7 @@ ABnsController::ABnsController()
 	ConstructorHelpers::FClassFinder<UMainUi> res(TEXT("/Game/UI/WBP_Ingame.WBP_Ingame_C"));
 	if (res.Succeeded())
 	{
-		mainUiClass = res.Class;
+		MainUiClass = res.Class;
 	}
 }
 
@@ -22,14 +22,14 @@ void ABnsController::BeginPlay()
 	Super::BeginPlay();
 
 	// UI 생성 
-	if (mainUiClass != nullptr)
+	if (MainUiClass != nullptr)
 	{
-		mainUi = CreateWidget<UMainUi>(this, mainUiClass);
-		mainUi->AddToViewport();
+		MainUi = CreateWidget<UMainUi>(this, MainUiClass);
+		MainUi->AddToViewport();
 	}
 	
 	auto character = GetPawn<AMyPlayer>();
-	auto presenter = new MainUIPresenter(mainUi, character);
+	auto presenter = new MainUIPresenter(MainUi, character);
 
 	presenter->OnLevelChange(character->GetCharacterLevel());
 	presenter->OnHpChange(character->GetCurHp(), character->GetMaxHp());

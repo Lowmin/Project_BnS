@@ -34,45 +34,45 @@ void UStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 float UStatComponent::GetCurHp() const
 {
-	return curHp;
+	return CurHp;
 }
 
 void UStatComponent::SetCurHp(float hp)
 {
-	curHp = hp;
+	CurHp = hp;
 }
 
 float UStatComponent::GetMaxHp() const 
 {
-	return maxHp;
+	return MaxHp;
 }
 
 int UStatComponent::GetCurMp() const
 {
-	return curMp;
+	return CurMp;
 }
 
 void UStatComponent::SetCurMp(float mp)
 {
-	curMp = mp;
+	CurMp = mp;
 }
 
 int UStatComponent::GetMaxMp() const
 {
-	return maxMp;
+	return MaxMp;
 }
 
 int UStatComponent::GetLevel() const
 {
-	return level;
+	return Level;
 }
 
 float UStatComponent::GetAtk() const
 {
-	return atk;
+	return Atk;
 }
 
 float UStatComponent::GetDef() const
 {
-	return def;
+	return Def;
 }

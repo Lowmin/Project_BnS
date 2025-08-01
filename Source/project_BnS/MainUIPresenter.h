@@ -11,12 +11,12 @@
 class PROJECT_BNS_API MainUIPresenter
 {
 public:
-	MainUIPresenter(class UMainUi* ui, class AMyPlayer* character);
+	MainUIPresenter(class UMainUi* ui, class AMyPlayer* player);
 	~MainUIPresenter();
 
 	// variable
-	UMainUi* mainUI = nullptr;
-	AMyPlayer* character = nullptr;
+	UMainUi* MainUI = nullptr;
+	AMyPlayer* MyPlayer = nullptr;
 
 	// Status
 public:
