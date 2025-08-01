@@ -39,6 +39,14 @@ void MainUIPresenter::OnStanimaChange(float current, float max) const
 	mainUI->SetStamina(current, max);
 }
 
+void MainUIPresenter::OnBattleChange(bool battle) const
+{
+	if (mainUI == nullptr)
+		return;
+
+	mainUI->SetStaminaEnable(!battle);
+}
+
 void MainUIPresenter::OnNicknameChange(const FString& nickname) const
 {
 	if (mainUI == nullptr)

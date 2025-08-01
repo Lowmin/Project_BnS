@@ -35,6 +35,7 @@ void ABnsController::BeginPlay()
 	presenter->OnHpChange(character->GetCurHp(), character->GetMaxHp());
 	presenter->OnMpChange(character->GetCurMp());
 	presenter->OnNicknameChange(TEXT("BNSUser"));
+	presenter->OnBattleChange(true);
 }
 
 void ABnsController::OnPossess(APawn* pawn)

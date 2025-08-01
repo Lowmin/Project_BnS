@@ -25,6 +25,9 @@ public:
 	void SetStamina(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void SetStaminaEnable(bool enable);
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void SetExp(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)

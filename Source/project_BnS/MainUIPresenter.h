@@ -23,6 +23,7 @@ public:
 	void OnHpChange(float current, float max) const;
 	void OnMpChange(float current) const;
 	void OnStanimaChange(float current, float max) const;
+	void OnBattleChange(bool battle) const;
 
 	void OnNicknameChange(const FString& nickname) const;
 	void OnLevelChange(int level) const;
