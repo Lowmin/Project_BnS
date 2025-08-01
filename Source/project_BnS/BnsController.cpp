@@ -28,12 +28,12 @@ void ABnsController::BeginPlay()
 		MainUi->AddToViewport();
 	}
 	
-	auto character = GetPawn<AMyPlayer>();
-	auto presenter = new MainUIPresenter(MainUi, character);
+	AMyPlayer* player = GetPawn<AMyPlayer>();
+	MainUIPresenter* presenter = new MainUIPresenter(MainUi, player);
 
-	presenter->OnLevelChange(character->GetCharacterLevel());
-	presenter->OnHpChange(character->GetCurHp(), character->GetMaxHp());
-	presenter->OnMpChange(character->GetCurMp());
+	presenter->OnLevelChange(player->GetCharacterLevel());
+	presenter->OnHpChange(player->GetCurHp(), player->GetMaxHp());
+	presenter->OnMpChange(player->GetCurMp());
 	presenter->OnNicknameChange(TEXT("BNSUser"));
 	presenter->OnBattleChange(true);
 }
