@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SkillSystem.h" // ASkillSystem을 상속받았다면 필요
+#include "SkillSystem.h"
 #include "InputActionValue.h"
 #include "MyPlayer.generated.h"
 
@@ -11,7 +11,7 @@
  *
  */
 UCLASS()
-class PROJECT_BNS_API AMyPlayer : public ASkillSystem // ASkillSystem을 상속받았다면 이렇게
+class PROJECT_BNS_API AMyPlayer : public ASkillSystem
 {
 	GENERATED_BODY()
 
