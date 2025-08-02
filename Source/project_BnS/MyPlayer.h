@@ -7,9 +7,6 @@
 #include "InputActionValue.h"
 #include "MyPlayer.generated.h"
 
-/**
- *
- */
 UCLASS()
 class PROJECT_BNS_API AMyPlayer : public ASkillSystem
 {
@@ -18,7 +15,6 @@ class PROJECT_BNS_API AMyPlayer : public ASkillSystem
 public:
 	AMyPlayer();
 
-	// 입력
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputMappingContext* IC_Player;
 
@@ -31,9 +27,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Look;
 
-	// 새로 추가할 달리기 Input Action
 	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputAction* IA_Run; // IA_Run 추가
+	class UInputAction* IA_Run;
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,14 +36,8 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-
 	void BeginWalking();
 	void StopWalking();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-	float WalkSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-	float RunSpeed;
 };
