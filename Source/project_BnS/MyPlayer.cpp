@@ -1,5 +1,5 @@
 // myplayer.cpp
-#include "MyPlayer.h" // AMyPlayer 클래스 정의를 위해 필수
+#include "MyPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"

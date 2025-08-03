@@ -51,7 +51,7 @@ public:
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-    USMoveComponent* MovementSystem; // 이 변수 선언이 있어야 합니다.
+    USMoveComponent* MovementSystem;
 
     float RunSpeed;
     float WalkSpeed;

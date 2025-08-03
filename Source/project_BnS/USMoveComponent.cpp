@@ -6,9 +6,12 @@
 USMoveComponent::USMoveComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	bIsWallClimbing = false;
-	WallClimbSpeed = 200.f;
-	WallCheckDistance = 100.f;
+	bIsSMove = false;
+	bIsGliding = false;
+	CurrentMoveState = EMoveState::Idle;
+	GlideSpeed = 1000.0f;
+	WallRunDuration = 5.0f;
+	WaterRunCheckRadius = 100.0f;
 }
 
 void USMoveComponent::BeginPlay()
@@ -16,55 +19,108 @@ void USMoveComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-bool USMoveComponent::CanWallClimb() const
+void USMoveComponent::SetSMoveState(EMoveState NewState)
 {
-	// 벽 감지 로직
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (!OwnerCharacter) return false;
-
-	FHitResult HitResult;
-	FVector Start = OwnerCharacter->GetActorLocation();
-	FVector End = Start + OwnerCharacter->GetActorForwardVector() * WallCheckDistance;
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OwnerCharacter);
-
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+	// 상태가 변경되었을 때만 로직 실행
+	if (CurrentMoveState != NewState)
 	{
-		// 충돌한 물체가 벽인지 확인 (예: 충돌 채널, 태그 등)
-		// 여기서는 간단히 충돌이 발생하면 벽으로 가정
-		return true;
+		CurrentMoveState = NewState;
+		// 델리게이트 호출
+		OnSMoveStateChanged.Broadcast(NewState);
+
+		// 상태에 따른 추가 로직 (예: 애니메이션 변경, 효과음 재생 등)
 	}
+}
+
+void USMoveComponent::StartSMove()
+{
+	if (!bIsSMove)
+	{
+		bIsSMove = true;
+		SetSMoveState(EMoveState::Running);
+	}
+}
+
+void USMoveComponent::StopSMove()
+{
+	if (bIsSMove)
+	{
+		bIsSMove = false;
+		SetSMoveState(EMoveState::Idle);
+	}
+}
+
+void USMoveComponent::StartGlide()
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (OwnerCharacter && !bIsGliding)
+	{
+		// 글라이딩 시작 조건 확인 (예: 공중에 있을 때)
+		if (OwnerCharacter->GetCharacterMovement()->IsFalling())
+		{
+			bIsGliding = true;
+			SetSMoveState(EMoveState::Gliding);
+			// 캐릭터의 이동 속도 및 중력 스케일 변경
+			OwnerCharacter->GetCharacterMovement()->AirControl = 1.0f;
+			OwnerCharacter->GetCharacterMovement()->GravityScale = 0.5f;
+		}
+	}
+}
+
+void USMoveComponent::StopGlide()
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (OwnerCharacter && bIsGliding)
+	{
+		bIsGliding = false;
+		// 글라이딩 종료
+		SetSMoveState(EMoveState::Idle);
+		// 원래 캐릭터 이동 속도 및 중력 스케일로 복구
+		OwnerCharacter->GetCharacterMovement()->AirControl = 0.2f;
+		OwnerCharacter->GetCharacterMovement()->GravityScale = 1.0f;
+	}
+}
+
+bool USMoveComponent::CheckForWall()
+{
+	// 벽 감지 로직 (예: 라인 트레이스 사용)
+	// ...
 	return false;
 }
 
-void USMoveComponent::StartWallClimb()
+void USMoveComponent::StartWallRun()
 {
-	if (bIsWallClimbing) return;
-
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (!OwnerCharacter) return;
-
-	// 벽타기 시작
-	bIsWallClimbing = true;
-
-	// 캐릭터의 움직임 모드를 비행 모드로 변경
-	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-
-	// 캐릭터의 Z축 속도를 벽타기 속도로 설정
-	OwnerCharacter->GetCharacterMovement()->Velocity.Z = WallClimbSpeed;
+	if (CheckForWall())
+	{
+		SetSMoveState(EMoveState::WallRunning);
+		// 벽타기 로직
+		// ...
+	}
 }
 
-void USMoveComponent::StopWallClimb()
+void USMoveComponent::StopWallRun()
 {
-	if (!bIsWallClimbing) return;
+	SetSMoveState(EMoveState::Idle);
+}
 
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (!OwnerCharacter) return;
+bool USMoveComponent::CheckForWater()
+{
+	// 물 감지 로직 (예: 구체 충돌 감지 사용)
+	// ...
+	return false;
+}
 
-	// 벽타기 중지
-	bIsWallClimbing = false;
+void USMoveComponent::StartWaterRun()
+{
+	if (CheckForWater())
+	{
+		SetSMoveState(EMoveState::WaterRunning);
+		// 물 위 달리기 로직
+		// ...
+	}
+}
 
-	// 캐릭터의 움직임 모드를 다시 걷기 모드로 변경
-	OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+void USMoveComponent::StopWaterRun()
+{
+	SetSMoveState(EMoveState::Idle);
 }
