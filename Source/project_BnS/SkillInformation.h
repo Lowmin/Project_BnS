@@ -97,4 +97,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSoftObjectPtr<UAnimMontage> CastMontage;   // 애니메이션
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TSubclassOf<UObject> SkillEffectRunClass;
 };

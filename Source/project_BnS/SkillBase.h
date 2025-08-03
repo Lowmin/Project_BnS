@@ -18,16 +18,16 @@ class PROJECT_BNS_API USkillBase : public UObject
 
 protected:
 	UPROPERTY()
-	FDataTableRowHandle skillDataHandle;
+	FSkillInformation mySkillInfo;
 
 public:
 	USkillBase();
 
 	UFUNCTION(BlueprintCallable)
-	void InitializeSkill(FDataTableRowHandle dataHandle);
+	void InitializeSkill(const FSkillInformation& skillInfo);
 
 	UFUNCTION(BlueprintCallable)
-	const FSkillInformation& GetSkillInformation() const;
+	const FSkillInformation& GetSkillInfo() const;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void RunSkill(ACharacter* instigator, AActor* target, FVector targetLocation);

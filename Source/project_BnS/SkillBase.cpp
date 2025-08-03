@@ -9,36 +9,18 @@ USkillBase::USkillBase()
 {
 }
 
-void USkillBase::InitializeSkill(FDataTableRowHandle data)
+void USkillBase::InitializeSkill(const FSkillInformation& skillInfo)
 {
-	skillDataHandle = data;
-
-	if (!skillDataHandle.DataTable)
-		return;
+	mySkillInfo = skillInfo;
 }
 
-const FSkillInformation& USkillBase::GetSkillInformation() const
+const FSkillInformation& USkillBase::GetSkillInfo() const
 {
-	if (!skillDataHandle.DataTable || skillDataHandle.RowName.IsNone())
-	{
-		static const FSkillInformation emptySkillInfo = FSkillInformation();
-		return emptySkillInfo;
-	}
-
-	const FSkillInformation* findSkillInfo = skillDataHandle.DataTable->FindRow<FSkillInformation>(skillDataHandle.RowName, TEXT("USkillBase::GetSkillInformation"));
-
-	if (findSkillInfo)
-	{
-		return *findSkillInfo;
-	}
-	else
-	{
-		static const FSkillInformation emptySkillInfo = FSkillInformation();
-		return emptySkillInfo;
-	}
+	return mySkillInfo;
 }
 
 void USkillBase::RunSkill_Implementation(ACharacter* instigator, AActor* target, FVector targetLocation)
 {
+
 }
 
