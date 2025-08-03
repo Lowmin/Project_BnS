@@ -21,15 +21,6 @@ ACharacterBase::ACharacterBase()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->bUsePawnControlRotation = true;
-
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
-
 	// statComponent 생성 
 	status = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 }

@@ -1,43 +1,58 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// myplayer.h
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SkillSystem.h"
+#include "CharacterBase.h"
 #include "InputActionValue.h"
+#include "USMoveComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "MyPlayer.generated.h"
 
 UCLASS()
-class PROJECT_BNS_API AMyPlayer : public ASkillSystem
+class PROJECT_BNS_API AMyPlayer : public ACharacterBase
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	AMyPlayer();
+    AMyPlayer();
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputMappingContext* IC_Player;
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputMappingContext* IC_Player;
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputAction* IA_Movement;
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Movement;
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputAction* IA_Jump;
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Jump;
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputAction* IA_Look;
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Look;
 
-	UPROPERTY(EditAnywhere, Category = Input)
-	class UInputAction* IA_Run;
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Run;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyTPS_Cam, meta = (AllowPrivateAccess = "true"))
+    class USpringArmComponent* CameraBoom;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = myTPS_Cam, meta = (AllowPrivateAccess = "true"))
+    class UCameraComponent* FollowCamera;
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void BeginPlay() override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void BeginWalking();
-	void StopWalking();
+    void Move(const FInputActionValue& Value);
+    void Look(const FInputActionValue& Value);
+    void BeginWalking();
+    void StopWalking();
 
 public:
+
+private:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    USMoveComponent* MovementSystem; // 이 변수 선언이 있어야 합니다.
+
+    float RunSpeed;
+    float WalkSpeed;
 };

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MovementSystem.h"
+#include "CharacterBase.h"
 #include "SkillSystem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API ASkillSystem : public AMovementSystem
+class PROJECT_BNS_API ASkillSystem : public ACharacterBase
 {
 	GENERATED_BODY()
 	
