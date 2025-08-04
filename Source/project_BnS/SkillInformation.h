@@ -6,6 +6,8 @@
 #include "Engine/DataTable.h"
 #include "SkillInformation.generated.h"
 
+class USkillBase;
+
 UENUM(BlueprintType)
 enum class ESkillType : uint8
 {
@@ -57,7 +59,7 @@ public:
 
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 ManaCost = 0;
+    int32 CostMP = 0;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float Cooldown = 0.f;
@@ -93,11 +95,11 @@ public:
     float ComboAvailableTime = 0.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 manaRecover = 0;
+    int32 RecoverMP = 0;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSoftObjectPtr<UAnimMontage> CastMontage;   // 애니메이션
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSubclassOf<UObject> SkillEffectRunClass;
+    TSubclassOf<USkillBase> SkillClass;
 };

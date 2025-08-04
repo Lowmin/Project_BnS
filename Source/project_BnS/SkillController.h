@@ -4,33 +4,43 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "SkillBase.h"
-#include "SkillInformation.h"
+#include "Engine/DataTable.h"
+#include "SkillInformation.h" 
 #include "SkillController.generated.h"
 
-/**
- * 
- */
+class USkillBase;
+class ACharacterBase;
+
 UCLASS()
 class PROJECT_BNS_API USkillController : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
-	USkillController();
-	
-	UFUNCTION(BlueprintCallable)
-	void InitializeController(const FSkillInformation& skillInfo, USkillBase* skillBase);
+	void Initialize(TObjectPtr<UDataTable> InSkillDataTable, TObjectPtr<ACharacterBase> InOwnerCharacter);
 
-	UFUNCTION(BlueprintCallable)
-	bool ActivateSkill(ACharacter* instigator, AActor* target, FVector targetLocation);
+	// 기본 공격 콤보용
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	void RunBasicAttack();
 
-	UFUNCTION(BlueprintCallable)
-	const FSkillInformation& GetSkillInfo() const;
+	// 스킬
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	void RunSkillID(int32 SkillID, AActor* Target = nullptr, FVector TargetLocation = FVector::ZeroVector);
 
 protected:
-	UPROPERTY()
-	FSkillInformation mySkillInfo;
-	UPROPERTY()
-	USkillBase* linkedSkillBase;
+	void ComboReset();
+
+private:
+	UPROPERTY(VisibleAnywhere) 
+		TObjectPtr<UDataTable> SkillDataTable;
+
+	UPROPERTY(VisibleAnywhere)
+		TObjectPtr<ACharacterBase> OwnerCharacter;
+
+	UPROPERTY(VisibleAnywhere)
+		int32 CurrentComboSkillID = 101;
+
+	UPROPERTY(VisibleAnywhere) 
+		FTimerHandle ComboTimerHandle;
+
 };

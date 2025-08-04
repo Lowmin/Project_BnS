@@ -3,22 +3,18 @@
 
 #include "SkillController.h"
 
-USkillController::USkillController()
+void USkillController::Initialize(TObjectPtr<UDataTable> InSkillDataTable, TObjectPtr<ACharacterBase> InOwnerCharacter)
 {
 }
 
-void USkillController::InitializeController(const FSkillInformation& skillInfo, USkillBase* skillBase)
+void USkillController::RunBasicAttack()
 {
-	mySkillInfo = skillInfo;
-	linkedSkillBase = skillBase;
 }
 
-bool USkillController::ActivateSkill(ACharacter* instigator, AActor* target, FVector targetLocation)
+void USkillController::RunSkillID(int32 SkillID, AActor* Target, FVector TargetLocation)
 {
-	return false;
 }
 
-const FSkillInformation& USkillController::GetSkillInfo() const
+void USkillController::ComboReset()
 {
-	return mySkillInfo;
 }
