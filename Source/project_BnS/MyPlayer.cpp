@@ -84,10 +84,16 @@ void AMyPlayer::Look(const FInputActionValue& Value)
 
 void AMyPlayer::SMoveToggle()
 {
-    MovementSystem->SMoveToggle();
+    if (MovementSystem)
+    {
+        MovementSystem->SMoveToggle();
+    }
 }
 
 void AMyPlayer::SGlidingToggle()
 {
-    MovementSystem->GlideToggle();
+    if (MovementSystem)
+    {
+        MovementSystem->GlideToggle();
+    }
 }

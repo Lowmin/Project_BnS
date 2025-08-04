@@ -15,12 +15,33 @@ USMoveComponent::USMoveComponent()
 
 void USMoveComponent::BeginPlay()
 {
-	Super::BeginPlay();
 	MyPlayer = Cast<ACharacter>(GetOwner());
 
 	if (MyPlayer && MyPlayer->GetCharacterMovement())
 	{
 		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+	}
+}
+
+void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!MyPlayer || !MyPlayer->GetCharacterMovement())
+	{
+		return;
+	}
+
+	if (bIsGliding)
+	{
+		if (CheckGroundDistance() <= 0.0f)
+		{
+			StopGlide();
+		}
+		else
+		{
+			MyPlayer->GetCharacterMovement()->AddInputVector(FVector(0, 0, -1) * 25.f * DeltaTime);
+		}
 	}
 }
 
@@ -52,6 +73,8 @@ void USMoveComponent::StopSMove()
 
 void USMoveComponent::SMoveToggle()
 {
+	if (!MyPlayer) return;
+
 	if (!bIsSMove)
 	{
 		StartSMove();
@@ -64,26 +87,32 @@ void USMoveComponent::SMoveToggle()
 
 void USMoveComponent::StartGlide()
 {
+	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
 	float groundDistance = CheckGroundDistance();
 
 	if (MyPlayer->GetCharacterMovement()->IsFalling() && groundDistance >= glideMinHeight)
 	{
 		bIsGliding = true;
 		SetMoveState(EMoveState::Gliding);
-		MyPlayer->GetCharacterMovement()->GravityScale = glideGravityScale;
+		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		MyPlayer->GetCharacterMovement()->MaxFlySpeed = glideSpeed;
 	}
 }
 
 void USMoveComponent::StopGlide()
 {
+	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
 	bIsGliding = false;
 	SetMoveState(EMoveState::Idle);
-	MyPlayer->GetCharacterMovement()->GravityScale = 1.f;
+	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
 void USMoveComponent::GlideToggle()
 {
+	if (!MyPlayer) return;
+
 	if (!bIsGliding)
 	{
 		StartGlide();

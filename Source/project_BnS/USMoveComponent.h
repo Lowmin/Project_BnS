@@ -24,6 +24,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
 	void SetMoveState(EMoveState NewState);
@@ -44,8 +45,12 @@ private:
 	float glideGravityScale{};
 	float glideMinHeight{};
 	float CheckGroundDistance();
-	float LineTraceStartOffset = -100.f;
+	float LineTraceStartOffset = -100.f;	// 캐릭터 메시 생각해서 수치 조절
 	float LineTraceLength = 500.f;
 	bool bIsSMove;
-	bool bIsGliding;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
+	bool bIsGliding; 
+
+	/*UPROPERTY(EditAnywhere, Category = "SMove|Gliding")
+	float GlideDescentSpeed = 200.0f;*/
 };
