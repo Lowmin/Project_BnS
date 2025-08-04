@@ -1,5 +1,6 @@
 // USMoveComponent.cpp
 #include "USMoveComponent.h"
+#include "Engine/Engine.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -7,120 +8,116 @@ USMoveComponent::USMoveComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	bIsSMove = false;
-	bIsGliding = false;
-	CurrentMoveState = EMoveState::Idle;
-	GlideSpeed = 1000.0f;
-	WallRunDuration = 5.0f;
-	WaterRunCheckRadius = 100.0f;
+	glideSpeed = 700.f;
+	glideGravityScale = 0.1f;
+	glideMinHeight = 0.0f;
 }
 
 void USMoveComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	MyPlayer = Cast<ACharacter>(GetOwner());
+
+	if (MyPlayer && MyPlayer->GetCharacterMovement())
+	{
+		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+	}
 }
 
-void USMoveComponent::SetSMoveState(EMoveState NewState)
+void USMoveComponent::SetMoveState(EMoveState NewState)
 {
-	// 상태가 변경되었을 때만 로직 실행
 	if (CurrentMoveState != NewState)
 	{
 		CurrentMoveState = NewState;
-		// 델리게이트 호출
-		OnSMoveStateChanged.Broadcast(NewState);
-
-		// 상태에 따른 추가 로직 (예: 애니메이션 변경, 효과음 재생 등)
 	}
 }
 
 void USMoveComponent::StartSMove()
 {
-	if (!bIsSMove)
-	{
-		bIsSMove = true;
-		SetSMoveState(EMoveState::Running);
-	}
+	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+	bIsSMove = true;
+	SetMoveState(EMoveState::Running);
+	MyPlayer->GetCharacterMovement()->MaxWalkSpeed = runSpeed;
 }
 
 void USMoveComponent::StopSMove()
 {
-	if (bIsSMove)
+	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+	bIsSMove = false;
+	SetMoveState(EMoveState::Idle);
+	MyPlayer->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+}
+
+void USMoveComponent::SMoveToggle()
+{
+	if (!bIsSMove)
 	{
-		bIsSMove = false;
-		SetSMoveState(EMoveState::Idle);
+		StartSMove();
+	}
+	else
+	{
+		StopSMove();
 	}
 }
 
 void USMoveComponent::StartGlide()
 {
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (OwnerCharacter && !bIsGliding)
+	float groundDistance = CheckGroundDistance();
+
+	if (MyPlayer->GetCharacterMovement()->IsFalling() && groundDistance >= glideMinHeight)
 	{
-		// 글라이딩 시작 조건 확인 (예: 공중에 있을 때)
-		if (OwnerCharacter->GetCharacterMovement()->IsFalling())
-		{
-			bIsGliding = true;
-			SetSMoveState(EMoveState::Gliding);
-			// 캐릭터의 이동 속도 및 중력 스케일 변경
-			OwnerCharacter->GetCharacterMovement()->AirControl = 1.0f;
-			OwnerCharacter->GetCharacterMovement()->GravityScale = 0.5f;
-		}
+		bIsGliding = true;
+		SetMoveState(EMoveState::Gliding);
+		MyPlayer->GetCharacterMovement()->GravityScale = glideGravityScale;
+		MyPlayer->GetCharacterMovement()->MaxFlySpeed = glideSpeed;
 	}
 }
 
 void USMoveComponent::StopGlide()
 {
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (OwnerCharacter && bIsGliding)
+	bIsGliding = false;
+	SetMoveState(EMoveState::Idle);
+	MyPlayer->GetCharacterMovement()->GravityScale = 1.f;
+}
+
+void USMoveComponent::GlideToggle()
+{
+	if (!bIsGliding)
 	{
-		bIsGliding = false;
-		// 글라이딩 종료
-		SetSMoveState(EMoveState::Idle);
-		// 원래 캐릭터 이동 속도 및 중력 스케일로 복구
-		OwnerCharacter->GetCharacterMovement()->AirControl = 0.2f;
-		OwnerCharacter->GetCharacterMovement()->GravityScale = 1.0f;
+		StartGlide();
+	}
+	else
+	{
+		StopGlide();
 	}
 }
 
-bool USMoveComponent::CheckForWall()
+float USMoveComponent::CheckGroundDistance()
 {
-	// 벽 감지 로직 (예: 라인 트레이스 사용)
-	// ...
-	return false;
-}
+	FHitResult HitResult;
+	FVector StartLocation = MyPlayer->GetActorLocation();
+	FVector EndLocation = StartLocation - FVector(0, 0, LineTraceLength);
 
-void USMoveComponent::StartWallRun()
-{
-	if (CheckForWall())
+	StartLocation.Z += LineTraceStartOffset;
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(MyPlayer);
+
+	bool bHasHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECollisionChannel::ECC_Visibility,
+		QueryParams
+	);
+
+	if (bHasHit)
 	{
-		SetSMoveState(EMoveState::WallRunning);
-		// 벽타기 로직
-		// ...
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Ground Distance: %f"), HitResult.Distance));
+		return HitResult.Distance;
 	}
-}
 
-void USMoveComponent::StopWallRun()
-{
-	SetSMoveState(EMoveState::Idle);
-}
-
-bool USMoveComponent::CheckForWater()
-{
-	// 물 감지 로직 (예: 구체 충돌 감지 사용)
-	// ...
-	return false;
-}
-
-void USMoveComponent::StartWaterRun()
-{
-	if (CheckForWater())
-	{
-		SetSMoveState(EMoveState::WaterRunning);
-		// 물 위 달리기 로직
-		// ...
-	}
-}
-
-void USMoveComponent::StopWaterRun()
-{
-	SetSMoveState(EMoveState::Idle);
+	return -1.0f;
 }

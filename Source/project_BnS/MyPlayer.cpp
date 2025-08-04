@@ -11,11 +11,7 @@ AMyPlayer::AMyPlayer()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    RunSpeed = 1000.0f;
-    WalkSpeed = 600.0f;
-
     MovementSystem = CreateDefaultSubobject<USMoveComponent>(TEXT("MovementSystem"));
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -53,8 +49,8 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
         EnhancedPlayerInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
 
-        EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::BeginWalking);
-        EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Completed, this, &AMyPlayer::StopWalking);
+        EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
+        EnhancedPlayerInputComponent->BindAction(IA_Glide, ETriggerEvent::Started, this, &AMyPlayer::SGlidingToggle);
     }
 }
 
@@ -86,12 +82,12 @@ void AMyPlayer::Look(const FInputActionValue& Value)
     }
 }
 
-void AMyPlayer::BeginWalking()
+void AMyPlayer::SMoveToggle()
 {
-    GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+    MovementSystem->SMoveToggle();
 }
 
-void AMyPlayer::StopWalking()
+void AMyPlayer::SGlidingToggle()
 {
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    MovementSystem->GlideToggle();
 }

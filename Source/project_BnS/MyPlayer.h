@@ -32,6 +32,9 @@ public:
     UPROPERTY(EditAnywhere, Category = Input)
     class UInputAction* IA_Run;
 
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Glide;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MyTPS_Cam, meta = (AllowPrivateAccess = "true"))
     class USpringArmComponent* CameraBoom;
 
@@ -44,15 +47,11 @@ protected:
 
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
-    void BeginWalking();
-    void StopWalking();
 
-public:
+    void SMoveToggle();
+    void SGlidingToggle();
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USMoveComponent* MovementSystem;
-
-    float RunSpeed;
-    float WalkSpeed;
 };
