@@ -20,18 +20,15 @@ class PROJECT_BNS_API ICastable
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RunSkill(ACharacter* Instigator, AActor* Target, FVector TargetLocation);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Skill")
+	void ExecuteSkill(ACharacter* Instigator, AActor* Target, FVector TargetLocation);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	bool CanRunSkill(ACharacter* Intigator);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Skill")
+	bool CanExecuteSkill(ACharacter* Intigator);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	float GetSkillCooldown();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Skill")
 	void SetSkillDataHandle(const FDataTableRowHandle& SkillInfoHandle);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	FSkillInformation GetSkillInfo();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Skill")
+	FSkillInformation GetSkillInformation();
 };

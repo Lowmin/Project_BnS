@@ -5,11 +5,9 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Engine/DataTable.h"
+#include "SkillBase.h"
 #include "SkillInformation.h" 
 #include "SkillController.generated.h"
-
-class USkillBase;
-class ACharacterBase;
 
 UCLASS()
 class PROJECT_BNS_API USkillController : public UObject
@@ -17,30 +15,27 @@ class PROJECT_BNS_API USkillController : public UObject
 	GENERATED_BODY()
 
 public:
-	void Initialize(TObjectPtr<UDataTable> InSkillDataTable, TObjectPtr<ACharacterBase> InOwnerCharacter);
+	USkillController();
 
-	// 기본 공격 콤보용
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	void RunBasicAttack();
+	void Initialize(ACharacter* InInstigator, const FDataTableRowHandle& InDataHandle);
 
-	// 스킬
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	void RunSkillID(int32 SkillID, AActor* Target = nullptr, FVector TargetLocation = FVector::ZeroVector);
+	bool TryExecuteSkill(AActor* Target, FVector TargetLocation);
 
 protected:
-	void ComboReset();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<USkillBase> SkillBaseClass;
+	UPROPERTY()
+	USkillBase* SkillBaseInstance;
+	UPROPERTY()
+	ACharacter* OwnerInstigator;
 
-private:
-	UPROPERTY(VisibleAnywhere) 
-		TObjectPtr<UDataTable> SkillDataTable;
+	float CooldownEndTime;
 
-	UPROPERTY(VisibleAnywhere)
-		TObjectPtr<ACharacterBase> OwnerCharacter;
+	void StartCooldown();
+	bool IsCooldown() const;
+	bool IsEnoughMP() const;
 
-	UPROPERTY(VisibleAnywhere)
-		int32 CurrentComboSkillID = 101;
-
-	UPROPERTY(VisibleAnywhere) 
-		FTimerHandle ComboTimerHandle;
-
+	FSkillInformation GetSkillInformation() const;
 };

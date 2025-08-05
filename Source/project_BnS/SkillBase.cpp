@@ -5,88 +5,54 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h" 
-#include "StatComponent.h" 
+
 
 USkillBase::USkillBase()
 {
-    IsOnCooldown = false;
 }
 
-void USkillBase::RunSkill_Implementation(ACharacter* Instigator, AActor* Target, FVector TargetLocation)
+void USkillBase::LoadSkillData()
 {
-    const FSkillInformation SkillInfo = GetSkillInfo_Implementation();
-    UE_LOG(LogTemp, Log, TEXT("Skill ID: %d"), *SkillInfo.SkillName.ToString(), SkillInfo.Index);
-
-    // 쿨타임
-    if (SkillInfo.Cooldown > 0.0f && GetWorld()) 
+    if (SkillInfoHandle.DataTable && !SkillInfoHandle.RowName.IsNone())
     {
-        IsOnCooldown = true;
-        GetWorld()->GetTimerManager().SetTimer(CooldownTimerHandle, this, &USkillBase::OnCooldownFinished, SkillInfo.Cooldown, false);
-    }
-    
-    // MP 사용
-    if (Instigator)
-    {
-        UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
-        if (StatComp)
+        FSkillInformation* RowData = 
+            SkillInfoHandle.DataTable->FindRow<FSkillInformation>(SkillInfoHandle.RowName, TEXT("LoadSkillData"));
+        if (RowData)
         {
-            StatComp->SetCurMp(StatComp->GetCurMp() - SkillInfo.CostMP);
+            CachedSkillInformation = *RowData;
+        }
+        else
+        {
+            CachedSkillInformation = FSkillInformation();
         }
     }
 }
 
-// 스킬 사용 가능 여부 확인
-bool USkillBase::CanRunSkill_Implementation(ACharacter* Instigator)
+void USkillBase::ExecuteSkill_Implementation(ACharacter* Instigator, AActor* Target, FVector TargetLocation)
 {
-    // 쿨타임 체크
-    if (IsOnCooldown)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("쿨타임 - %s"), *GetSkillInfo_Implementation().SkillName.ToString());
-        return false;
-    }
+    // 스킬 효과 구현
+}
 
-    // 마나 체크
-    if (Instigator) 
-    {
-        UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
-        if (StatComp) 
-        {
-            if (StatComp->GetCurMp() < GetSkillInfo_Implementation().CostMP)
-            {
-                return false;
-            }
-        }
-    }
-
+bool USkillBase::CanExecuteSkill_Implementation(ACharacter* Instigator)
+{
+    // 스킬 사용 가능 여부
     return true;
-}
-
-float USkillBase::GetSkillCooldown_Implementation()
-{
-    return GetSkillInfo_Implementation().Cooldown;
 }
 
 void USkillBase::SetSkillDataHandle_Implementation(const FDataTableRowHandle& InSkillInfoHandle) 
 {
     SkillInfoHandle = InSkillInfoHandle;
+    LoadSkillData();
 }
 
 
-FSkillInformation USkillBase::GetSkillInfo_Implementation()
+FSkillInformation USkillBase::GetSkillInformation_Implementation()
 {
-    if (SkillInfoHandle.DataTable && !SkillInfoHandle.RowName.IsNone())
+    if (CachedSkillInformation.SkillName.IsEmpty() || SkillInfoHandle.RowName == NAME_None || SkillInfoHandle.DataTable == nullptr)
     {
-        const FSkillInformation* FoundRow = SkillInfoHandle.DataTable->FindRow<FSkillInformation>(SkillInfoHandle.RowName, TEXT("USkillBase::GetSkillInfo"));
-        if (FoundRow)
-        {
-            return *FoundRow;
-        }
+        LoadSkillData();
     }
-    return FSkillInformation();
+    return CachedSkillInformation;
 }
 
-void USkillBase::OnCooldownFinished()
-{
-    IsOnCooldown = false;
-}
 

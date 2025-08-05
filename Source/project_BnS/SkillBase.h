@@ -18,24 +18,19 @@ class PROJECT_BNS_API USkillBase : public UObject, public ICastable
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Data")
 	FDataTableRowHandle SkillInfoHandle;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill Data")
+	FSkillInformation CachedSkillInformation;
 
-	UPROPERTY()
-	FTimerHandle CooldownTimerHandle;
-
-	UPROPERTY()
-	bool IsOnCooldown;
-
-	void OnCooldownFinished();
+	void LoadSkillData();
 
 public:
 	USkillBase();
 
-	virtual void RunSkill_Implementation(ACharacter* Instigator, AActor* Target, FVector TargetLocation) override;
-	virtual bool CanRunSkill_Implementation(ACharacter* Instigator) override; 
-	virtual float GetSkillCooldown_Implementation() override;
+	virtual void ExecuteSkill_Implementation(ACharacter* Instigator, AActor* Target, FVector TargetLocation) override;
+	virtual bool CanExecuteSkill_Implementation(ACharacter* Instigator) override;
 	virtual void SetSkillDataHandle_Implementation(const FDataTableRowHandle& InSkillInfoHandle) override;
-	virtual FSkillInformation GetSkillInfo_Implementation() override;
+	virtual FSkillInformation GetSkillInformation_Implementation() override;
 
 };
