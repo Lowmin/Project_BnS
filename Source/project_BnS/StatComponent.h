@@ -30,11 +30,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float MaxHp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int CurMp = 10.0f;
+	int32 CurMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int MaxMp = 10.0f;
+	int32 MaxMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int Level = 1;
+	int32 Level = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float Atk = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
@@ -47,12 +47,12 @@ public:
 	float GetMaxHp() const;
 
 	// MP
-	int GetCurMp() const;
+	int32 GetCurMp() const;
 	void SetCurMp(float mp);
-	int GetMaxMp() const;
+	int32 GetMaxMp() const;
 
 	// level
-	int GetLevel() const;
+	int32 GetLevel() const;
 
 	// Atk
 	float GetAtk() const;

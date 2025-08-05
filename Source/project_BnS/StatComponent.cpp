@@ -47,7 +47,7 @@ float UStatComponent::GetMaxHp() const
 	return MaxHp;
 }
 
-int UStatComponent::GetCurMp() const
+int32 UStatComponent::GetCurMp() const
 {
 	return CurMp;
 }
@@ -57,12 +57,12 @@ void UStatComponent::SetCurMp(float mp)
 	CurMp = mp;
 }
 
-int UStatComponent::GetMaxMp() const
+int32 UStatComponent::GetMaxMp() const
 {
 	return MaxMp;
 }
 
-int UStatComponent::GetLevel() const
+int32 UStatComponent::GetLevel() const
 {
 	return Level;
 }
