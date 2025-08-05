@@ -25,16 +25,23 @@ void USMoveComponent::BeginPlay()
 
 void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement())
 	{
 		return;
 	}
 
+	if (bIsSMove)
+	{
+		const FVector Velocity = MyPlayer->GetCharacterMovement()->Velocity;
+		if (MyPlayer->GetCharacterMovement()->IsMovingOnGround() && Velocity.SizeSquared() < 1.0f)
+		{
+			StopSMove();
+		}
+	}
+
 	if (bIsGliding)
 	{
-		if (CheckGroundDistance() <= 0.0f)
+		if (checkGroundDistance() <= 0.0f)
 		{
 			StopGlide();
 		}
@@ -43,6 +50,11 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			MyPlayer->GetCharacterMovement()->AddInputVector(FVector(0, 0, -1) * 25.f * DeltaTime);
 		}
 	}
+}
+
+EMoveState USMoveComponent::getMoveState()
+{
+	return CurrentMoveState;
 }
 
 void USMoveComponent::SetMoveState(EMoveState NewState)
@@ -89,7 +101,9 @@ void USMoveComponent::StartGlide()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
-	float groundDistance = CheckGroundDistance();
+	float groundDistance = checkGroundDistance();
+
+	PrevMoveState = CurrentMoveState;
 
 	if (MyPlayer->GetCharacterMovement()->IsFalling() && groundDistance >= glideMinHeight)
 	{
@@ -105,8 +119,8 @@ void USMoveComponent::StopGlide()
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
 	bIsGliding = false;
-	SetMoveState(EMoveState::Idle);
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	SetMoveState(PrevMoveState);
 }
 
 void USMoveComponent::GlideToggle()
@@ -123,13 +137,30 @@ void USMoveComponent::GlideToggle()
 	}
 }
 
-float USMoveComponent::CheckGroundDistance()
+void USMoveComponent::SJump()
+{
+	jumpVelocity = 600.f;
+
+	if (MyPlayer && MyPlayer->GetCharacterMovement())
+	{
+		if (MyPlayer->GetCharacterMovement()->IsMovingOnGround())
+		{
+			if (CurrentMoveState == EMoveState::Running)
+			{
+				jumpVelocity = jumpVelocity * 2.f;
+			}
+			MyPlayer->LaunchCharacter(FVector(0.f, 0.f, jumpVelocity), false, true);
+		}
+	}
+}
+
+float USMoveComponent::checkGroundDistance()
 {
 	FHitResult HitResult;
 	FVector StartLocation = MyPlayer->GetActorLocation();
-	FVector EndLocation = StartLocation - FVector(0, 0, LineTraceLength);
+	FVector EndLocation = StartLocation - FVector(0, 0, lineTraceLength);
 
-	StartLocation.Z += LineTraceStartOffset;
+	StartLocation.Z += lineTraceStartOffset;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(MyPlayer);

@@ -9,6 +9,7 @@ enum class EMoveState : uint8
 {
 	Idle        UMETA(DisplayName = "Idle"),
 	Running     UMETA(DisplayName = "Running"),
+	Jumping     UMETA(DisplayName = "Jumping"),
 	Gliding     UMETA(DisplayName = "Gliding"),
 	WaterRunning UMETA(DisplayName = "WaterRunning"),
 	WallRunning  UMETA(DisplayName = "WallRunning")
@@ -26,6 +27,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	EMoveState getMoveState();
+
 public:
 	void SetMoveState(EMoveState NewState);
 	void StartSMove();
@@ -34,9 +37,11 @@ public:
 	void StartGlide();
 	void StopGlide();
 	void GlideToggle();
+	void SJump();
 
 private:
 	EMoveState CurrentMoveState;
+	EMoveState PrevMoveState;
 	ACharacter* MyPlayer;
 
 	float walkSpeed = 300.f;
@@ -44,9 +49,10 @@ private:
 	float glideSpeed{};
 	float glideGravityScale{};
 	float glideMinHeight{};
-	float CheckGroundDistance();
-	float LineTraceStartOffset = -100.f;	// 캐릭터 메시 생각해서 수치 조절
-	float LineTraceLength = 500.f;
+	float checkGroundDistance();
+	float lineTraceStartOffset = -100.f;	// 캐릭터 메시 생각해서 수치 조절
+	float lineTraceLength = 1000.f;
+	float jumpVelocity = 600.f;
 	bool bIsSMove;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
 	bool bIsGliding; 

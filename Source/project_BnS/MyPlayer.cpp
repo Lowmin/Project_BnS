@@ -82,6 +82,14 @@ void AMyPlayer::Look(const FInputActionValue& Value)
     }
 }
 
+void AMyPlayer::Jump()
+{
+    if (MovementSystem)
+    {
+        MovementSystem->SJump();
+    }
+}
+
 void AMyPlayer::SMoveToggle()
 {
     if (MovementSystem)

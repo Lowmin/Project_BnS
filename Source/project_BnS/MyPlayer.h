@@ -47,6 +47,7 @@ protected:
 
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
+    virtual void Jump() override;
 
     void SMoveToggle();
     void SGlidingToggle();
