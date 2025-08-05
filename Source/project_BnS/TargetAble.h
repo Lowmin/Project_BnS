@@ -22,6 +22,7 @@ class PROJECT_BNS_API ITargetAble
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	FVector GetTargetCenter();
-	FVector GetTargetSize();
+	virtual FVector GetWorldLocation() const = 0;
+	virtual FVector2D GetTargetCenter() const = 0;
+	virtual FVector2D GetTargetSize() const = 0;
 };

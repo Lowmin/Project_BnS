@@ -22,6 +22,9 @@ public:
 private:
 
 	// ITargetAble
-	FVector2D GetTargetCenter_Implementation();
-	FVector2D GetTargetSize_Implementation();
+	// FVector2D GetTargetCenter_Implementation();
+	// FVector2D GetTargetSize_Implementation();
+	virtual FVector GetWorldLocation() const override;
+	virtual FVector2D GetTargetCenter() const override;
+	virtual FVector2D GetTargetSize() const override;
 };

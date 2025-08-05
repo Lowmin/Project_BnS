@@ -16,12 +16,17 @@ AEnemy::AEnemy()
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 }
 
-FVector2D AEnemy::GetTargetCenter_Implementation()
+FVector AEnemy::GetWorldLocation() const
+{
+	return GetActorLocation();
+}
+
+FVector2D AEnemy::GetTargetCenter() const
 {
 	return FVector2D::ZeroVector;
 }
 
-FVector2D AEnemy::GetTargetSize_Implementation()
+FVector2D AEnemy::GetTargetSize() const
 {
 	return FVector2D(200.0f, 200.0f);
 }

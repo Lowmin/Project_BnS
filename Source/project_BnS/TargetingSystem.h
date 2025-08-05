@@ -28,13 +28,22 @@ protected:
 
 	// Targetting
 private:
+	UPROPERTY()
+	TArray<class ITargetAble*> TargetAbles{};
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* TargetSensor = nullptr;
 
-	UPROPERTY(VisibleAnywhere)
-	ACharacterBase* Target = nullptr;
+	// UPROPERTY(VisibleAnywhere)
+	ITargetAble* Target = nullptr;
+
+	// 현재 타겟 설정 
+	void SetCurTarget();
+
+	// 타겟 유효성 검사 
+	void ValidateTarget();
 
 public:
+	bool IsTargetAble() const;
 	ACharacterBase* GetTarget() const;
 
 	UFUNCTION()

@@ -38,53 +38,126 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// 타겟 유효성 검사 
+	ValidateTarget();
+
+	// 타겟 선정 
+	if(Target == nullptr && TargetAbles.Num() > 0)
+	{
+		SetCurTarget();
+	}
+
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	ABnsController* bnsController = Cast<ABnsController>(playerController);
 	
-	UE_LOG(LogActor, Warning, TEXT("Tick"));
-
-	FVector2D size;
-	GEngine->GameViewport->GetViewportSize(size);
+	if(Target == nullptr)
+	{
+		bnsController->MainUi->SetTarget(true, FVector2D::ZeroVector, FVector2D(100, 100));
+	}
+	else
+	{
+		FVector2D viewportSize;
+		GEngine->GameViewport->GetViewportSize(viewportSize);
 	
-	UE_LOG(LogActor, Warning, TEXT("Size : %s"), *size.ToString());
+		// 좌표 계산 
+		FVector pos = Target->GetWorldLocation();
+		FVector2D screen;
+		UGameplayStatics::ProjectWorldToScreen(playerController, pos, screen);
 
-	// 좌표 계산 
-	auto con = GetWorld()->GetFirstPlayerController();
-	ABnsController* bcon = Cast<ABnsController>(con);
-	FVector pos(2520, 1320, 96); 
-	FVector2D screen;
-	UGameplayStatics::ProjectWorldToScreen(con, pos, screen);
-	UE_LOG(LogActor, Warning, TEXT("screen : %s"), *screen.ToString());
+		float x = ((screen.X/viewportSize.X) - 0.5f);
+		float y = ((screen.Y/viewportSize.Y) - 0.5f);
 
-	float x = ((screen.X/size.X) - 0.5f);
-	float y = ((screen.Y/size.Y) - 0.5f);
+		// 크기 계산 
+		FVector camPos = Cast<AMyPlayer>(bnsController->GetPawn())->FollowCamera->GetComponentLocation();
+		float radius = 42.0f * 2.0f;
+		float distance = FVector::Distance(pos, camPos);
+		float fov = 90.0f * 0.5f;
+		float targetBoxSize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
+		targetBoxSize *= ((1 / GEngine->GameViewport->GetDPIScale()) * viewportSize.Y * 2);
 
-	// 크기 계산 
-	FVector camPos = Cast<AMyPlayer>(bcon->GetPawn())->FollowCamera->GetComponentLocation();
-	float radius = 42.0f * 2.0f;
-	float distance = FVector::Distance(pos, camPos);
-	float fov = 90.0 * 0.5f;
-	float asize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
-	asize *= ((1 / GEngine->GameViewport->GetDPIScale()) * size.Y * 2);
-	UE_LOG(LogActor, Warning, TEXT("size : %f"), asize);
-	UE_LOG(LogActor, Warning, TEXT("distance : %f"), distance);
+		bnsController->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
+	}
+}
+
+void UTargetingSystem::SetCurTarget()
+{
+	FVector pos = GetComponentLocation();
+	FVector forward = GetForwardVector();
 	
+	float distance = std::numeric_limits<float>::max();
 
-	bcon->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(asize, asize));
+	for (ITargetAble* targetAble : TargetAbles)
+	{
+		FVector targetPos = targetAble->GetWorldLocation();
+		FVector dir = (targetPos - pos).GetSafeNormal();
+		float dot = FVector::DotProduct(forward, dir);
+
+		float distSqrt = FVector::DistSquared(pos, targetPos);
+
+		// 45도 이내, 가장 짧은 거리 타겟 설정 
+		if(dot > 0.5f && distSqrt < distance)
+		{
+			distance = distSqrt;
+			const ACharacterBase*  characterBase = Cast<ACharacterBase>(targetAble);
+			if(characterBase != nullptr)
+			{
+				Target = targetAble;
+			}
+		}
+	}
+}
+
+void UTargetingSystem::ValidateTarget()
+{
+	if(Target == nullptr)
+		return;
+	
+	FVector pos = GetComponentLocation();
+	FVector targetPos = Target->GetWorldLocation();
+	
+	FVector forward = GetForwardVector();
+	FVector dir = (targetPos - pos).GetSafeNormal();
+	float dot = FVector::DotProduct(forward, dir);
+
+	// 45도 이상 벗어나면 타겟 해제 
+	if(dot < 0.5f)
+	{
+		Target = nullptr;
+	}
+}
+
+bool UTargetingSystem::IsTargetAble() const
+{
+	return Target != nullptr;
+}
+
+ACharacterBase* UTargetingSystem::GetTarget() const
+{
+	return nullptr;
 }
 
 void UTargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogActor, Warning, TEXT("Overlap : %s"), *OtherActor->GetActorNameOrLabel());
-
 	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
-	
 	if(targetAble != nullptr)
 	{
-		UE_LOG(LogActor, Warning, TEXT("Is TargetAble"));
+		TargetAbles.Add(targetAble);
 	}
 }
 
 void UTargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogActor, Warning, TEXT("overlap end : %s"), *OtherActor->GetActorNameOrLabel());
+	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
+	
+	if(targetAble != nullptr)
+	{
+		TargetAbles.Remove(targetAble);
+		if(targetAble == Target)
+		{
+			Target = nullptr;
+		}
+	}
+	
 }
 
