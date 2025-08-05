@@ -25,6 +25,7 @@ private:
 	// UI
 private:
 	TSubclassOf<class UMainUi> MainUiClass = nullptr;
+public:
 	UMainUi* MainUi = nullptr;
 
 	// 빙의 시 호출 
