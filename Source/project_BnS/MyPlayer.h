@@ -55,4 +55,9 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USMoveComponent* MovementSystem;
+
+
+private:
+    UPROPERTY(VisibleAnywhere)
+    class UTargetingSystem* TargetingSystem = nullptr;
 };
