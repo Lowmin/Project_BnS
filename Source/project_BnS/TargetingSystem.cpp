@@ -48,13 +48,13 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 	auto con = GetWorld()->GetFirstPlayerController();
 	ABnsController* bcon = Cast<ABnsController>(con);
 
-	FVector pos(2320, 1280, 96);
+	FVector pos(2520, 1320, 96); 
 	FVector2D screen;
 	UGameplayStatics::ProjectWorldToScreen(con, pos, screen);
 	UE_LOG(LogActor, Warning, TEXT("screen : %s"), *screen.ToString());
 
-	float x = ((screen.X/size.X) - 0.5f) * size.X;
-	float y = ((screen.Y/size.Y) - 0.5f) * size.Y;
+	float x = ((screen.X/size.X) - 0.5f);
+	float y = ((screen.Y/size.Y) - 0.5f);
 	bcon->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(200, 200));
 }
 
