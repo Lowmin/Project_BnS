@@ -8,6 +8,7 @@
 #include "MainUi.h"
 #include "TargetAble.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyPlayer.h"
 
 
 // Sets default values for this component's properties
@@ -45,9 +46,9 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 	
 	UE_LOG(LogActor, Warning, TEXT("Size : %s"), *size.ToString());
 
+	// 좌표 계산 
 	auto con = GetWorld()->GetFirstPlayerController();
 	ABnsController* bcon = Cast<ABnsController>(con);
-
 	FVector pos(2520, 1320, 96); 
 	FVector2D screen;
 	UGameplayStatics::ProjectWorldToScreen(con, pos, screen);
@@ -55,7 +56,19 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	float x = ((screen.X/size.X) - 0.5f);
 	float y = ((screen.Y/size.Y) - 0.5f);
-	bcon->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(200, 200));
+
+	// 크기 계산 
+	FVector camPos = Cast<AMyPlayer>(bcon->GetPawn())->FollowCamera->GetComponentLocation();
+	float radius = 42.0f * 2.0f;
+	float distance = FVector::Distance(pos, camPos);
+	float fov = 90.0 * 0.5f;
+	float asize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
+	asize *= ((1 / GEngine->GameViewport->GetDPIScale()) * size.Y * 2);
+	UE_LOG(LogActor, Warning, TEXT("size : %f"), asize);
+	UE_LOG(LogActor, Warning, TEXT("distance : %f"), distance);
+	
+
+	bcon->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(asize, asize));
 }
 
 void UTargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
