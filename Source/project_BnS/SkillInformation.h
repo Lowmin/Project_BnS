@@ -89,16 +89,13 @@ public:
     TSubclassOf<AActor> AoEClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    int32 NextComboSkillID = -1; // 다음 연계 스킬의 ID (-1이면 연계 없음)
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    float ComboAvailableTime = 0.f;
+    float ComboDelay = 1.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     int32 RecoverMP = 0;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSoftObjectPtr<UAnimMontage> CastMontage;   // 애니메이션
+    TSoftObjectPtr<UAnimMontage> AnimMontage;   // 애니메이션
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSubclassOf<USkillBase> SkillClass;
