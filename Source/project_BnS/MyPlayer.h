@@ -41,6 +41,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = myTPS_Cam, meta = (AllowPrivateAccess = "true"))
     class UCameraComponent* FollowCamera;
 
+    // Skill
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_BasicAttack;
+
 protected:
     virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -51,6 +55,9 @@ protected:
 
     void SMoveToggle();
     void SGlidingToggle();
+
+    // Skill
+    void HandleBasicAttack(const FInputActionValue& Value);
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

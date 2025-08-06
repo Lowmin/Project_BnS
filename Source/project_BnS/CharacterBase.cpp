@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "StatComponent.h"
+#include "SkillSystemComponent.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -23,6 +24,8 @@ ACharacterBase::ACharacterBase()
 
 	// statComponent 생성 
 	status = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+	// skillComponent 생성
+	SkillSystem = CreateDefaultSubobject<USkillSystemComponent>(TEXT("SkillSystem"));
 }
 
 // Called when the game starts or when spawned

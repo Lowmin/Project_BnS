@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SkillInformation.h"
+#include "SkillController.h"
 #include "SkillSystemComponent.generated.h"
 
 
@@ -16,13 +18,21 @@ public:
 	// Sets default values for this component's properties
 	USkillSystemComponent();
 
+	UFUNCTION(BlueprintCallable)
+	void HandleBasicAttack();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void ExecuteComboAttack(const FSkillInformation* ComboData);
+	void ResetCombo();
 
+private:
+	UPROPERTY(EditAnywhere, Category = "Combo")
+	UDataTable* ComboSkillDataTable;
+
+	int32 CurrentComboID = 0;
+	FTimerHandle ComboTimerHandle;
 		
 };

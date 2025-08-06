@@ -6,6 +6,7 @@
 #include "InputAction.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "SkillSystemComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -51,6 +52,11 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
         EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
         EnhancedPlayerInputComponent->BindAction(IA_Glide, ETriggerEvent::Started, this, &AMyPlayer::SGlidingToggle);
+
+        if (IA_BasicAttack)
+        {
+            EnhancedPlayerInputComponent->BindAction(IA_BasicAttack, ETriggerEvent::Started, this, &AMyPlayer::HandleBasicAttack);
+        }
     }
 }
 
@@ -103,5 +109,14 @@ void AMyPlayer::SGlidingToggle()
     if (MovementSystem)
     {
         MovementSystem->GlideToggle();
+    }
+}
+
+void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
+{
+    GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("HandleBasicAttack Called!"));
+    if (GetSkillSystemComponent())
+    {
+        GetSkillSystemComponent()->HandleBasicAttack();
     }
 }

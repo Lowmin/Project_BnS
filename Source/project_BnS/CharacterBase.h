@@ -29,10 +29,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	class UStatComponent* status = nullptr;
 
+	// skill Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USkillSystemComponent* SkillSystem = nullptr;
+
 public:
 	float GetCurHp() const;
 	float GetMaxHp() const;
 	int GetCurMp() const;
 	int GetCharacterLevel() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Skills")
+	USkillSystemComponent* GetSkillSystemComponent() const { return SkillSystem; }
 
 };
