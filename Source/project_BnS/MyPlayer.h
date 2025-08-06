@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CharacterBase.h"
+#include "TargetingSystem.h"
 #include "InputActionValue.h"
 #include "USMoveComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -10,7 +10,7 @@
 #include "MyPlayer.generated.h"
 
 UCLASS()
-class PROJECT_BNS_API AMyPlayer : public ACharacterBase
+class PROJECT_BNS_API AMyPlayer : public ATargetingSystem
 {
     GENERATED_BODY()
 
@@ -55,9 +55,4 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USMoveComponent* MovementSystem;
-
-
-private:
-    UPROPERTY(VisibleAnywhere)
-    class UTargetingSystem* TargetingSystem = nullptr;
 };

@@ -9,37 +9,36 @@
 #include "TargetAble.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayer.h"
+#include "Components/SphereComponent.h"
 
 
 // Sets default values for this component's properties
-UTargetingSystem::UTargetingSystem()
+ATargetingSystem::ATargetingSystem()
 {
 	// ...
+	//Primar Tick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
+
+	TargetSensor = CreateDefaultSubobject<USphereComponent>(TEXT("TargetSensors"));
+	TargetSensor->SetSphereRadius(400);
+	TargetSensor->SetHiddenInGame(false);
+	TargetSensor->SetupAttachment(RootComponent);
+
+	TargetSensor->OnComponentBeginOverlap.AddDynamic(this, &ATargetingSystem::OnOverlapBegin);
+	TargetSensor->OnComponentEndOverlap.AddDynamic(this, &ATargetingSystem::OnOverlapEnd);
 }
 
-void UTargetingSystem::BeginPlay()
+void ATargetingSystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 틱 활성화 
-	PrimaryComponentTick.Target = this;
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.SetTickFunctionEnable(true);
-	PrimaryComponentTick.RegisterTickFunction(GetComponentLevel());
-	
-	SetSphereRadius(400);
-	SetHiddenInGame(false);
-
-	OnComponentBeginOverlap.AddDynamic(this, &UTargetingSystem::OnOverlapBegin);
-	OnComponentEndOverlap.AddDynamic(this, &UTargetingSystem::OnOverlapEnd);
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 	DpScale = GEngine->GameViewport->GetDPIScale();
 }
 
-void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+void ATargetingSystem::Tick(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::Tick(DeltaTime);
 
 	// 타겟 유효성 검사 
 	ValidateTarget();
@@ -79,10 +78,10 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 }
 
-void UTargetingSystem::SetCurTarget()
+void ATargetingSystem::SetCurTarget()
 {
-	FVector pos = GetComponentLocation();
-	FVector forward = GetForwardVector();
+	FVector pos = GetActorLocation();
+	FVector forward = GetActorForwardVector();
 	
 	float distance = std::numeric_limits<float>::max();
 
@@ -107,15 +106,15 @@ void UTargetingSystem::SetCurTarget()
 	}
 }
 
-void UTargetingSystem::ValidateTarget()
+void ATargetingSystem::ValidateTarget()
 {
 	if(Target == nullptr)
 		return;
 	
-	FVector pos = GetComponentLocation();
+	FVector pos = GetActorLocation();
 	FVector targetPos = Target->GetWorldLocation();
 	
-	FVector forward = GetForwardVector();
+	FVector forward = GetActorForwardVector();
 	FVector dir = (targetPos - pos).GetSafeNormal();
 	float dot = FVector::DotProduct(forward, dir);
 
@@ -126,17 +125,17 @@ void UTargetingSystem::ValidateTarget()
 	}
 }
 
-bool UTargetingSystem::IsTargetAble() const
+bool ATargetingSystem::IsTargetAble() const
 {
 	return Target != nullptr;
 }
 
-ACharacterBase* UTargetingSystem::GetTarget() const
+ACharacterBase* ATargetingSystem::GetTarget() const
 {
 	return nullptr;
 }
 
-void UTargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
 	if(targetAble != nullptr)
@@ -145,7 +144,7 @@ void UTargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 	}
 }
 
-void UTargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
 	

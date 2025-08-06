@@ -4,27 +4,25 @@
 
 #include "CoreMinimal.h"
 
-#include "Components/SphereComponent.h"
+#include "CharacterBase.h"
 #include "TargetingSystem.generated.h"
 
 
-class ACharacterBase;
-
 UCLASS()
-class PROJECT_BNS_API UTargetingSystem : public USphereComponent
+class PROJECT_BNS_API ATargetingSystem : public ACharacterBase
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UTargetingSystem();
+	ATargetingSystem();
 
 protected:
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Targetting
 private:
@@ -33,8 +31,9 @@ private:
 
 	UPROPERTY()
 	TArray<class ITargetAble*> TargetAbles{};
+
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* TargetSensor = nullptr;
+	class USphereComponent* TargetSensor = nullptr;
 
 	// UPROPERTY(VisibleAnywhere)
 	ITargetAble* Target = nullptr;

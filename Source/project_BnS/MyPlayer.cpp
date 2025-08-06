@@ -6,7 +6,6 @@
 #include "InputAction.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "TargetingSystem.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -22,9 +21,6 @@ AMyPlayer::AMyPlayer()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
-
-    TargetingSystem = CreateDefaultSubobject<UTargetingSystem>(TEXT("TargetingSystem"));
-    TargetingSystem->SetupAttachment(RootComponent);
 }
 
 void AMyPlayer::BeginPlay()
