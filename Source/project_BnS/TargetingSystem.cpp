@@ -32,6 +32,8 @@ void UTargetingSystem::BeginPlay()
 
 	OnComponentBeginOverlap.AddDynamic(this, &UTargetingSystem::OnOverlapBegin);
 	OnComponentEndOverlap.AddDynamic(this, &UTargetingSystem::OnOverlapEnd);
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+	DpScale = GEngine->GameViewport->GetDPIScale();
 }
 
 void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -57,16 +59,13 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 	}
 	else
 	{
-		FVector2D viewportSize;
-		GEngine->GameViewport->GetViewportSize(viewportSize);
-	
 		// 좌표 계산 
 		FVector pos = Target->GetWorldLocation();
 		FVector2D screen;
 		UGameplayStatics::ProjectWorldToScreen(playerController, pos, screen);
 
-		float x = ((screen.X/viewportSize.X) - 0.5f);
-		float y = ((screen.Y/viewportSize.Y) - 0.5f);
+		float x = ((screen.X/ViewportSize.X) - 0.5f);
+		float y = ((screen.Y/ViewportSize.Y) - 0.5f);
 
 		// 크기 계산 
 		FVector camPos = Cast<AMyPlayer>(bnsController->GetPawn())->FollowCamera->GetComponentLocation();
@@ -74,7 +73,7 @@ void UTargetingSystem::TickComponent(float DeltaTime, ELevelTick TickType,
 		float distance = FVector::Distance(pos, camPos);
 		float fov = 90.0f * 0.5f;
 		float targetBoxSize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
-		targetBoxSize *= ((1 / GEngine->GameViewport->GetDPIScale()) * viewportSize.Y * 2);
+		targetBoxSize *= ((1 / DpScale) * ViewportSize.Y * 2);
 
 		bnsController->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
 	}

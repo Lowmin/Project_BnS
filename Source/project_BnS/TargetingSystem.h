@@ -28,6 +28,9 @@ protected:
 
 	// Targetting
 private:
+	FVector2D ViewportSize = FVector2D::ZeroVector;
+	float DpScale = 1.0f;
+
 	UPROPERTY()
 	TArray<class ITargetAble*> TargetAbles{};
 	UPROPERTY(VisibleAnywhere)
