@@ -19,7 +19,7 @@ public:
 	void SetHp(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetMp(int current);
+	void SetMp(int32 current);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetStamina(float current, float max);

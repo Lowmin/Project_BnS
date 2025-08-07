@@ -4,29 +4,41 @@
 
 #include "CoreMinimal.h"
 
+#include "MainUIPresenter.generated.h"
 
 /**
  * 
  */
-class PROJECT_BNS_API MainUIPresenter
+ UCLASS()
+class PROJECT_BNS_API AMainUIPresenter : public AActor
 {
-public:
-	MainUIPresenter(class UMainUi* ui, class AMyPlayer* player);
-	~MainUIPresenter();
+	GENERATED_BODY()
 
+public:
+	void SetMainUI(class UMainUi* ui);
+ 	void SetMyPlayer(class AMyPlayer* player);
+
+ private:
+ 	void Bind(class UStatComponent* stat);
+ 	
 	// variable
 	UMainUi* MainUI = nullptr;
 	AMyPlayer* MyPlayer = nullptr;
 
 	// Status
 public:
+ 	UFUNCTION()
 	void OnHpChange(float current, float max) const;
-	void OnMpChange(float current) const;
+ 	UFUNCTION()
+	void OnMpChange(int32 current) const;
+ 	UFUNCTION()
 	void OnStanimaChange(float current, float max) const;
 	void OnBattleChange(bool battle) const;
 
 	void OnNicknameChange(const FString& nickname) const;
+ 	UFUNCTION()
 	void OnLevelChange(int level) const;
+ 	UFUNCTION()
 	void OnExpChange(float current, float max) const;
 
 	void OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const;

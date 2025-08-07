@@ -6,6 +6,7 @@
 #include "BnsController.h"
 #include "CharacterBase.h"
 #include "MainUi.h"
+#include "MainUIPresenter.h"
 #include "TargetAble.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayer.h"
@@ -54,7 +55,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 	
 	if(Target == nullptr)
 	{
-		bnsController->MainUi->SetTarget(true, FVector2D::ZeroVector, FVector2D(100, 100));
+		bnsController->UIPresenter->OnTargetChange(true, FVector2D::ZeroVector, FVector2D(100, 100));
 	}
 	else
 	{
@@ -74,7 +75,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 		float targetBoxSize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
 		targetBoxSize *= ((1 / DpScale) * ViewportSize.Y * 2);
 
-		bnsController->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
+		bnsController->UIPresenter->OnTargetChange(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
 	}
 }
 

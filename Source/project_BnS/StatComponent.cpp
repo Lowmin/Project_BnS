@@ -39,7 +39,12 @@ float UStatComponent::GetCurHp() const
 
 void UStatComponent::SetCurHp(float hp)
 {
+	if(FMath::IsNearlyEqual(CurHp, hp))
+		return;
+	
 	CurHp = hp;
+
+	OnHpChange.ExecuteIfBound(CurHp, MaxHp);
 }
 
 float UStatComponent::GetMaxHp() const 
@@ -52,14 +57,29 @@ int32 UStatComponent::GetCurMp() const
 	return CurMp;
 }
 
-void UStatComponent::SetCurMp(float mp)
+void UStatComponent::SetCurMp(int32 mp)
 {
+	if(CurMp == mp)
+		return;
+		
 	CurMp = mp;
+
+	OnMpChange.ExecuteIfBound(CurMp);
 }
 
 int32 UStatComponent::GetMaxMp() const
 {
 	return MaxMp;
+}
+
+void UStatComponent::SetLevel(int32 level)
+{
+	if(Level == level)
+		return;
+	
+	Level = level;
+	
+	OnLevelChange.ExecuteIfBound(level);
 }
 
 int32 UStatComponent::GetLevel() const

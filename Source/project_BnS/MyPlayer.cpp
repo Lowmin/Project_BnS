@@ -7,6 +7,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SkillSystemComponent.h"
+#include "StatComponent.h"
 
 AMyPlayer::AMyPlayer()
 {

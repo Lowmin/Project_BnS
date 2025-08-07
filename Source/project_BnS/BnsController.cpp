@@ -15,6 +15,8 @@ ABnsController::ABnsController()
 	{
 		MainUiClass = res.Class;
 	}
+	//UIPresenter = CreateDefaultSubobject<AMainUIPresenter>(TEXT("UiPresenter"));
+	
 }
 
 void ABnsController::BeginPlay()
@@ -29,13 +31,15 @@ void ABnsController::BeginPlay()
 	}
 	
 	AMyPlayer* player = GetPawn<AMyPlayer>();
-	MainUIPresenter* presenter = new MainUIPresenter(MainUi, player);
+	UIPresenter = GetWorld()->SpawnActor<AMainUIPresenter>(AMainUIPresenter::StaticClass());
+	UIPresenter->SetMainUI(MainUi);
+	UIPresenter->SetMyPlayer(player);
+	UIPresenter->OnLevelChange(player->GetCharacterLevel());
+	UIPresenter->OnHpChange(player->GetCurHp(), player->GetMaxHp());
+	UIPresenter->OnMpChange(player->GetCurMp());
+	UIPresenter->OnNicknameChange(TEXT("BNSUser"));
+	UIPresenter->OnBattleChange(false);
 
-	presenter->OnLevelChange(player->GetCharacterLevel());
-	presenter->OnHpChange(player->GetCurHp(), player->GetMaxHp());
-	presenter->OnMpChange(player->GetCurMp());
-	presenter->OnNicknameChange(TEXT("BNSUser"));
-	presenter->OnBattleChange(true);
 }
 
 void ABnsController::OnPossess(APawn* pawn)

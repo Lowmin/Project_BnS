@@ -25,8 +25,10 @@ private:
 	// UI
 private:
 	TSubclassOf<class UMainUi> MainUiClass = nullptr;
-public:
 	UMainUi* MainUi = nullptr;
+public:
+	UPROPERTY(VisibleAnywhere)
+	class AMainUIPresenter* UIPresenter = nullptr;
 
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;

@@ -5,18 +5,28 @@
 
 #include "MainUi.h"
 #include "MyPlayer.h"
+#include "StatComponent.h"
 
-MainUIPresenter::MainUIPresenter(UMainUi* ui, AMyPlayer* player)
+void AMainUIPresenter::SetMainUI(UMainUi* ui)
 {
 	MainUI = ui;
-	this->MyPlayer = player;
 }
 
-MainUIPresenter::~MainUIPresenter()
+
+void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 {
+	MyPlayer = player;
+	Bind(MyPlayer->GetStatusComponent());
 }
 
-void MainUIPresenter::OnHpChange(float current, float max) const
+void AMainUIPresenter::Bind(UStatComponent* stat)
+{
+	stat->OnHpChange.BindUObject(this, &AMainUIPresenter::OnHpChange);
+	stat->OnMpChange.BindUObject(this, &AMainUIPresenter::OnMpChange);
+	stat->OnLevelChange.BindUObject(this, &AMainUIPresenter::OnLevelChange);
+}
+
+void AMainUIPresenter::OnHpChange(float current, float max) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -24,7 +34,7 @@ void MainUIPresenter::OnHpChange(float current, float max) const
 	MainUI->SetHp(current, max);
 }
 
-void MainUIPresenter::OnMpChange(float current) const
+void AMainUIPresenter::OnMpChange(int32 current) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -32,7 +42,7 @@ void MainUIPresenter::OnMpChange(float current) const
 	MainUI->SetMp(current);
 }
 
-void MainUIPresenter::OnStanimaChange(float current, float max) const
+void AMainUIPresenter::OnStanimaChange(float current, float max) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -40,7 +50,7 @@ void MainUIPresenter::OnStanimaChange(float current, float max) const
 	MainUI->SetStamina(current, max);
 }
 
-void MainUIPresenter::OnBattleChange(bool battle) const
+void AMainUIPresenter::OnBattleChange(bool battle) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -48,7 +58,7 @@ void MainUIPresenter::OnBattleChange(bool battle) const
 	MainUI->SetStaminaEnable(!battle);
 }
 
-void MainUIPresenter::OnNicknameChange(const FString& nickname) const
+void AMainUIPresenter::OnNicknameChange(const FString& nickname) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -56,7 +66,7 @@ void MainUIPresenter::OnNicknameChange(const FString& nickname) const
 	MainUI->SetNickname(nickname);
 }
 
-void MainUIPresenter::OnLevelChange(int level) const
+void AMainUIPresenter::OnLevelChange(int level) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -64,7 +74,7 @@ void MainUIPresenter::OnLevelChange(int level) const
 	MainUI->SetLevel(level);
 }
 
-void MainUIPresenter::OnExpChange(float current, float max) const
+void AMainUIPresenter::OnExpChange(float current, float max) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -72,6 +82,10 @@ void MainUIPresenter::OnExpChange(float current, float max) const
 	MainUI->SetExp(current, max);
 }
 
-void MainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const
+void AMainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const
 {
+	if(MainUI == nullptr)
+		return;
+
+	MainUI->SetTarget(isTarget, center, size);
 }

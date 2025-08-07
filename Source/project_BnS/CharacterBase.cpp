@@ -45,6 +45,11 @@ bool ACharacterBase::IsDead() const
 	return status->GetCurHp() <= 0.0f;
 }
 
+UStatComponent* ACharacterBase::GetStatusComponent() const
+{
+	return status;
+}
+
 float ACharacterBase::GetCurHp() const
 {
 	return status->GetCurHp();

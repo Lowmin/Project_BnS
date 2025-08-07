@@ -25,11 +25,14 @@ public:
 	
 
 	// Stat Component
-private:
+protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	class UStatComponent* status = nullptr;
+public:
+	UStatComponent* GetStatusComponent() const;
 
 	// skill Component
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USkillSystemComponent* SkillSystem = nullptr;
 
