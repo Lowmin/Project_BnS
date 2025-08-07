@@ -9,6 +9,8 @@
 #include "Camera/CameraComponent.h"
 #include "MyPlayer.generated.h"
 
+DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
+
 UCLASS()
 class PROJECT_BNS_API AMyPlayer : public ATargetingSystem
 {
@@ -62,4 +64,18 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USMoveComponent* MovementSystem;
+
+    // Status
+private:
+    float CurStamina;
+    float MaxStamina;
+    float CurExp;
+    float MaxExp;
+public:
+    FDele_Single_FF OnStaminaChange = nullptr;
+    FDele_Single_FF OnExpChange = nullptr;
+    
+    void SetCurStamina(float stamina);
+    float GetMaxStamina();
+    void AddExp(float exp);
 };

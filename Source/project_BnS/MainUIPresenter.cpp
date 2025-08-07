@@ -16,11 +16,15 @@ void AMainUIPresenter::SetMainUI(UMainUi* ui)
 void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 {
 	MyPlayer = player;
+	
 	Bind(MyPlayer->GetStatusComponent());
 }
 
 void AMainUIPresenter::Bind(UStatComponent* stat)
 {
+	MyPlayer->OnStaminaChange.BindUObject(this, &AMainUIPresenter::OnStaminaChange);
+	MyPlayer->OnExpChange.BindUObject(this, &AMainUIPresenter::OnExpChange);
+	
 	stat->OnHpChange.BindUObject(this, &AMainUIPresenter::OnHpChange);
 	stat->OnMpChange.BindUObject(this, &AMainUIPresenter::OnMpChange);
 	stat->OnLevelChange.BindUObject(this, &AMainUIPresenter::OnLevelChange);
@@ -42,7 +46,7 @@ void AMainUIPresenter::OnMpChange(int32 current) const
 	MainUI->SetMp(current);
 }
 
-void AMainUIPresenter::OnStanimaChange(float current, float max) const
+void AMainUIPresenter::OnStaminaChange(float current, float max) const
 {
 	if (MainUI == nullptr)
 		return;

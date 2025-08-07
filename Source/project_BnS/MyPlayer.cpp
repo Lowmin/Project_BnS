@@ -121,3 +121,28 @@ void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
         GetSkillSystemComponent()->HandleBasicAttack();
     }
 }
+
+void AMyPlayer::SetCurStamina(float stamina)
+{
+    if(FMath::IsNearlyEqual(CurStamina, stamina))
+        return;
+    
+    CurStamina = stamina;
+
+    OnStaminaChange.ExecuteIfBound(CurStamina, MaxStamina);
+}
+
+float AMyPlayer::GetMaxStamina()
+{
+    return MaxStamina;
+}
+
+void AMyPlayer::AddExp(float exp)
+{
+    if(exp <= 0.f)
+        return;
+    
+    CurExp += exp;
+
+    OnExpChange.ExecuteIfBound(CurExp, MaxExp);
+}

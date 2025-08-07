@@ -32,7 +32,7 @@ public:
  	UFUNCTION()
 	void OnMpChange(int32 current) const;
  	UFUNCTION()
-	void OnStanimaChange(float current, float max) const;
+	void OnStaminaChange(float current, float max) const;
 	void OnBattleChange(bool battle) const;
 
 	void OnNicknameChange(const FString& nickname) const;
