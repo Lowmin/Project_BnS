@@ -28,10 +28,9 @@ protected:
 private:
 	FVector2D ViewportSize = FVector2D::ZeroVector;
 	float DpScale = 1.0f;
-	/*
-	UPROPERTY(VisibleAnywhere)
+	
 	TArray<class ITargetAble*> TargetAbles{};
-	*/
+	
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* TargetSensor = nullptr;
@@ -46,7 +45,15 @@ private:
 	void ValidateTarget();
 
 public:
-	bool IsTargetAble() const;
+	/// <summary>
+	/// 현재 조준한 타겟 존재 여부 
+	/// </summary>
+	/// <returns> 타겟 존재 여부 </returns>
+	bool IsTarget() const;
+	/// <summary>
+	/// 현재 조준한 타겟 
+	/// </summary>
+	/// <returns> 조준한 타겟  </returns>
 	ACharacterBase* GetTarget() const;
 
 	UFUNCTION()
