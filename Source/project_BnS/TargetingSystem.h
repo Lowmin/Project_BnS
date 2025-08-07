@@ -28,15 +28,16 @@ protected:
 private:
 	FVector2D ViewportSize = FVector2D::ZeroVector;
 	float DpScale = 1.0f;
-
-	UPROPERTY()
+	/*
+	UPROPERTY(VisibleAnywhere)
 	TArray<class ITargetAble*> TargetAbles{};
+	*/
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* TargetSensor = nullptr;
 
 	// UPROPERTY(VisibleAnywhere)
-	ITargetAble* Target = nullptr;
+	class ITargetAble* Target = nullptr;
 
 	// 현재 타겟 설정 
 	void SetCurTarget();

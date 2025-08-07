@@ -39,7 +39,7 @@ void ATargetingSystem::BeginPlay()
 void ATargetingSystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	/*
 	// 타겟 유효성 검사 
 	ValidateTarget();
 
@@ -76,10 +76,12 @@ void ATargetingSystem::Tick(float DeltaTime)
 
 		bnsController->MainUi->SetTarget(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
 	}
+	*/
 }
 
 void ATargetingSystem::SetCurTarget()
 {
+	/*
 	FVector pos = GetActorLocation();
 	FVector forward = GetActorForwardVector();
 	
@@ -104,6 +106,7 @@ void ATargetingSystem::SetCurTarget()
 			}
 		}
 	}
+	*/
 }
 
 void ATargetingSystem::ValidateTarget()
@@ -137,17 +140,17 @@ ACharacterBase* ATargetingSystem::GetTarget() const
 
 void ATargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
+	/*ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
 	if(targetAble != nullptr)
 	{
 		TargetAbles.Add(targetAble);
-	}
+	}*/
 }
 
 void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
-	
+	/*
 	if(targetAble != nullptr)
 	{
 		TargetAbles.Remove(targetAble);
@@ -155,7 +158,7 @@ void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor*
 		{
 			Target = nullptr;
 		}
-	}
+	}*/
 	
 }
 
