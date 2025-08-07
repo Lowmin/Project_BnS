@@ -1,47 +1,202 @@
-// USMoveComponent.cpp
 #include "USMoveComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 USMoveComponent::USMoveComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	bIsSMove = false;
-	glideSpeed = 700.f;
-	glideGravityScale = 0.1f;
-	glideMinHeight = 0.0f;
+    PrimaryComponentTick.bCanEverTick = true;
+    CurrentMoveState = EMoveState::Idle;
 }
 
 void USMoveComponent::BeginPlay()
 {
-	MyPlayer = Cast<ACharacter>(GetOwner());
-
-	if (MyPlayer && MyPlayer->GetCharacterMovement())
-	{
-		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
-	}
+    Super::BeginPlay();
+    MyPlayer = Cast<ACharacter>(GetOwner());
+    if (MyPlayer && MyPlayer->GetCharacterMovement())
+    {
+        MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    }
 }
 
 void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (!MyPlayer || !MyPlayer->GetCharacterMovement())
-	{
-		return;
-	}
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (bIsSMove)
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement())
+    {
+        return;
+    }
+
+    Glide(DeltaTime);
+}
+
+void USMoveComponent::SetMoveState(EMoveState NewState)
+{
+    if (CurrentMoveState != NewState)
+    {
+        CurrentMoveState = NewState;
+        SetMovementSpeed(NewState);
+    }
+}
+
+EMoveState USMoveComponent::GetMoveState() const
+{
+    return CurrentMoveState;
+}
+
+void USMoveComponent::SetMovementSpeed(EMoveState NewState)
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    switch (NewState)
+    {
+    case EMoveState::Idle:
+        MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+        break;
+    case EMoveState::Running:
+        MyPlayer->GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+        break;
+    case EMoveState::WallRunning:
+        MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WallRunSpeed;
+        break;
+    case EMoveState::Gliding:
+        MyPlayer->GetCharacterMovement()->MaxFlySpeed = GlideSpeed;
+        break;
+    default:
+        break;
+    }
+}
+
+bool USMoveComponent::CheckWall(FHitResult& OutHit)
+{
+    if (!MyPlayer || !GetWorld()) return false;
+
+    FVector Start = MyPlayer->GetActorLocation();
+    FVector End = Start + MyPlayer->GetActorForwardVector() * WallCheckDistance;
+
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(MyPlayer);
+
+    bool bHasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, QueryParams);
+
+    if (bHasHit)
+    {
+        if (OutHit.GetActor()->ActorHasTag("Wall"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void USMoveComponent::StartWallRun()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    SetMoveState(EMoveState::WallRunning);
+    MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
+    MyPlayer->GetCharacterMovement()->GravityScale = 0.0f;
+}
+
+void USMoveComponent::StopWallRun()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    SetMoveState(EMoveState::Idle);
+    MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
+}
+
+void USMoveComponent::WallRun()
+{
+}
+
+void USMoveComponent::SMoveToggle()
+{
+    if (!MyPlayer) return;
+    if (CurrentMoveState == EMoveState::Running)
+    {
+        StopSMove();
+    }
+    else
+    {
+        StartSMove();
+    }
+}
+
+void USMoveComponent::StartSMove()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    if (CurrentMoveState == EMoveState::Gliding)
+    {
+        StopGlide();
+    }
+    SetMoveState(EMoveState::Running);
+}
+
+void USMoveComponent::StopSMove()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    SetMoveState(EMoveState::Idle);
+}
+
+void USMoveComponent::StartGlide()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    if (CurrentMoveState == EMoveState::Running)
+    {
+        StopSMove();
+    }
+    float groundDistance = CheckGroundDistance();
+    if (MyPlayer->GetCharacterMovement()->IsFalling() && groundDistance >= GlideMinHeight)
+    {
+        SetMoveState(EMoveState::Gliding);
+        MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+    }
+}
+
+void USMoveComponent::StopGlide()
+{
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
+    SetMoveState(EMoveState::Running);
+    MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
+}
+
+void USMoveComponent::GlideToggle()
+{
+    if (!MyPlayer) return;
+
+    if (CurrentMoveState != EMoveState::Gliding)
+    {
+        StartGlide();
+    }
+    else
+    {
+        StopGlide();
+    }
+}
+void USMoveComponent::Glide(float DeltaTime)
+{
+	if (CurrentMoveState == EMoveState::Running)
 	{
 		const FVector Velocity = MyPlayer->GetCharacterMovement()->Velocity;
+
 		if (MyPlayer->GetCharacterMovement()->IsMovingOnGround() && Velocity.SizeSquared() < 1.0f)
 		{
 			StopSMove();
 		}
 	}
-
-	if (bIsGliding)
+	if (CurrentMoveState != EMoveState::Running)
 	{
-		if (checkGroundDistance() <= 0.0f)
+		if (CheckGroundDistance() <= 0.0f)
 		{
 			StopGlide();
 		}
@@ -52,132 +207,48 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	}
 }
 
-EMoveState USMoveComponent::getMoveState()
-{
-	return CurrentMoveState;
-}
-
-void USMoveComponent::SetMoveState(EMoveState NewState)
-{
-	if (CurrentMoveState != NewState)
-	{
-		CurrentMoveState = NewState;
-	}
-}
-
-void USMoveComponent::StartSMove()
-{
-	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
-	bIsSMove = true;
-	SetMoveState(EMoveState::Running);
-	MyPlayer->GetCharacterMovement()->MaxWalkSpeed = runSpeed;
-}
-
-void USMoveComponent::StopSMove()
-{
-	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
-	bIsSMove = false;
-	SetMoveState(EMoveState::Idle);
-	MyPlayer->GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
-}
-
-void USMoveComponent::SMoveToggle()
-{
-	if (!MyPlayer) return;
-
-	if (!bIsSMove)
-	{
-		StartSMove();
-	}
-	else
-	{
-		StopSMove();
-	}
-}
-
-void USMoveComponent::StartGlide()
-{
-	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
-	float groundDistance = checkGroundDistance();
-
-	PrevMoveState = CurrentMoveState;
-
-	if (MyPlayer->GetCharacterMovement()->IsFalling() && groundDistance >= glideMinHeight)
-	{
-		bIsGliding = true;
-		SetMoveState(EMoveState::Gliding);
-		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		MyPlayer->GetCharacterMovement()->MaxFlySpeed = glideSpeed;
-	}
-}
-
-void USMoveComponent::StopGlide()
-{
-	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
-	bIsGliding = false;
-	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	SetMoveState(PrevMoveState);
-}
-
-void USMoveComponent::GlideToggle()
-{
-	if (!MyPlayer) return;
-
-	if (!bIsGliding)
-	{
-		StartGlide();
-	}
-	else
-	{
-		StopGlide();
-	}
-}
-
 void USMoveComponent::SJump()
 {
-	jumpVelocity = 600.f;
+    if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
-	if (MyPlayer && MyPlayer->GetCharacterMovement())
-	{
-		if (MyPlayer->GetCharacterMovement()->IsMovingOnGround())
-		{
-			if (CurrentMoveState == EMoveState::Running)
-			{
-				jumpVelocity = jumpVelocity * 2.f;
-			}
-			MyPlayer->LaunchCharacter(FVector(0.f, 0.f, jumpVelocity), false, true);
-		}
-	}
+    float CurrentJumpVelocity = JumpVelocity;
+
+    if (CurrentMoveState == EMoveState::WallRunning)
+    {
+        StopWallRun();
+    }
+
+    if (CurrentMoveState == EMoveState::Running)
+    {
+        CurrentJumpVelocity = JumpVelocity * 2.f;
+    }
+
+    MyPlayer->LaunchCharacter(FVector(0.f, 0.f, CurrentJumpVelocity), false, true);
 }
 
-float USMoveComponent::checkGroundDistance()
+float USMoveComponent::CheckGroundDistance()
 {
-	FHitResult HitResult;
-	FVector StartLocation = MyPlayer->GetActorLocation();
-	FVector EndLocation = StartLocation - FVector(0, 0, lineTraceLength);
+    if (!MyPlayer || !GetWorld()) return -1.0f;
 
-	StartLocation.Z += lineTraceStartOffset;
+    FHitResult HitResult;
+    FVector StartLocation = MyPlayer->GetActorLocation();
+    FVector EndLocation = StartLocation - FVector(0, 0, LineTraceLength);
+    StartLocation.Z += LineTraceStartOffset;
 
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(MyPlayer);
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(MyPlayer);
 
-	bool bHasHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		StartLocation,
-		EndLocation,
-		ECollisionChannel::ECC_Visibility,
-		QueryParams
-	);
+    bool bHasHit = GetWorld()->LineTraceSingleByChannel(
+        HitResult,
+        StartLocation,
+        EndLocation,
+        ECollisionChannel::ECC_Visibility,
+        QueryParams
+    );
 
-	if (bHasHit)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Ground Distance: %f"), HitResult.Distance));
-		return HitResult.Distance;
-	}
-
-	return -1.0f;
+    if (bHasHit)
+    {
+        return HitResult.Distance;
+    }
+    return -1.0f;
 }
