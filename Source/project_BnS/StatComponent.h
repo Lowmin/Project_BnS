@@ -28,9 +28,9 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float CurHp = 10.0f;
+	float CurHp = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	float MaxHp = 10.0f;
+	float MaxHp = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	int32 CurMp = 10.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
