@@ -132,7 +132,12 @@ void AMyPlayer::SetCurStamina(float stamina)
     OnStaminaChange.ExecuteIfBound(CurStamina, MaxStamina);
 }
 
-float AMyPlayer::GetMaxStamina()
+float AMyPlayer::GetCurStamina() const
+{
+    return CurStamina;
+}
+
+float AMyPlayer::GetMaxStamina() const
 {
     return MaxStamina;
 }
@@ -145,4 +150,14 @@ void AMyPlayer::AddExp(float exp)
     CurExp += exp;
 
     OnExpChange.ExecuteIfBound(CurExp, MaxExp);
+}
+
+float AMyPlayer::GetCurExp() const
+{
+    return CurExp;
+}
+
+float AMyPlayer::GetMaxExp() const
+{
+    return MaxExp;
 }

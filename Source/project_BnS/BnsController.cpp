@@ -34,9 +34,11 @@ void ABnsController::BeginPlay()
 	UIPresenter = GetWorld()->SpawnActor<AMainUIPresenter>(AMainUIPresenter::StaticClass());
 	UIPresenter->SetMainUI(MainUi);
 	UIPresenter->SetMyPlayer(player);
-	UIPresenter->OnLevelChange(player->GetCharacterLevel());
 	UIPresenter->OnHpChange(player->GetCurHp(), player->GetMaxHp());
 	UIPresenter->OnMpChange(player->GetCurMp());
+	UIPresenter->OnStaminaChange(player->GetCurStamina(), player->GetMaxStamina());
+	UIPresenter->OnLevelChange(player->GetCharacterLevel());
+	UIPresenter->OnExpChange(player->GetCurExp(), player->GetMaxExp());
 	UIPresenter->OnNicknameChange(TEXT("BNSUser"));
 	UIPresenter->OnBattleChange(false);
 

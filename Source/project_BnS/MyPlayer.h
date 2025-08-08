@@ -67,15 +67,22 @@ private:
 
     // Status
 private:
-    float CurStamina;
-    float MaxStamina;
-    float CurExp;
-    float MaxExp;
+    UPROPERTY(VisibleAnywhere, Category = "Status")
+    float CurStamina = 10000.0f;
+    UPROPERTY(VisibleAnywhere, Category = "Status")
+    float MaxStamina = 10000.0f;
+    UPROPERTY(VisibleAnywhere, Category = "Status")
+    float CurExp = 0.0f;
+    UPROPERTY(VisibleAnywhere, Category = "Status")
+    float MaxExp = 100.0f;
 public:
     FDele_Single_FF OnStaminaChange = nullptr;
     FDele_Single_FF OnExpChange = nullptr;
     
     void SetCurStamina(float stamina);
-    float GetMaxStamina();
+    float GetCurStamina() const;
+    float GetMaxStamina() const;
     void AddExp(float exp);
+    float GetCurExp() const;
+    float GetMaxExp() const;
 };
