@@ -41,9 +41,9 @@ public:
     void Glide(float DeltaTime);
 
     // 벽타기
-    void StartWallRun();
+    void StartWallRun(const FHitResult& WallHit);
     void StopWallRun();
-    void WallRun();
+    void WallRun(); 
 
     // 점프
     void SJump();
@@ -59,31 +59,19 @@ private:
 
     ACharacter* MyPlayer;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Speed", meta = (AllowPrivateAccess = "true"))
     float WalkSpeed = 300.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Speed", meta = (AllowPrivateAccess = "true"))
     float RunSpeed = 600.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Jump", meta = (AllowPrivateAccess = "true"))
     float JumpVelocity = 600.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Gliding", meta = (AllowPrivateAccess = "true"))
     float GlideSpeed = 700.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Gliding", meta = (AllowPrivateAccess = "true"))
     float GlideGravityScale = 0.1f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Gliding", meta = (AllowPrivateAccess = "true"))
     float GlideMinHeight = 0.0f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|Gliding", meta = (AllowPrivateAccess = "true"))
     float GlideDescentSpeed = 25.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|LineTrace", meta = (AllowPrivateAccess = "true"))
     float LineTraceStartOffset = -100.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|LineTrace", meta = (AllowPrivateAccess = "true"))
     float LineTraceLength = 5000.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|WallRun", meta = (AllowPrivateAccess = "true"))
     float WallRunSpeed = 600.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|WallRun", meta = (AllowPrivateAccess = "true"))
-    float WallCheckDistance = 150.f;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SMove|WallRun", meta = (AllowPrivateAccess = "true"))
+    float WallCheckDistance = 100.f;
     float WallRunZVelocity = 500.f;
 };

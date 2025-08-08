@@ -1,4 +1,4 @@
-#include "USMoveComponent.h"
+ #include "USMoveComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -29,7 +29,37 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
         return;
     }
 
-    Glide(DeltaTime);
+    FVector curVelocity = MyPlayer->GetCharacterMovement()->Velocity;
+
+    if (CurrentMoveState == EMoveState::Running)
+    {
+        FHitResult WallHit;
+        if (CheckWall(WallHit))
+        {
+            StartWallRun(WallHit);
+        }
+    }
+
+    if (CurrentMoveState == EMoveState::Running && curVelocity.Size() <= 0)
+    {
+        SetMoveState(EMoveState::Idle);
+    }
+
+    if (CurrentMoveState == EMoveState::WallRunning)
+    {
+        WallRun();
+    }
+
+    if (CurrentMoveState == EMoveState::Gliding)
+    {
+        Glide(DeltaTime);
+    }
+
+    if (GEngine)
+    {
+        FString StateString = UEnum::GetValueAsString(CurrentMoveState);
+        GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, StateString);
+    }
 }
 
 void USMoveComponent::SetMoveState(EMoveState NewState)
@@ -81,6 +111,17 @@ bool USMoveComponent::CheckWall(FHitResult& OutHit)
 
     bool bHasHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, QueryParams);
 
+    DrawDebugLine(
+        GetWorld(),
+        Start,
+        End,
+        bHasHit ? FColor::Green : FColor::Red,
+        false,
+        1.0f,
+        0,
+        1.0f
+    );
+
     if (bHasHit)
     {
         if (OutHit.GetActor()->ActorHasTag("Wall"))
@@ -92,12 +133,11 @@ bool USMoveComponent::CheckWall(FHitResult& OutHit)
     return false;
 }
 
-void USMoveComponent::StartWallRun()
+void USMoveComponent::StartWallRun(const FHitResult& WallHit)
 {
     if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
     SetMoveState(EMoveState::WallRunning);
-    MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
     MyPlayer->GetCharacterMovement()->GravityScale = 0.0f;
 }
 
@@ -106,7 +146,6 @@ void USMoveComponent::StopWallRun()
     if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
     SetMoveState(EMoveState::Idle);
-    MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
     MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
 }
 
@@ -121,7 +160,7 @@ void USMoveComponent::SMoveToggle()
     {
         StopSMove();
     }
-    else
+    else if (CurrentMoveState == EMoveState::Idle)
     {
         StartSMove();
     }
@@ -213,6 +252,11 @@ void USMoveComponent::SJump()
 
     float CurrentJumpVelocity = JumpVelocity;
 
+    if (MyPlayer->GetCharacterMovement()->IsFalling())
+    {
+        return;
+    }
+
     if (CurrentMoveState == EMoveState::WallRunning)
     {
         StopWallRun();
@@ -221,6 +265,12 @@ void USMoveComponent::SJump()
     if (CurrentMoveState == EMoveState::Running)
     {
         CurrentJumpVelocity = JumpVelocity * 2.f;
+    }
+
+    if (CurrentMoveState == EMoveState::Gliding)
+    {
+        StopGlide();
+        return;
     }
 
     MyPlayer->LaunchCharacter(FVector(0.f, 0.f, CurrentJumpVelocity), false, true);
