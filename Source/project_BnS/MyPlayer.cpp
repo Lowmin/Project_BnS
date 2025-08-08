@@ -115,7 +115,6 @@ void AMyPlayer::SGlidingToggle()
 
 void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("HandleBasicAttack Called!"));
     if (GetSkillSystemComponent())
     {
         GetSkillSystemComponent()->HandleBasicAttack();

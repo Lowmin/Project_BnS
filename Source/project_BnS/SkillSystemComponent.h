@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Engine/DataTable.h"
 #include "SkillInformation.h"
 #include "SkillController.h"
 #include "SkillSystemComponent.generated.h"
@@ -32,7 +33,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combo")
 	UDataTable* ComboSkillDataTable;
 
+	UPROPERTY()
+	TMap<FName, UAnimMontage*> LoadedMontages;
+
 	int32 CurrentComboID = 0;
 	FTimerHandle ComboTimerHandle;
-		
+	float LastComboDelay = 0.f;
+
+	bool bIsComboPlaying = false;
+	bool bIsComboNextInput = false;
+
+	UFUNCTION()
+	void OnAttackMontageEnd(UAnimMontage* Montage, bool bInterrupted);
 };
