@@ -32,6 +32,11 @@ void AMyPlayer::BeginPlay()
 
 void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+    if (MovementSystem && MovementSystem->GetMoveState() == EMoveState::WallRunning)
+    {
+        return;
+    }
+
     UEnhancedInputComponent* EnhancedPlayerInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
     if (EnhancedPlayerInputComponent != nullptr)
@@ -47,8 +52,12 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         }
 
         EnhancedPlayerInputComponent->BindAction(IA_Movement, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
-        EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
-        EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
+
+        if (MovementSystem && MovementSystem->GetMoveState() != EMoveState::Gliding)
+        {
+            EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
+            EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
+        }
         EnhancedPlayerInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
 
         EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
@@ -63,6 +72,12 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPlayer::Move(const FInputActionValue& Value)
 {
+
+    if (MovementSystem && MovementSystem->GetMoveState() == EMoveState::WallRunning)
+    {
+        return;
+    }
+
     const FVector2D MovementVector = Value.Get<FVector2D>();
 
     if (Controller != nullptr)
