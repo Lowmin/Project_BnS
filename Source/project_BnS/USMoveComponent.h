@@ -4,7 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "USMoveComponent.generated.h"
 
-// 파쿠르 시스템의 감지(Trace) 설정을 위한 구조체
 USTRUCT(BlueprintType)
 struct FParkourTraceSettings
 {
@@ -24,7 +23,7 @@ enum class EMoveState : uint8
 	Running			UMETA(DisplayName = "Running"),
 	Gliding			UMETA(DisplayName = "Gliding"),
 	WallRunning		UMETA(DisplayName = "WallRunning"),
-	ClimbingLedge	UMETA(DisplayName = "ClimbingLedge") // 난간 오르기 상태
+	ClimbingLedge	UMETA(DisplayName = "ClimbingLedge")
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -88,7 +87,7 @@ private:
 	float GlideSpeed = 700.f;
 	float GlideGravityScale = 0.1f;
 	float GlideMinHeight = 0.0f;
-	float GlideDescentSpeed = 25.f;
+	float GlideDescentSpeed = 50.f;
 	float LineTraceStartOffset = -100.f;
 	float LineTraceLength = 5000.f;
 
