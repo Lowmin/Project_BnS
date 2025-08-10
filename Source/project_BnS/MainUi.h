@@ -6,6 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "MainUi.generated.h"
 
+
+class UProgressBar;
+class UTextBlock;
+
 /**
  * 
  */
@@ -13,27 +17,47 @@ UCLASS()
 class PROJECT_BNS_API UMainUi : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UProgressBar* HpBar = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* HpText = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UProgressBar* StaminaBar = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* StaminaText = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UProgressBar* ExpBar = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* NicknameText = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* LevelText = nullptr;
 	
 public:
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetHp(float current, float max);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetMp(int32 current);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetStamina(float current, float max);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetStaminaEnable(bool enable);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetExp(float current, float max);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetNickname(const FString& nickname);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetLevel(int level);
 
 	UFUNCTION(BlueprintImplementableEvent)
