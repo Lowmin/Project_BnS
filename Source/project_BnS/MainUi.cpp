@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "SkillIcon.h"
 
 void UMainUi::SetHp(float current, float max)
 {
@@ -59,4 +60,28 @@ void UMainUi::SetTarget(bool isTarget, FVector2D center, FVector2D size)
 
 	TargetSlot->SetPosition(center);
 	TargetSlot->SetSize(size);
+}
+
+void UMainUi::SetSkillCooldown(int index, float remain, float cooldown)
+{
+	switch (index)
+	{
+	case 0:
+		Skill_0->SetCooldown(remain, cooldown);
+		break;
+	case 1:
+		Skill_1->SetCooldown(remain, cooldown);
+		break;
+	case 2:
+		Skill_2->SetCooldown(remain, cooldown);
+		break;
+	case 3:
+		Skill_3->SetCooldown(remain, cooldown);
+		break;
+	case 4:
+		Skill_4->SetCooldown(remain, cooldown);
+		break;
+	default:
+		break;
+	}
 }

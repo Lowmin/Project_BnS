@@ -93,3 +93,11 @@ void AMainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D
 
 	MainUI->SetTarget(isTarget, center, size);
 }
+
+void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetSkillCooldown(index, remain, cooldown);
+}
