@@ -9,6 +9,7 @@
 #include "SkillController.h"
 #include "SkillSystemComponent.generated.h"
 
+class UProjectileSkill;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_BNS_API USkillSystemComponent : public UActorComponent
@@ -21,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleBasicAttack();
+
+	UFUNCTION(BlueprintCallable)
+	void TestProjectileSkill();
 
 protected:
 	// Called when the game starts
@@ -45,4 +49,15 @@ private:
 
 	UFUNCTION()
 	void OnAttackMontageEnd(UAnimMontage* Montage, bool bInterrupted);
+
+	// 발사체 테스트
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UProjectileSkill> ProjectileSkillClass;
+
+	UPROPERTY(EditAnywhere)
+	FDataTableRowHandle TestSkillRow;
+
+	UPROPERTY()
+	UProjectileSkill* TestSkillLive = nullptr;
+
 };

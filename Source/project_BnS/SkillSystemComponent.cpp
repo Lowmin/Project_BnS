@@ -2,9 +2,11 @@
 
 
 #include "SkillSystemComponent.h"
+#include "ProjectileSkill.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 #include "TimerManager.h"
 
 USkillSystemComponent::USkillSystemComponent()
@@ -32,7 +34,7 @@ void USkillSystemComponent::BeginPlay()
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Montage Load Failed"))
+					UE_LOG(LogTemp, Warning, TEXT("Montage Load Failed"));
 				}
 			}
 		}
@@ -41,6 +43,8 @@ void USkillSystemComponent::BeginPlay()
 
 void USkillSystemComponent::HandleBasicAttack()
 {
+	if (!ComboSkillDataTable) { ResetCombo(); return; }
+
 	if (bIsComboPlaying)
 	{
 		bIsComboNextInput = true;   // 콤보 입력 대기 상태
@@ -68,6 +72,12 @@ void USkillSystemComponent::HandleBasicAttack()
 		ResetCombo();
 	}
 }
+
+void USkillSystemComponent::TestProjectileSkill()
+{
+
+}
+
 
 void USkillSystemComponent::ExecuteComboAttack(const FSkillInformation* ComboData)
 {
