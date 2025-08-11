@@ -88,7 +88,7 @@ private:
 	float GlideSpeed = 700.f;
 	float GlideGravityScale = 0.1f;
 	float GlideMinHeight = 0.0f;
-	float GlideDescentSpeed = 25.f;
+	float GlideDescentSpeed = 100.f;
 	float LineTraceStartOffset = -100.f;
 	float LineTraceLength = 5000.f;
 

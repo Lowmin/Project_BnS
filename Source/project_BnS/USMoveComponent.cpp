@@ -37,6 +37,12 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			BeginWallRun(WallHit);
 		}
 	}
+
+	if (CurrentMoveState == EMoveState::Running && MyPlayer->GetVelocity().SizeSquared() < 1.0f)
+	{
+		SetMoveState(EMoveState::Idle);
+	}
+
 	else if (CurrentMoveState == EMoveState::WallRunning)
 	{
 		TickWallRun();
@@ -125,7 +131,7 @@ void USMoveComponent::StartGlide()
 void USMoveComponent::StopGlide()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-	SetMoveState(EMoveState::Idle);
+	SetMoveState(EMoveState::Running);
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
 }
@@ -139,7 +145,8 @@ void USMoveComponent::GlideToggle()
 void USMoveComponent::Glide(float DeltaTime)
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-	if (MyPlayer->GetCharacterMovement()->IsMovingOnGround())
+
+	if (CheckGroundDistance() <= 0.1f)
 	{
 		StopGlide();
 		return;
