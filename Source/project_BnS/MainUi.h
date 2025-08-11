@@ -9,6 +9,8 @@
 
 class UProgressBar;
 class UTextBlock;
+class UCanvasPanel;
+class UCanvasPanelSlot;
 
 /**
  * 
@@ -38,6 +40,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* LevelText = nullptr;
 	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UCanvasPanel* Target = nullptr;
+	UPROPERTY(BlueprintReadOnly)
+	UCanvasPanelSlot* TargetSlot = nullptr;
+	
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetHp(float current, float max);
@@ -60,6 +68,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetLevel(int level);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetTarget(bool isTarget, FVector2D center, FVector2D size);
 };

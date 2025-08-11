@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayer.h"
 #include "Components/SphereComponent.h"
-
+#include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
 
 // Sets default values for this component's properties
 ATargetingSystem::ATargetingSystem()
@@ -21,7 +21,7 @@ ATargetingSystem::ATargetingSystem()
 	PrimaryActorTick.bCanEverTick = true;
 
 	TargetSensor = CreateDefaultSubobject<USphereComponent>(TEXT("TargetSensors"));
-	TargetSensor->SetSphereRadius(400);
+	TargetSensor->SetSphereRadius(1000);
 	TargetSensor->SetHiddenInGame(false);
 	TargetSensor->SetupAttachment(RootComponent);
 
@@ -34,7 +34,8 @@ void ATargetingSystem::BeginPlay()
 	Super::BeginPlay();
 
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	DpScale = GEngine->GameViewport->GetDPIScale();
+	float uiDpScale = UWidgetLayoutLibrary::GetViewportScale(GEngine->GameViewport->GetWorld());
+	UiViewportSize = ViewportSize * (1 / uiDpScale);
 }
 
 void ATargetingSystem::Tick(float DeltaTime)
@@ -67,13 +68,16 @@ void ATargetingSystem::Tick(float DeltaTime)
 		float x = ((screen.X/ViewportSize.X) - 0.5f);
 		float y = ((screen.Y/ViewportSize.Y) - 0.5f);
 
+		x *= UiViewportSize.X;
+		y *= UiViewportSize.Y;
+
 		// 크기 계산 
 		FVector camPos = Cast<AMyPlayer>(bnsController->GetPawn())->FollowCamera->GetComponentLocation();
 		float radius = 42.0f * 2.0f;
 		float distance = FVector::Distance(pos, camPos);
 		float fov = 90.0f * 0.5f;
 		float targetBoxSize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
-		targetBoxSize *= ((1 / DpScale) * ViewportSize.Y * 2);
+		targetBoxSize *= (UiViewportSize.Y);
 
 		bnsController->UIPresenter->OnTargetChange(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
 	}

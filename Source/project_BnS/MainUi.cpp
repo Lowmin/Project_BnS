@@ -5,6 +5,8 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 
 void UMainUi::SetHp(float current, float max)
 {
@@ -40,4 +42,21 @@ void UMainUi::SetNickname(const FString& nickname)
 void UMainUi::SetLevel(int level)
 {
 	LevelText->SetText(FText::AsNumber(level));
+}
+
+void UMainUi::SetTarget(bool isTarget, FVector2D center, FVector2D size)
+{
+	if (TargetSlot == nullptr)
+	{
+		TargetSlot = Cast<UCanvasPanelSlot>(Target->Slot);
+	}
+
+	if (TargetSlot == nullptr)
+		return;
+
+	float viewportScale = 1.f;
+	FVector2D viewportSize = FVector2D::UnitVector;
+
+	TargetSlot->SetPosition(center);
+	TargetSlot->SetSize(size);
 }
