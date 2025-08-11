@@ -20,7 +20,7 @@ void USkillIcon::SetCooldown(float remain, float cooldown)
 		return;
 	}
 
-	int remainTime = FMath::FloorToInt32(remain);
+	int remainTime = FMath::CeilToInt32(remain);
 
 	//if (remainTime == 0)
 	{
@@ -28,6 +28,6 @@ void USkillIcon::SetCooldown(float remain, float cooldown)
 	//else
 	{
 		UmatInstance->SetScalarParameterValue(TEXT("Progress"), remain / cooldown);
-		CooldownText->SetText(FText::AsNumber(FMath::FloorToInt32(remain)));
+		CooldownText->SetText(FText::AsNumber(remainTime));
 	}
 }
