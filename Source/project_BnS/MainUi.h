@@ -9,6 +9,9 @@
 
 class UProgressBar;
 class UTextBlock;
+class UCanvasPanel;
+class UCanvasPanelSlot;
+class USkillIcon;
 
 /**
  * 
@@ -38,6 +41,22 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* LevelText = nullptr;
 	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UCanvasPanel* Target = nullptr;
+	UPROPERTY(BlueprintReadOnly)
+	UCanvasPanelSlot* TargetSlot = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USkillIcon* Skill_0 = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USkillIcon* Skill_1 = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USkillIcon* Skill_2 = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USkillIcon* Skill_3 = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	USkillIcon* Skill_4 = nullptr;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetHp(float current, float max);
@@ -60,6 +79,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetLevel(int level);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetTarget(bool isTarget, FVector2D center, FVector2D size);
+
+	/// <summary>
+	/// 스킬 쿨타임 표시 <br/>
+	/// </summary>
+	/// <param name="index"> 스킬 인덱스 <para/>
+	/// ㄴ0 : 기본공격  <para/>
+	/// ㄴ1 : 1번스킬
+	/// </param>
+	/// <param name="remain"> 남은 시간 </param>
+	/// <param name="cooldown"> 총 쿨타임 시간 </param>
+	UFUNCTION()
+	void SetSkillCooldown(int index, float remain, float cooldown);
 };
