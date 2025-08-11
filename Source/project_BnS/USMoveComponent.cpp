@@ -1,13 +1,11 @@
 #include "USMoveComponent.h"
-#include "Gameframework/Character.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "LatentActions.h"
-
-
 
 USMoveComponent::USMoveComponent()
 {
@@ -18,9 +16,7 @@ USMoveComponent::USMoveComponent()
 void USMoveComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	MyPlayer = Cast<ACharacter>(GetOwner());
-
 	if (MyPlayer && MyPlayer->GetCharacterMovement())
 	{
 		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
@@ -36,22 +32,21 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	if (CurrentMoveState == EMoveState::Running)
 	{
 		FHitResult WallHit;
-
 		if (CanWallRun(WallHit))
 		{
 			BeginWallRun(WallHit);
 		}
 	}
-
 	else if (CurrentMoveState == EMoveState::WallRunning)
 	{
 		TickWallRun();
 	}
-
 	else if (CurrentMoveState == EMoveState::Gliding)
 	{
 		Glide(DeltaTime);
 	}
+
+	TickMeshTilt(DeltaTime);
 
 	if (GEngine)
 	{
@@ -75,7 +70,6 @@ EMoveState USMoveComponent::GetMoveState() const
 }
 
 void USMoveComponent::SetMovementSpeed(EMoveState NewState)
-
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
@@ -86,15 +80,12 @@ void USMoveComponent::SetMovementSpeed(EMoveState NewState)
 	case EMoveState::Idle:
 		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 		break;
-
 	case EMoveState::Running:
 		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 		break;
-
 	case EMoveState::Gliding:
 		MyPlayer->GetCharacterMovement()->MaxFlySpeed = GlideSpeed;
 		break;
-
 	default:
 		break;
 	}
@@ -125,9 +116,7 @@ void USMoveComponent::StartGlide()
 	if (MyPlayer->GetCharacterMovement()->IsFalling() && CheckGroundDistance() >= GlideMinHeight)
 	{
 		if (CurrentMoveState == EMoveState::Running) StopSMove();
-
 		SetMoveState(EMoveState::Gliding);
-
 		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		MyPlayer->GetCharacterMovement()->GravityScale = GlideGravityScale;
 	}
@@ -136,11 +125,8 @@ void USMoveComponent::StartGlide()
 void USMoveComponent::StopGlide()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
 	SetMoveState(EMoveState::Idle);
-
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
 	MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
 }
 
@@ -153,7 +139,6 @@ void USMoveComponent::GlideToggle()
 void USMoveComponent::Glide(float DeltaTime)
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-
 	if (MyPlayer->GetCharacterMovement()->IsMovingOnGround())
 	{
 		StopGlide();
@@ -162,17 +147,25 @@ void USMoveComponent::Glide(float DeltaTime)
 	MyPlayer->GetCharacterMovement()->Velocity.Z = -GlideDescentSpeed;
 }
 
-
-
 void USMoveComponent::SJump()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement() || MyPlayer->GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
-	const float CurrentJumpVelocity = (CurrentMoveState == EMoveState::Running) ? JumpVelocity * 2.f : JumpVelocity;
 
+	const float CurrentJumpVelocity = (CurrentMoveState == EMoveState::Running) ? JumpVelocity * 2.f : JumpVelocity;
 	MyPlayer->LaunchCharacter(FVector(0.f, 0.f, CurrentJumpVelocity), false, true);
+}
+
+void USMoveComponent::WallJump()
+{
+	if (!MyPlayer || CurrentMoveState != EMoveState::WallRunning) return;
+	EndWallRun();
+
+	const FVector JumpDirection = (WallNormal + FVector(0.f, 0.f, 0.7f)).GetSafeNormal();
+
+	MyPlayer->LaunchCharacter(JumpDirection * WallJumpForce, true, true);
 }
 
 float USMoveComponent::CheckGroundDistance()
@@ -180,15 +173,11 @@ float USMoveComponent::CheckGroundDistance()
 	if (!MyPlayer || !GetWorld()) return -1.0f;
 
 	FHitResult HitResult;
-
 	FVector StartLocation = MyPlayer->GetActorLocation();
-
 	FVector EndLocation = StartLocation - FVector(0, 0, LineTraceLength);
-
 	StartLocation.Z += LineTraceStartOffset;
 
 	FCollisionQueryParams QueryParams;
-
 	QueryParams.AddIgnoredActor(MyPlayer);
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams))
@@ -203,6 +192,7 @@ bool USMoveComponent::CanWallRun(FHitResult& OutHit)
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return false;
 	if (MyPlayer->GetCharacterMovement()->IsFalling()) return false;
 	if (MyPlayer->GetVelocity().SizeSquared() < 1.0f) return false;
+
 	return CheckWall(OutHit);
 }
 
@@ -214,7 +204,6 @@ bool USMoveComponent::CheckWall(FHitResult& OutHit)
 	const FVector End = Start + MyPlayer->GetActorForwardVector() * WallTraceSettings.MaxReach;
 
 	TArray<AActor*> ActorsToIgnore;
-
 	ActorsToIgnore.Add(MyPlayer);
 
 	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, WallTraceSettings.TraceRadius,
@@ -229,36 +218,41 @@ void USMoveComponent::BeginWallRun(const FHitResult& WallHit)
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
 	SetMoveState(EMoveState::WallRunning);
-
 	WallNormal = WallHit.ImpactNormal;
 
 	bOriginalOrientRotationToMovement = MyPlayer->GetCharacterMovement()->bOrientRotationToMovement;
 	bOriginalUseControllerRotationYaw = MyPlayer->bUseControllerRotationYaw;
+
 	MyPlayer->GetCharacterMovement()->bOrientRotationToMovement = false;
 	MyPlayer->bUseControllerRotationYaw = false;
 
 	const FRotator LookAtWallRotation = (-WallNormal).Rotation();
-
 	MyPlayer->SetActorRotation(FRotator(0.0f, LookAtWallRotation.Yaw, 0.0f));
+
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+
+	TargetMeshPitch = -60.0f;
 }
 
 void USMoveComponent::EndWallRun()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
-	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	TargetMeshPitch = 0.0f;
 	SJump();
+
+	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	MyPlayer->GetCharacterMovement()->bOrientRotationToMovement = bOriginalOrientRotationToMovement;
 	MyPlayer->bUseControllerRotationYaw = bOriginalUseControllerRotationYaw;
+
 	SetMoveState(EMoveState::Running);
 }
 
 void USMoveComponent::TickWallRun()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-	FHitResult LedgeHit;
 
+	FHitResult LedgeHit;
 	if (CheckLedge(LedgeHit))
 	{
 		ClimbLedge(LedgeHit);
@@ -266,31 +260,40 @@ void USMoveComponent::TickWallRun()
 	}
 
 	FHitResult WallHit;
-
 	if (CheckWall(WallHit))
 	{
 		APlayerController* PlayerController = MyPlayer->GetController<APlayerController>();
-
 		if (PlayerController)
 		{
+			const FVector UpDirection = FVector::UpVector;
+
+			const FVector StrafeDirection = FVector::CrossProduct(WallNormal, UpDirection);
+
 			const bool bMoveUp = PlayerController->IsInputKeyDown(EKeys::W);
 			const bool bMoveLeft = PlayerController->IsInputKeyDown(EKeys::A);
 			const bool bMoveRight = PlayerController->IsInputKeyDown(EKeys::D);
 
-			const FVector UpDirection = bMoveUp ? FVector::UpVector : FVector::ZeroVector;
-			const FVector WallRightVector = FVector::CrossProduct(WallNormal, FVector::UpVector);
-			const FVector LeftDirection = bMoveLeft ? -WallRightVector : FVector::ZeroVector;
-			const FVector RightDirection = bMoveRight ? WallRightVector : FVector::ZeroVector;
+			FVector TargetDirection = FVector::ZeroVector;
 
-			FVector TargetDirection = UpDirection + LeftDirection + RightDirection;
-			FVector TargetVelocity = FVector::ZeroVector;
-
-			if (!TargetDirection.IsNearlyZero())
+			if (bMoveUp)
 			{
-				TargetVelocity = TargetDirection.GetSafeNormal() * WallRunSpeed;
+				TargetDirection += UpDirection;
+			}
+			if (bMoveLeft)
+			{
+				TargetDirection -= StrafeDirection;
+			}
+			if (bMoveRight)
+			{
+				TargetDirection += StrafeDirection;
 			}
 
-			MyPlayer->GetCharacterMovement()->Velocity = TargetVelocity;
+			const FVector TargetVelocity = TargetDirection.IsNearlyZero() ? FVector::ZeroVector : TargetDirection.GetSafeNormal() * WallRunSpeed;
+			const FVector CurrentVelocity = MyPlayer->GetCharacterMovement()->Velocity;
+			const float InterpSpeed = 8.0f;
+			const FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, TargetVelocity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
+
+			MyPlayer->GetCharacterMovement()->Velocity = NewVelocity;
 		}
 	}
 	else
@@ -299,23 +302,18 @@ void USMoveComponent::TickWallRun()
 	}
 }
 
-
-
 bool USMoveComponent::CheckLedge(FHitResult& OutHit)
 {
 	if (!MyPlayer) return false;
 
 	const FVector Forward = MyPlayer->GetActorForwardVector();
-
 	const FVector Up = MyPlayer->GetActorUpVector();
-
 	const FVector Start = MyPlayer->GetActorLocation() + Up * MyPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 	FHitResult ForwardTraceHit;
-
 	TArray<AActor*> ActorsToIgnore;
-
 	ActorsToIgnore.Add(MyPlayer);
+
 	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, Start + Forward * LedgeTraceSettings.MaxReach,
 		LedgeTraceSettings.TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, ActorsToIgnore,
 		EDrawDebugTrace::None, ForwardTraceHit, true);
@@ -333,26 +331,34 @@ bool USMoveComponent::CheckLedge(FHitResult& OutHit)
 	return false;
 }
 
-
-
 void USMoveComponent::ClimbLedge(const FHitResult& LedgeHit)
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
+
 	SetMoveState(EMoveState::ClimbingLedge);
+
 	const FVector TargetLocation = LedgeHit.ImpactPoint + WallNormal * 50.0f + FVector(0, 0, MyPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 5.0f);
 
 	FLatentActionInfo LatentInfo;
-
 	LatentInfo.Linkage = 0;
 	LatentInfo.CallbackTarget = this;
 	LatentInfo.ExecutionFunction = FName("OnClimbLedgeFinished");
 	LatentInfo.UUID = __LINE__;
+
 	UKismetSystemLibrary::MoveComponentTo(MyPlayer->GetCapsuleComponent(), TargetLocation, MyPlayer->GetActorRotation(), true, true, 0.2f, false, EMoveComponentAction::Type::Move, LatentInfo);
 }
-
-
 
 void USMoveComponent::OnClimbLedgeFinished()
 {
 	EndWallRun();
+}
+
+void USMoveComponent::TickMeshTilt(float DeltaTime)
+{
+	if (!MyPlayer || !MyPlayer->GetMesh()) return;
+
+	FRotator CurrentRelativeRotation = MyPlayer->GetMesh()->GetRelativeRotation();
+
+	float NewRoll = FMath::FInterpTo(CurrentRelativeRotation.Roll, TargetMeshPitch, DeltaTime, TiltInterpSpeed);
+	MyPlayer->GetMesh()->SetRelativeRotation(FRotator(CurrentRelativeRotation.Pitch, CurrentRelativeRotation.Yaw, NewRoll));
 }

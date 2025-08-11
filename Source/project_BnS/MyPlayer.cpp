@@ -32,13 +32,7 @@ void AMyPlayer::BeginPlay()
 
 void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-    if (MovementSystem && MovementSystem->GetMoveState() == EMoveState::WallRunning)
-    {
-        return;
-    }
-
     UEnhancedInputComponent* EnhancedPlayerInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-
     if (EnhancedPlayerInputComponent != nullptr)
     {
         APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -52,17 +46,13 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         }
 
         EnhancedPlayerInputComponent->BindAction(IA_Movement, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
-
-        if (MovementSystem && MovementSystem->GetMoveState() != EMoveState::Gliding)
-        {
-            EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
-            EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
-        }
         EnhancedPlayerInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
+
+        EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
+        EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
 
         EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
         EnhancedPlayerInputComponent->BindAction(IA_Glide, ETriggerEvent::Started, this, &AMyPlayer::SGlidingToggle);
-
         if (IA_BasicAttack)
         {
             EnhancedPlayerInputComponent->BindAction(IA_BasicAttack, ETriggerEvent::Started, this, &AMyPlayer::HandleBasicAttack);
@@ -108,7 +98,14 @@ void AMyPlayer::Jump()
 {
     if (MovementSystem)
     {
-        MovementSystem->SJump();
+        if (MovementSystem->GetMoveState() == EMoveState::WallRunning)
+        {
+            MovementSystem->WallJump();
+        }
+        else
+        {
+            MovementSystem->SJump();
+        }
     }
 }
 

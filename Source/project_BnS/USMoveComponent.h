@@ -10,7 +10,7 @@ struct FParkourTraceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parkour")
-	float MaxReach = 100.0f;
+	float MaxReach = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parkour")
 	float TraceRadius = 20.0f;
@@ -42,7 +42,7 @@ public:
 	void SetMoveState(EMoveState NewState);
 	EMoveState GetMoveState() const;
 
-	// 경공(달리기)
+	// 움직임
 	void StartSMove();
 	void StopSMove();
 	void SMoveToggle();
@@ -55,12 +55,13 @@ public:
 
 	// 점프
 	void SJump();
+	void WallJump();
 
 private:
-	// 상태 설정
 	void SetMovementSpeed(EMoveState NewState);
 	float CheckGroundDistance();
 
+	// 벽 체크
 	bool CanWallRun(FHitResult& OutHit);
 	bool CheckWall(FHitResult& OutHit);
 	void BeginWallRun(const FHitResult& WallHit);
@@ -72,27 +73,27 @@ private:
 	UFUNCTION()
 	void OnClimbLedgeFinished();
 
+	void TickMeshTilt(float DeltaTime);
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
 	EMoveState CurrentMoveState;
 
 	ACharacter* MyPlayer;
 
-	// 기본 이동 설정
 	float WalkSpeed = 300.f;
 	float RunSpeed = 600.f;
 	float JumpVelocity = 600.f;
 
-	// 글라이드 설정
 	float GlideSpeed = 700.f;
 	float GlideGravityScale = 0.1f;
 	float GlideMinHeight = 0.0f;
-	float GlideDescentSpeed = 50.f;
+	float GlideDescentSpeed = 25.f;
 	float LineTraceStartOffset = -100.f;
 	float LineTraceLength = 5000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
-	float WallRunSpeed = 500.0f;
+	float WallRunSpeed = 600.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
 	FParkourTraceSettings WallTraceSettings;
@@ -102,7 +103,11 @@ private:
 
 	FVector WallNormal;
 
-	// 캐릭터의 원래 회전 설정 저장용
 	bool bOriginalOrientRotationToMovement;
 	bool bOriginalUseControllerRotationYaw;
+
+	float TargetMeshPitch = 0.0f;
+	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
+	float TiltInterpSpeed = 3.0f;
+	float WallJumpForce = 500.0f;
 };
