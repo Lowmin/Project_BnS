@@ -6,8 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "StatComponent.generated.h"
 
-DECLARE_DELEGATE_OneParam(FDele_Single_I, int32);
-DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FDele_Multi_I, int32);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_FF, float, float);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_BNS_API UStatComponent : public UActorComponent
@@ -43,9 +43,9 @@ private:
 	float Def = 10.0f;
 
 public:
-	FDele_Single_FF OnHpChange = nullptr;
-	FDele_Single_I OnMpChange = nullptr;
-	FDele_Single_I OnLevelChange = nullptr;
+	FDele_Multi_FF OnHpChange{};
+	FDele_Multi_I OnMpChange{};
+	FDele_Multi_I OnLevelChange{};
 	
 	// HP
 	float GetCurHp() const;

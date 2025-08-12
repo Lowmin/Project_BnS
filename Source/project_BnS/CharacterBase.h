@@ -22,6 +22,7 @@ protected:
 public:
 	void Attack();
 	bool IsDead() const;
+	void OnDamaged(int32 damage);
 	
 
 	// Stat Component

@@ -45,6 +45,11 @@ bool ACharacterBase::IsDead() const
 	return status->GetCurHp() <= 0.0f;
 }
 
+void ACharacterBase::OnDamaged(int32 damage)
+{
+	status->SetCurHp(status->GetCurHp() - damage);
+}
+
 UStatComponent* ACharacterBase::GetStatusComponent() const
 {
 	return status;
