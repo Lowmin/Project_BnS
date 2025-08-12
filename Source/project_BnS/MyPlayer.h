@@ -7,6 +7,7 @@
 #include "USMoveComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "MyPlayer.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
@@ -19,6 +20,12 @@ class PROJECT_BNS_API AMyPlayer : public ATargetingSystem
 public:
     AMyPlayer();
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effects")
+    class UPostProcessComponent* PostProcessComponent;
+
+    UPROPERTY(EditAnywhere, Category = "Effects")
+
+    class UMaterialInterface* FastGlideEffectMaterial;
     UPROPERTY(EditAnywhere, Category = Input)
     class UInputMappingContext* IC_Player;
 
@@ -49,6 +56,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     void Move(const FInputActionValue& Value);
@@ -64,6 +72,12 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     USMoveComponent* MovementSystem;
+
+    UPROPERTY()
+    class UMaterialInstanceDynamic* DynamicFastGlideMaterial;
+
+    float CurrentBlurStrength;
+    float TargetBlurStrength;
 
     // Status
 private:

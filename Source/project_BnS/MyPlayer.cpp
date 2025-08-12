@@ -15,6 +15,9 @@ AMyPlayer::AMyPlayer()
 
     MovementSystem = CreateDefaultSubobject<USMoveComponent>(TEXT("MovementSystem"));
 
+    PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+    PostProcessComponent->SetupAttachment(RootComponent);
+
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = 300.0f;
@@ -28,6 +31,30 @@ AMyPlayer::AMyPlayer()
 void AMyPlayer::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (FastGlideEffectMaterial)
+    {
+        DynamicFastGlideMaterial = UMaterialInstanceDynamic::Create(FastGlideEffectMaterial, this);
+        PostProcessComponent->AddOrUpdateBlendable(DynamicFastGlideMaterial);
+    }
+
+    CurrentBlurStrength = 0.f;
+    TargetBlurStrength = 0.f;
+}
+
+
+void AMyPlayer::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (MovementSystem && DynamicFastGlideMaterial)
+    {
+        TargetBlurStrength = (MovementSystem->GetMoveState() == EMoveState::FastGliding) ? 0.4f : 0.0f;
+
+        CurrentBlurStrength = FMath::FInterpTo(CurrentBlurStrength, TargetBlurStrength, DeltaTime, 5.0f);
+
+        DynamicFastGlideMaterial->SetScalarParameterValue(FName("BlurStrength"), CurrentBlurStrength);
+    }
 }
 
 void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -47,12 +74,10 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
         EnhancedPlayerInputComponent->BindAction(IA_Movement, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
         EnhancedPlayerInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
-
         EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Started, this, &AMyPlayer::Jump);
         EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
-
         EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
-        EnhancedPlayerInputComponent->BindAction(IA_Glide, ETriggerEvent::Started, this, &AMyPlayer::SGlidingToggle);
+
         if (IA_BasicAttack)
         {
             EnhancedPlayerInputComponent->BindAction(IA_BasicAttack, ETriggerEvent::Started, this, &AMyPlayer::HandleBasicAttack);
@@ -98,13 +123,13 @@ void AMyPlayer::Jump()
 {
     if (MovementSystem)
     {
-        if (MovementSystem->GetMoveState() == EMoveState::WallRunning)
+        if (GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())
         {
-            MovementSystem->WallJump();
+            MovementSystem->SJump();
         }
         else
         {
-            MovementSystem->SJump();
+            MovementSystem->GlideToggle();
         }
     }
 }

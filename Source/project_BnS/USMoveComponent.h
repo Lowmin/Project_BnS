@@ -22,6 +22,7 @@ enum class EMoveState : uint8
 	Idle			UMETA(DisplayName = "Idle"),
 	Running			UMETA(DisplayName = "Running"),
 	Gliding			UMETA(DisplayName = "Gliding"),
+	FastGliding		UMETA(DisplayName = "FastGliding"),
 	WallRunning		UMETA(DisplayName = "WallRunning"),
 	ClimbingLedge	UMETA(DisplayName = "ClimbingLedge")
 };
@@ -52,6 +53,9 @@ public:
 	void StopGlide();
 	void GlideToggle();
 	void Glide(float DeltaTime);
+	void FastGlideToggle();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|Glide")
+	float GroundDistance{};
 
 	// มกวม
 	void SJump();
@@ -85,10 +89,12 @@ private:
 	float RunSpeed = 600.f;
 	float JumpVelocity = 600.f;
 
-	float GlideSpeed = 700.f;
+	float GlideSpeed = 600.f;
 	float GlideGravityScale = 0.1f;
 	float GlideMinHeight = 0.0f;
-	float GlideDescentSpeed = 100.f;
+	float GlideDescentSpeed = 100.f; 
+	float FastGlideSpeed = 1200.f;
+	float FastGlideDescentSpeed = 100.f;
 	float LineTraceStartOffset = -100.f;
 	float LineTraceLength = 5000.f;
 

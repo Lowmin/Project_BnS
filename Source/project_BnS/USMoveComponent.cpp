@@ -47,7 +47,7 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	{
 		TickWallRun();
 	}
-	else if (CurrentMoveState == EMoveState::Gliding)
+	else if (CurrentMoveState == EMoveState::Gliding || CurrentMoveState == EMoveState::FastGliding)
 	{
 		Glide(DeltaTime);
 	}
@@ -92,6 +92,9 @@ void USMoveComponent::SetMovementSpeed(EMoveState NewState)
 	case EMoveState::Gliding:
 		MyPlayer->GetCharacterMovement()->MaxFlySpeed = GlideSpeed;
 		break;
+	case EMoveState::FastGliding:
+		MyPlayer->GetCharacterMovement()->MaxFlySpeed = FastGlideSpeed;
+		break;
 	default:
 		break;
 	}
@@ -100,8 +103,28 @@ void USMoveComponent::SetMovementSpeed(EMoveState NewState)
 void USMoveComponent::SMoveToggle()
 {
 	if (!MyPlayer) return;
-	if (CurrentMoveState == EMoveState::Running) StopSMove();
-	else if (CurrentMoveState == EMoveState::Idle) StartSMove();
+
+	switch (CurrentMoveState)
+	{
+	case EMoveState::Idle:
+		StartSMove();
+		break;
+
+	case EMoveState::Running:
+		StopSMove();
+		break;
+
+	case EMoveState::Gliding:
+		SetMoveState(EMoveState::FastGliding);
+		break;
+
+	case EMoveState::FastGliding:
+		SetMoveState(EMoveState::Gliding);
+		break;
+
+	default:
+		break;
+	}
 }
 
 void USMoveComponent::StartSMove()
@@ -138,20 +161,40 @@ void USMoveComponent::StopGlide()
 
 void USMoveComponent::GlideToggle()
 {
-	if (CurrentMoveState != EMoveState::Gliding) StartGlide();
-	else StopGlide();
+	if (CurrentMoveState == EMoveState::Gliding || CurrentMoveState == EMoveState::FastGliding)
+	{
+		StopGlide();
+	}
+	else
+	{
+		StartGlide();
+	}
 }
 
 void USMoveComponent::Glide(float DeltaTime)
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
-	if (CheckGroundDistance() <= 0.1f)
+	GroundDistance = CheckGroundDistance();
+
+	if (GroundDistance <= 0.1f)
 	{
 		StopGlide();
 		return;
 	}
 	MyPlayer->GetCharacterMovement()->Velocity.Z = -GlideDescentSpeed;
+}
+
+void USMoveComponent::FastGlideToggle()
+{
+	if (CurrentMoveState != EMoveState::FastGliding)
+	{
+		SetMoveState(EMoveState::FastGliding);
+	}
+	else
+	{
+		SetMoveState(EMoveState::Gliding);
+	}
 }
 
 void USMoveComponent::SJump()
