@@ -25,9 +25,9 @@ void AMainUIPresenter::Bind(UStatComponent* stat)
 	MyPlayer->OnStaminaChange.BindUObject(this, &AMainUIPresenter::OnStaminaChange);
 	MyPlayer->OnExpChange.BindUObject(this, &AMainUIPresenter::OnExpChange);
 	
-	stat->OnHpChange.BindUObject(this, &AMainUIPresenter::OnHpChange);
-	stat->OnMpChange.BindUObject(this, &AMainUIPresenter::OnMpChange);
-	stat->OnLevelChange.BindUObject(this, &AMainUIPresenter::OnLevelChange);
+	stat->OnHpChange.AddUObject(this, &AMainUIPresenter::OnHpChange);
+	stat->OnMpChange.AddUObject(this, &AMainUIPresenter::OnMpChange);
+	stat->OnLevelChange.AddUObject(this, &AMainUIPresenter::OnLevelChange);
 }
 
 void AMainUIPresenter::OnHpChange(float current, float max) const

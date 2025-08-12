@@ -44,7 +44,8 @@ void UStatComponent::SetCurHp(float hp)
 	
 	CurHp = hp;
 
-	OnHpChange.ExecuteIfBound(CurHp, MaxHp);
+	if(OnHpChange.IsBound())
+		OnHpChange.Broadcast(CurHp, MaxHp);
 }
 
 float UStatComponent::GetMaxHp() const 
@@ -64,7 +65,8 @@ void UStatComponent::SetCurMp(int32 mp)
 		
 	CurMp = mp;
 
-	OnMpChange.ExecuteIfBound(CurMp);
+	if(OnMpChange.IsBound())
+		OnMpChange.Broadcast(CurMp);
 }
 
 int32 UStatComponent::GetMaxMp() const
@@ -79,7 +81,8 @@ void UStatComponent::SetLevel(int32 level)
 	
 	Level = level;
 	
-	OnLevelChange.ExecuteIfBound(level);
+	if(OnLevelChange.IsBound())
+		OnLevelChange.Broadcast(level);
 }
 
 int32 UStatComponent::GetLevel() const
