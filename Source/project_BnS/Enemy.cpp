@@ -5,6 +5,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "WorldFloatingUiComponent.h"
 #include "Nameplate.h"
+#include "HpBar.h"
+#include "StatComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -47,6 +49,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(TEXT("Enemy"));
+	status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
 }
 
 FVector AEnemy::GetWorldLocation() const
