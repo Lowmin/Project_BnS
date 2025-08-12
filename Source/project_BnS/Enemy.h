@@ -19,7 +19,13 @@ class PROJECT_BNS_API AEnemy : public ACharacterBase, public ITargetAble
 public:
 	AEnemy();
 
+	virtual void BeginPlay() override;
+
 private:
+	UPROPERTY(VisibleAnywhere)
+	class UWorldFloatingUiComponent* HpBar = nullptr;
+	UPROPERTY(VisibleAnywhere)
+	class UWidgetComponent* Nameplate = nullptr;
 
 	// ITargetAble
 	// FVector2D GetTargetCenter_Implementation();
