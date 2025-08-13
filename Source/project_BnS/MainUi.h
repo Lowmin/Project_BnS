@@ -87,6 +87,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTarget(bool isTarget, FVector2D center, FVector2D size);
 
+	UFUNCTION()
+	void SetSkillIcon(int index, UTexture2D* texture);
 	/// <summary>
 	/// 스킬 쿨타임 표시 <br/>
 	/// </summary>

@@ -70,6 +70,30 @@ void UMainUi::SetTarget(bool isTarget, FVector2D center, FVector2D size)
 	TargetSlot->SetSize(size);
 }
 
+void UMainUi::SetSkillIcon(int index, UTexture2D* texture)
+{
+	switch (index)
+	{
+	case 0:
+		Skill_0->SetIcon(texture);
+		break;
+	case 1:
+		Skill_1->SetIcon(texture);
+		break;
+	case 2:
+		Skill_2->SetIcon(texture);
+		break;
+	case 3:
+		Skill_3->SetIcon(texture);
+		break;
+	case 4:
+		Skill_4->SetIcon(texture);
+		break;
+	default:
+		break;
+	}
+}
+
 void UMainUi::SetSkillCooldown(int index, float remain, float cooldown)
 {
 	switch (index)

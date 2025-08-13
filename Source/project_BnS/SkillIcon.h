@@ -18,7 +18,6 @@ class PROJECT_BNS_API USkillIcon : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
@@ -36,5 +35,6 @@ protected:
 	UPROPERTY()
 	UMaterialInstanceDynamic* UmatInstance = nullptr;
 public:
+	void SetIcon(UTexture2D* texture);
 	void SetCooldown(float remain, float cooldown);
 };

@@ -12,6 +12,11 @@ void USkillIcon::NativeConstruct()
 	Block->SetBrushFromMaterial(UmatInstance);
 }
 
+void USkillIcon::SetIcon(UTexture2D* texture)
+{
+	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
+}
+
 void USkillIcon::SetCooldown(float remain, float cooldown)
 {
 	if (UmatInstance == nullptr)
