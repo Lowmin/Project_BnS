@@ -29,6 +29,7 @@ protected:
 	TObjectPtr<class UTextBlock> DIstanceText;
 
 public:
+	void SetInfo(float curHp, float maxHp, int32 level, FString name, float distance);
 	void OnChangeHp(float current, float max);
 	void SetLevel(int32 level);
 	void SetName(FString name);

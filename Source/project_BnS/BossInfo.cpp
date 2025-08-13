@@ -6,6 +6,14 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
+void UBossInfo::SetInfo(float curHp, float maxHp, int32 level, FString name, float distance)
+{
+	OnChangeHp(curHp, maxHp);
+	SetLevel(level);
+	SetName(name);
+	SetDistance(distance);
+}
+
 void UBossInfo::OnChangeHp(float current, float max)
 {
 	float amount = current / max;
