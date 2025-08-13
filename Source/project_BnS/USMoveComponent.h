@@ -24,7 +24,9 @@ enum class EMoveState : uint8
 	Gliding			UMETA(DisplayName = "Gliding"),
 	FastGliding		UMETA(DisplayName = "FastGliding"),
 	WallRunning		UMETA(DisplayName = "WallRunning"),
-	ClimbingLedge	UMETA(DisplayName = "ClimbingLedge")
+	ClimbingLedge	UMETA(DisplayName = "ClimbingLedge"),
+	WaterRunning	UMETA(DisplayName = "WaterRunning"),
+	Swim			UMETA(DisplayName = "Swim")
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -60,6 +62,7 @@ public:
 	// 점프
 	void SJump();
 	void WallJump();
+	void JumpOnWater();
 
 private:
 	void SetMovementSpeed(EMoveState NewState);
@@ -78,6 +81,13 @@ private:
 	void OnClimbLedgeFinished();
 
 	void TickMeshTilt(float DeltaTime);
+
+	// 수상보
+	void CheckWaterRun();
+	void TickWaterRun();
+
+	// 수영
+	void CheckInWater();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
@@ -98,13 +108,10 @@ private:
 	float LineTraceStartOffset = -100.f;
 	float LineTraceLength = 5000.f;
 
-	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
 	float WallRunSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
 	FParkourTraceSettings WallTraceSettings;
 
-	UPROPERTY(EditAnywhere, Category = "Parkour|Ledge")
 	FParkourTraceSettings LedgeTraceSettings;
 
 	FVector WallNormal;
@@ -113,7 +120,6 @@ private:
 	bool bOriginalUseControllerRotationYaw;
 
 	float TargetMeshPitch = 0.0f;
-	UPROPERTY(EditAnywhere, Category = "Parkour|Wall Run")
 	float TiltInterpSpeed = 3.0f;
 	float WallJumpForce = 500.0f;
 };

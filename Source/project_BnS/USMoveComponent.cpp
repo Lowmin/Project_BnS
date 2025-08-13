@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/Engine.h"
+#include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "LatentActions.h"
 
@@ -29,6 +30,13 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 	if (!MyPlayer) return;
 
+	if (CurrentMoveState != EMoveState::Swim &&
+		CurrentMoveState != EMoveState::WallRunning &&
+		CurrentMoveState != EMoveState::WaterRunning)
+	{
+		CheckInWater();
+	}
+
 	if (CurrentMoveState == EMoveState::Running)
 	{
 		FHitResult WallHit;
@@ -36,6 +44,19 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		{
 			BeginWallRun(WallHit);
 		}
+	}
+	else if (CurrentMoveState == EMoveState::WaterRunning)
+	{
+		TickWaterRun();
+	}
+	else if (CurrentMoveState == EMoveState::WallRunning)
+	{
+		TickWallRun();
+	}
+
+	if (MyPlayer->GetCharacterMovement()->IsFalling() && CurrentMoveState != EMoveState::WallRunning)
+	{
+		CheckWaterRun();
 	}
 
 	if (CurrentMoveState == EMoveState::Running && MyPlayer->GetVelocity().SizeSquared() < 1.0f)
@@ -95,6 +116,9 @@ void USMoveComponent::SetMovementSpeed(EMoveState NewState)
 	case EMoveState::FastGliding:
 		MyPlayer->GetCharacterMovement()->MaxFlySpeed = FastGlideSpeed;
 		break;
+	case EMoveState::WaterRunning:
+		MyPlayer->GetCharacterMovement()->MaxFlySpeed = RunSpeed;
+		break;
 	default:
 		break;
 	}
@@ -107,6 +131,9 @@ void USMoveComponent::SMoveToggle()
 	switch (CurrentMoveState)
 	{
 	case EMoveState::Idle:
+		if (MyPlayer->GetCharacterMovement()->IsFalling())
+			break;
+
 		StartSMove();
 		break;
 
@@ -411,4 +438,82 @@ void USMoveComponent::TickMeshTilt(float DeltaTime)
 
 	float NewRoll = FMath::FInterpTo(CurrentRelativeRotation.Roll, TargetMeshPitch, DeltaTime, TiltInterpSpeed);
 	MyPlayer->GetMesh()->SetRelativeRotation(FRotator(CurrentRelativeRotation.Pitch, CurrentRelativeRotation.Yaw, NewRoll));
+}
+
+void USMoveComponent::CheckWaterRun()
+{
+	if (CurrentMoveState != EMoveState::Running && CurrentMoveState != EMoveState::FastGliding)
+	{
+		return;
+	}
+
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params))
+	{
+		if (WaterHitResult.GetActor() && WaterHitResult.GetActor()->ActorHasTag("Water"))
+		{
+			SetMoveState(EMoveState::WaterRunning);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		}
+	}
+}
+
+void USMoveComponent::TickWaterRun()
+{
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) && WaterHitResult.GetActor()->ActorHasTag("Water"))
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
+		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
+
+		FVector NewLocation = MyPlayer->GetActorLocation();
+		NewLocation.Z = WaterHitResult.Location.Z + MyPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		MyPlayer->SetActorLocation(NewLocation);
+	}
+	else
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0.f);
+		SetMoveState(EMoveState::Idle);
+		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
+}
+
+void USMoveComponent::CheckInWater()
+{
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation() + FVector(0, 0, 100.f);
+	FVector End = Start - FVector(0, 0, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) && WaterHitResult.GetActor()->ActorHasTag("Water"))
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
+		
+		const float WaterZ = WaterHitResult.Location.Z;
+		const float PlayerZ = MyPlayer->GetActorLocation().Z;
+
+		if (WaterZ > PlayerZ)
+		{
+			SetMoveState(EMoveState::Swim);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
+		}
+	}
+}
+
+void USMoveComponent::JumpOnWater()
+{
+	SetMoveState(EMoveState::Idle);
+	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	MyPlayer->LaunchCharacter(FVector(0.f, 0.f, JumpVelocity * 2), false, true);
 }
