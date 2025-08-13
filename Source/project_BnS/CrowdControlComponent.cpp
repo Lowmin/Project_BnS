@@ -38,9 +38,14 @@ void UCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		RemoveCrowdControl();
 }
 
+void UCrowdControlComponent::SetActivateStackCount(int32 count)
+{
+	ActivateStackCount = count;
+}
+
 bool UCrowdControlComponent::IsEffect()
 {
-	return Duration > 0.f;
+	return Stack >= ActivateStackCount && Duration > 0.f;
 }
 
 ECrowdControlType UCrowdControlComponent::GetCrowdControlType()

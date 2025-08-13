@@ -28,7 +28,10 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float Duration = 0.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Status")
 	int32 Stack = 0;
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	int32 ActivateStackCount = 1;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	ECrowdControlType CurrentType = ECrowdControlType::None;
 
@@ -40,6 +43,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void SetActivateStackCount(int32 count);
 	bool IsEffect();
 	ECrowdControlType GetCrowdControlType();
 	void ApplyCrowdControl(ECrowdControlType type, float duration);

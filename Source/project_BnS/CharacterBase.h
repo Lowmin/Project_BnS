@@ -41,6 +41,7 @@ protected:
 
 public:
 	UCrowdControlComponent* GetCrowdControlComponent();
+	void SetCrowdControl(ECrowdControlType type, float duration);
 	ECrowdControlType GetCrowdControlType();
 
 	// skill Component

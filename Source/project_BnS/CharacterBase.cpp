@@ -63,6 +63,11 @@ UCrowdControlComponent* ACharacterBase::GetCrowdControlComponent()
 	return CrowdControl;
 }
 
+void ACharacterBase::SetCrowdControl(ECrowdControlType type, float duration)
+{
+	CrowdControl->ApplyCrowdControl(type, duration);
+}
+
 ECrowdControlType ACharacterBase::GetCrowdControlType()
 {
 	return CrowdControl->GetCrowdControlType();
