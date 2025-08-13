@@ -23,39 +23,39 @@ class PROJECT_BNS_API UMainUi : public UUserWidget
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UProgressBar* HpBar = nullptr;
+	TObjectPtr<UProgressBar> HpBar = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UTextBlock* HpText = nullptr;
+	TObjectPtr<UTextBlock> HpText = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UProgressBar* StaminaBar = nullptr;
+	TObjectPtr<UProgressBar> StaminaBar = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UTextBlock* StaminaText = nullptr;
+	TObjectPtr<UTextBlock> StaminaText = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UProgressBar* ExpBar = nullptr;
+	TObjectPtr<UProgressBar> ExpBar = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UTextBlock* NicknameText = nullptr;
+	TObjectPtr<UTextBlock> NicknameText = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UTextBlock* LevelText = nullptr;
+	TObjectPtr<UTextBlock> LevelText = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	UCanvasPanel* Target = nullptr;
+	TObjectPtr<UCanvasPanel> Target = nullptr;
 	UPROPERTY(BlueprintReadOnly)
-	UCanvasPanelSlot* TargetSlot = nullptr;
+	TObjectPtr<UCanvasPanelSlot> TargetSlot = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USkillIcon* Skill_0 = nullptr;
+	TObjectPtr<USkillIcon> Skill_0 = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USkillIcon* Skill_1 = nullptr;
+	TObjectPtr<USkillIcon> Skill_1 = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USkillIcon* Skill_2 = nullptr;
+	TObjectPtr<USkillIcon> Skill_2 = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USkillIcon* Skill_3 = nullptr;
+	TObjectPtr<USkillIcon> Skill_3 = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	USkillIcon* Skill_4 = nullptr;
+	TObjectPtr<USkillIcon> Skill_4 = nullptr;
 
 public:
 	UFUNCTION(BlueprintCallable)

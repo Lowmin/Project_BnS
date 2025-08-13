@@ -23,9 +23,9 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	class UWorldFloatingUiComponent* HpBar = nullptr;
+	TObjectPtr<class UWorldFloatingUiComponent> HpBar = nullptr;
 	UPROPERTY(VisibleAnywhere)
-	class UWidgetComponent* Nameplate = nullptr;
+	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
 
 	// ITargetAble
 	// FVector2D GetTargetCenter_Implementation();

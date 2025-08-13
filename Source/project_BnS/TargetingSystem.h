@@ -33,7 +33,7 @@ private:
 	
 
 	UPROPERTY(VisibleAnywhere)
-	class USphereComponent* TargetSensor = nullptr;
+	TObjectPtr<class USphereComponent> TargetSensor = nullptr;
 
 	// UPROPERTY(VisibleAnywhere)
 	class ITargetAble* Target = nullptr;

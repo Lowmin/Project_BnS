@@ -28,7 +28,7 @@ public:
 	// Stat Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	class UStatComponent* status = nullptr;
+	TObjectPtr<class UStatComponent> status = nullptr;
 public:
 	UStatComponent* GetStatusComponent() const;
 

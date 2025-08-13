@@ -24,11 +24,13 @@ private:
 
 	// UI
 private:
+	UPROPERTY()
 	TSubclassOf<class UMainUi> MainUiClass = nullptr;
-	UMainUi* MainUi = nullptr;
+	UPROPERTY()
+	TObjectPtr<class UMainUi> MainUi = nullptr;
 public:
 	UPROPERTY(VisibleAnywhere)
-	class AMainUIPresenter* UIPresenter = nullptr;
+	TObjectPtr<class AMainUIPresenter> UIPresenter = nullptr;
 
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;
