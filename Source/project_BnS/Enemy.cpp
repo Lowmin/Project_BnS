@@ -49,7 +49,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(TEXT("Enemy"));
-	status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
+	Status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
 }
 
 FVector AEnemy::GetWorldLocation() const

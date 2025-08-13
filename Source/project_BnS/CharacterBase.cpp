@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "StatComponent.h"
+#include "CrowdControlComponent.h"
 #include "SkillSystemComponent.h"
 
 // Sets default values
@@ -23,7 +24,9 @@ ACharacterBase::ACharacterBase()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	// statComponent 생성 
-	status = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+	Status = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+	// CrowdControlComponent 생성
+	CrowdControl = CreateDefaultSubobject<UCrowdControlComponent>(TEXT("CrowdControl"));
 	// skillComponent 생성
 	SkillSystem = CreateDefaultSubobject<USkillSystemComponent>(TEXT("SkillSystem"));
 }
@@ -42,35 +45,40 @@ void ACharacterBase::Attack()
 
 bool ACharacterBase::IsDead() const
 {
-	return status->GetCurHp() <= 0.0f;
+	return Status->GetCurHp() <= 0.0f;
 }
 
 void ACharacterBase::OnDamaged(int32 damage)
 {
-	status->SetCurHp(status->GetCurHp() - damage);
+	Status->SetCurHp(Status->GetCurHp() - damage);
 }
 
 UStatComponent* ACharacterBase::GetStatusComponent() const
 {
-	return status;
+	return Status;
+}
+
+ECrowdControlType ACharacterBase::GetCrowdControlType()
+{
+	return CrowdControl->GetCrowdControlType();
 }
 
 float ACharacterBase::GetCurHp() const
 {
-	return status->GetCurHp();
+	return Status->GetCurHp();
 }
 
 float ACharacterBase::GetMaxHp() const
 {
-	return status->GetMaxHp();
+	return Status->GetMaxHp();
 }
 
 int ACharacterBase::GetCurMp() const
 {
-	return status->GetCurMp();
+	return Status->GetCurMp();
 }
 
 int ACharacterBase::GetCharacterLevel() const
 {
-	return status->GetLevel();
+	return Status->GetLevel();
 }

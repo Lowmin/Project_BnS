@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "CharacterBase.generated.h"
 
+enum class ECrowdControlType : uint8;
+
 UCLASS()
 class PROJECT_BNS_API ACharacterBase : public ACharacter
 {
@@ -28,9 +30,17 @@ public:
 	// Stat Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	TObjectPtr<class UStatComponent> status = nullptr;
+	TObjectPtr<class UStatComponent> Status = nullptr;
 public:
 	UStatComponent* GetStatusComponent() const;
+
+	// CrowdControl
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UCrowdControlComponent> CrowdControl = nullptr;
+
+public:
+	ECrowdControlType GetCrowdControlType();
 
 	// skill Component
 private:
