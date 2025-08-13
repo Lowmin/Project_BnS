@@ -52,17 +52,17 @@ void AEnemy::BeginPlay()
 	Status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
 }
 
-FVector AEnemy::GetWorldLocation() const
+FVector AEnemy::GetWorldLocation_Implementation() const
 {
 	return GetActorLocation();
 }
 
-FVector2D AEnemy::GetTargetCenter() const
+FVector2D AEnemy::GetTargetCenter_Implementation() const
 {
 	return FVector2D::ZeroVector;
 }
 
-FVector2D AEnemy::GetTargetSize() const
+FVector2D AEnemy::GetTargetSize_Implementation() const
 {
 	return FVector2D(200.0f, 200.0f);
 }

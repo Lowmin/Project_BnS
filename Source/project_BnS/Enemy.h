@@ -28,9 +28,7 @@ private:
 	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
 
 	// ITargetAble
-	// FVector2D GetTargetCenter_Implementation();
-	// FVector2D GetTargetSize_Implementation();
-	virtual FVector GetWorldLocation() const override;
-	virtual FVector2D GetTargetCenter() const override;
-	virtual FVector2D GetTargetSize() const override;
+	FVector GetWorldLocation_Implementation() const;
+	FVector2D GetTargetCenter_Implementation() const;
+	FVector2D GetTargetSize_Implementation() const;
 };

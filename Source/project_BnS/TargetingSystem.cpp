@@ -60,8 +60,14 @@ void ATargetingSystem::Tick(float DeltaTime)
 	}
 	else
 	{
+		UObject* obj = Cast<UObject>(Target);
+		if (obj == nullptr)
+		{
+			Target = nullptr;
+			return;
+		}
 		// 좌표 계산 
-		FVector pos = Target->GetWorldLocation();
+		FVector pos = ITargetAble::Execute_GetWorldLocation(obj);
 		FVector2D screen;
 		UGameplayStatics::ProjectWorldToScreen(playerController, pos, screen);
 
@@ -92,7 +98,10 @@ void ATargetingSystem::SetCurTarget()
 
 	for (ITargetAble* targetAble : TargetAbles)
 	{
-		FVector targetPos = targetAble->GetWorldLocation();
+		UObject* target = Cast<UObject>(targetAble);
+		if (target == nullptr)
+			continue;
+		FVector targetPos = ITargetAble::Execute_GetWorldLocation(target);
 		FVector dir = (targetPos - pos).GetSafeNormal();
 		float dot = FVector::DotProduct(forward, dir);
 
@@ -115,9 +124,14 @@ void ATargetingSystem::ValidateTarget()
 {
 	if(Target == nullptr)
 		return;
+	UObject* obj = Cast<UObject>(Target);
+	if (obj == nullptr)
+	{
+		Target = nullptr;
+	}
 	
 	FVector pos = GetActorLocation();
-	FVector targetPos = Target->GetWorldLocation();
+	FVector targetPos = ITargetAble::Execute_GetWorldLocation(obj);
 	
 	FVector forward = GetActorForwardVector();
 	FVector dir = (targetPos - pos).GetSafeNormal();
