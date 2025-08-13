@@ -6,7 +6,7 @@
 #include "InputAction.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "SkillSystemComponent.h"
+#include "Skill/SkillSystemComponent.h"
 #include "StatComponent.h"
 
 AMyPlayer::AMyPlayer()
@@ -81,6 +81,10 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         if (IA_BasicAttack)
         {
             EnhancedPlayerInputComponent->BindAction(IA_BasicAttack, ETriggerEvent::Started, this, &AMyPlayer::HandleBasicAttack);
+        }
+        if (IA_ProjectileSkill)
+        {
+            EnhancedPlayerInputComponent->BindAction(IA_ProjectileSkill, ETriggerEvent::Started, this, &AMyPlayer::HandleProjectileSkill);
         }
     }
 }
@@ -163,6 +167,14 @@ void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
     if (GetSkillSystemComponent())
     {
         GetSkillSystemComponent()->HandleBasicAttack();
+    }
+}
+
+void AMyPlayer::HandleProjectileSkill(const FInputActionValue& Value)
+{
+    if (GetSkillSystemComponent())
+    {
+        GetSkillSystemComponent()->UseProjectileSkill();
     }
 }
 

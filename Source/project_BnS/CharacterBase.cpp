@@ -7,7 +7,8 @@
 
 #include "StatComponent.h"
 #include "CrowdControlComponent.h"
-#include "SkillSystemComponent.h"
+
+#include "Skill/SkillSystemComponent.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()

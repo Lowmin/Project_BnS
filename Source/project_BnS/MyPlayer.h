@@ -54,6 +54,9 @@ public:
     UPROPERTY(EditAnywhere, Category = Input)
     class UInputAction* IA_BasicAttack;
 
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_ProjectileSkill;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
@@ -68,6 +71,7 @@ protected:
 
     // Skill
     void HandleBasicAttack(const FInputActionValue& Value);
+    void HandleProjectileSkill(const FInputActionValue& Value);
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

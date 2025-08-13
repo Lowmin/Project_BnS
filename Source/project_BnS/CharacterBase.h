@@ -7,6 +7,7 @@
 #include "CharacterBase.generated.h"
 
 enum class ECrowdControlType : uint8;
+class USkillSystemComponent;
 
 UCLASS()
 class PROJECT_BNS_API ACharacterBase : public ACharacter
