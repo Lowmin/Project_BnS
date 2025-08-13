@@ -40,6 +40,7 @@ protected:
 	TObjectPtr<class UCrowdControlComponent> CrowdControl = nullptr;
 
 public:
+	UCrowdControlComponent* GetCrowdControlComponent();
 	ECrowdControlType GetCrowdControlType();
 
 	// skill Component

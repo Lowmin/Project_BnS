@@ -58,6 +58,11 @@ UStatComponent* ACharacterBase::GetStatusComponent() const
 	return Status;
 }
 
+UCrowdControlComponent* ACharacterBase::GetCrowdControlComponent()
+{
+	return CrowdControl;
+}
+
 ECrowdControlType ACharacterBase::GetCrowdControlType()
 {
 	return CrowdControl->GetCrowdControlType();
