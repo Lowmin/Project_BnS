@@ -57,7 +57,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<USkillIcon> Skill_4 = nullptr;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UBossInfo> BossInfo = nullptr;
+
 public:
+	virtual void NativeConstruct() override;
+
 	UFUNCTION(BlueprintCallable)
 	void SetHp(float current, float max);
 

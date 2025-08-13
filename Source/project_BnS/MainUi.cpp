@@ -8,6 +8,14 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "SkillIcon.h"
+#include "BossInfo.h"
+
+void UMainUi::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	BossInfo->SetVisibility(ESlateVisibility::Hidden);
+}
 
 void UMainUi::SetHp(float current, float max)
 {
