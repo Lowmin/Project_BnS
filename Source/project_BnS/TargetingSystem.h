@@ -30,15 +30,16 @@ private:
 	FVector2D ViewportSize = FVector2D::ZeroVector;
 	UPROPERTY()
 	TObjectPtr<APlayerCameraManager> CameraManager;
+	TObjectPtr<class ABnsController> BnsController;
 	
-	TArray<class ITargetAble*> TargetAbles{};
+	TArray<TObjectPtr<AActor>> TargetAbles{};
 	
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class USphereComponent> TargetSensor = nullptr;
 
 	// UPROPERTY(VisibleAnywhere)
-	class ITargetAble* Target = nullptr;
+	TObjectPtr<AActor> Target = nullptr;
 
 	// 타겟 해제
 	void RemoveCurrentTarget();

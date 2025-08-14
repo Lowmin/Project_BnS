@@ -30,6 +30,7 @@ AEnemy::AEnemy()
 		HpBar->SetWidgetClass(hpBarClass.Class);
 		HpBar->SetDrawSize(FVector2D(80.f, 8.f));
 		HpBar->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+		HpBar->SetVisibility(false);
 	}
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> nameplateClass(TEXT("/Game/UI/WBP_Nameplate.WBP_Nameplate_C"));
@@ -73,4 +74,9 @@ FVector2D AEnemy::GetTargetBoxSize_Implementation() const
 {
 	float radius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
 	return FVector2D(radius*2, radius*2);
+}
+
+void AEnemy::OnTargeted_Implementation(bool isTarget)
+{
+	HpBar->SetVisibility(isTarget);
 }

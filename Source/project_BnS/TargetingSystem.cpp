@@ -34,6 +34,9 @@ void ATargetingSystem::BeginPlay()
 	float uiDpScale = UWidgetLayoutLibrary::GetViewportScale(GEngine->GameViewport->GetWorld());
 	UiViewportSize = ViewportSize * (1 / uiDpScale);
 	CameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	BnsController = Cast<ABnsController>(playerController);
 }
 
 void ATargetingSystem::Tick(float DeltaTime)
@@ -48,26 +51,17 @@ void ATargetingSystem::Tick(float DeltaTime)
 	{
 		SetCurTarget();
 	}
-
-	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
-	ABnsController* bnsController = Cast<ABnsController>(playerController);
 	
 	if(Target == nullptr)
 	{
-		bnsController->UIPresenter->OnTargetChange(true, FVector2D::ZeroVector, FVector2D(100, 100));
+		BnsController->UIPresenter->OnTargetChange(true, FVector2D::ZeroVector, FVector2D(100, 100));
 	}
 	else
 	{
-		UObject* obj = Cast<UObject>(Target);
-		if (obj == nullptr)
-		{
-			RemoveCurrentTarget();
-			return;
-		}
 		// 좌표 계산 
-		FVector pos = ITargetAble::Execute_GetWorldLocation(obj);
+		FVector pos = ITargetAble::Execute_GetWorldLocation(Target);
 		FVector2D screen;
-		UGameplayStatics::ProjectWorldToScreen(playerController, pos, screen);
+		UGameplayStatics::ProjectWorldToScreen(BnsController, pos, screen);
 
 		// viewport 기준 계산 
 		float x = ((screen.X/ViewportSize.X) - 0.5f);
@@ -83,17 +77,18 @@ void ATargetingSystem::Tick(float DeltaTime)
 		float fov = CameraManager->GetFOVAngle() * 0.5f;
 		float targetBoxRatio = (UiViewportSize.Y) / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
 
-		FVector2D targetCenter = ITargetAble::Execute_GetTargetCenter(obj);
-		FVector2D targetBoxSize = ITargetAble::Execute_GetTargetBoxSize(obj);
+		FVector2D targetCenter = ITargetAble::Execute_GetTargetCenter(Target);
+		FVector2D targetBoxSize = ITargetAble::Execute_GetTargetBoxSize(Target);
 
 		targetBoxSize *= targetBoxRatio;
 
-		bnsController->UIPresenter->OnTargetChange(true, targetCenter + FVector2D(x, y), targetBoxSize);
+		BnsController->UIPresenter->OnTargetChange(true, targetCenter + FVector2D(x, y), targetBoxSize);
 	}
 }
 
 void ATargetingSystem::RemoveCurrentTarget()
 {
+	ITargetAble::Execute_OnTargeted(Target, false);
 	Target = nullptr;
 }
 
@@ -104,15 +99,12 @@ void ATargetingSystem::SetCurTarget()
 	
 	float distance = std::numeric_limits<float>::max();
 
-	for (ITargetAble* targetAble : TargetAbles)
+	for (AActor* targetAble : TargetAbles)
 	{
-		UObject* obj = Cast<UObject>(targetAble);
-		if (obj == nullptr)
-			continue;
-		if (!ITargetAble::Execute_IsActiveTarget(obj))
+		if (!ITargetAble::Execute_IsActiveTarget(targetAble))
 			continue;
 
-		FVector targetPos = ITargetAble::Execute_GetWorldLocation(obj);
+		FVector targetPos = ITargetAble::Execute_GetWorldLocation(targetAble);
 
 		FVector dir = (targetPos - pos).GetSafeNormal();
 		float dot = FVector::DotProduct(forward, dir);
@@ -127,6 +119,7 @@ void ATargetingSystem::SetCurTarget()
 			if(characterBase != nullptr)
 			{
 				Target = targetAble;
+				ITargetAble::Execute_OnTargeted(Target, true);
 			}
 		}
 	}
@@ -173,20 +166,19 @@ ACharacterBase* ATargetingSystem::GetTarget() const
 void ATargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
-	if(targetAble != nullptr)
+	
+	if(OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
 	{
-		TargetAbles.Add(targetAble);
+		TargetAbles.Add(OtherActor);
 	}
 }
 
 void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
-	
-	if(targetAble != nullptr)
+	if (OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
 	{
-		TargetAbles.Remove(targetAble);
-		if(targetAble == Target)
+		TargetAbles.Remove(OtherActor);
+		if(OtherActor == Target)
 		{
 			RemoveCurrentTarget();
 		}
