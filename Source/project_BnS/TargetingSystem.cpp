@@ -4,12 +4,9 @@
 #include "TargetingSystem.h"
 
 #include "BnsController.h"
-#include "CharacterBase.h"
-#include "MainUi.h"
 #include "MainUIPresenter.h"
 #include "TargetAble.h"
 #include "Kismet/GameplayStatics.h"
-#include "MyPlayer.h"
 #include "Components/SphereComponent.h"
 #include "Runtime/UMG/Public/Blueprint/WidgetLayoutLibrary.h"
 
@@ -36,6 +33,7 @@ void ATargetingSystem::BeginPlay()
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 	float uiDpScale = UWidgetLayoutLibrary::GetViewportScale(GEngine->GameViewport->GetWorld());
 	UiViewportSize = ViewportSize * (1 / uiDpScale);
+	CameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 }
 
 void ATargetingSystem::Tick(float DeltaTime)
@@ -78,7 +76,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 		y *= UiViewportSize.Y;
 
 		// 크기 계산 
-		FVector camPos = Cast<AMyPlayer>(bnsController->GetPawn())->FollowCamera->GetComponentLocation();
+		FVector camPos = CameraManager->GetCameraLocation();
 		float radius = 42.0f * 2.0f;
 		float distance = FVector::Distance(pos, camPos);
 		float fov = 90.0f * 0.5f;

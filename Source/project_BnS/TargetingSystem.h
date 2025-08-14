@@ -28,6 +28,8 @@ protected:
 private:
 	FVector2D UiViewportSize = FVector2D::ZeroVector;
 	FVector2D ViewportSize = FVector2D::ZeroVector;
+	UPROPERTY()
+	TObjectPtr<APlayerCameraManager> CameraManager;
 	
 	TArray<class ITargetAble*> TargetAbles{};
 	
