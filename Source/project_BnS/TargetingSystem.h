@@ -40,6 +40,9 @@ private:
 	// UPROPERTY(VisibleAnywhere)
 	class ITargetAble* Target = nullptr;
 
+	// 타겟 해제
+	void RemoveCurrentTarget();
+
 	// 현재 타겟 설정 
 	void SetCurTarget();
 

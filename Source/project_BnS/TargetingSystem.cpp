@@ -61,7 +61,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 		UObject* obj = Cast<UObject>(Target);
 		if (obj == nullptr)
 		{
-			Target = nullptr;
+			RemoveCurrentTarget();
 			return;
 		}
 		// 좌표 계산 
@@ -92,6 +92,11 @@ void ATargetingSystem::Tick(float DeltaTime)
 	}
 }
 
+void ATargetingSystem::RemoveCurrentTarget()
+{
+	Target = nullptr;
+}
+
 void ATargetingSystem::SetCurTarget()
 {
 	FVector pos = GetActorLocation();
@@ -101,10 +106,14 @@ void ATargetingSystem::SetCurTarget()
 
 	for (ITargetAble* targetAble : TargetAbles)
 	{
-		UObject* target = Cast<UObject>(targetAble);
-		if (target == nullptr)
+		UObject* obj = Cast<UObject>(targetAble);
+		if (obj == nullptr)
 			continue;
-		FVector targetPos = ITargetAble::Execute_GetWorldLocation(target);
+		if (!ITargetAble::Execute_IsActiveTarget(obj))
+			continue;
+
+		FVector targetPos = ITargetAble::Execute_GetWorldLocation(obj);
+
 		FVector dir = (targetPos - pos).GetSafeNormal();
 		float dot = FVector::DotProduct(forward, dir);
 
@@ -130,7 +139,11 @@ void ATargetingSystem::ValidateTarget()
 	UObject* obj = Cast<UObject>(Target);
 	if (obj == nullptr)
 	{
-		Target = nullptr;
+		RemoveCurrentTarget();
+	}
+	if (!ITargetAble::Execute_IsActiveTarget(obj))
+	{
+		RemoveCurrentTarget();
 	}
 	
 	FVector pos = GetActorLocation();
@@ -143,7 +156,7 @@ void ATargetingSystem::ValidateTarget()
 	// 45도 이상 벗어나면 타겟 해제 
 	if(dot < 0.5f)
 	{
-		Target = nullptr;
+		RemoveCurrentTarget();
 	}
 }
 
@@ -175,7 +188,7 @@ void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor*
 		TargetAbles.Remove(targetAble);
 		if(targetAble == Target)
 		{
-			Target = nullptr;
+			RemoveCurrentTarget();
 		}
 	}
 }

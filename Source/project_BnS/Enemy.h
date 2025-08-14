@@ -28,6 +28,7 @@ private:
 	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
 
 	// ITargetAble
+	bool IsActiveTarget_Implementation() const;
 	FVector GetWorldLocation_Implementation() const;
 	FVector2D GetTargetCenter_Implementation() const;
 	FVector2D GetTargetBoxSize_Implementation() const;

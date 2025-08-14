@@ -54,6 +54,11 @@ void AEnemy::BeginPlay()
 	Status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
 }
 
+bool AEnemy::IsActiveTarget_Implementation() const
+{
+	return !IsDead();
+}
+
 FVector AEnemy::GetWorldLocation_Implementation() const
 {
 	return GetActorLocation();
