@@ -94,6 +94,14 @@ void AMainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D
 	MainUI->SetTarget(isTarget, center, size);
 }
 
+void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetSkillIcon(index, texture);
+}
+
 void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown)
 {
 	if (MainUI == nullptr)

@@ -46,7 +46,15 @@ public:
 	void OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const;
 
 	/// <summary>
-	/// 스킬 쿨타임 표시 <br/>
+	/// 스킬 아이콘 변경 
+	/// </summary>
+	/// <param name="index"> 스킬 인덱스 <para/>
+	/// ㄴ0 : 기본공격  <para/>
+	/// ㄴ1 : 1번스킬</param>
+	/// <param name="texture"> 스킬 아이콘 텍스쳐 </param>
+	void SetSkillIcon(int index, UTexture2D* texture);
+	/// <summary>
+	/// 스킬 쿨타임 표시
 	/// </summary>
 	/// <param name="index"> 스킬 인덱스 <para/>
 	/// ㄴ0 : 기본공격  <para/>
