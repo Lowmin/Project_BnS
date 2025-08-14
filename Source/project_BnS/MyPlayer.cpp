@@ -139,6 +139,10 @@ void AMyPlayer::Jump()
         {
             MovementSystem->WallJump();
         }
+        else if (MovementSystem->GetMoveState() == EMoveState::Swim)
+        {
+            MovementSystem->JumpOnWater();
+        }
         else
         {
             MovementSystem->GlideToggle();

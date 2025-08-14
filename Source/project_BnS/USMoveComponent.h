@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "USMoveComponent.generated.h"
 
+class AMyPlayer;
+
 USTRUCT(BlueprintType)
 struct FParkourTraceSettings
 {
@@ -49,6 +51,8 @@ public:
 	void StartSMove();
 	void StopSMove();
 	void SMoveToggle();
+	void TickRunning();
+
 
 	// 글라이드
 	void StartGlide();
@@ -67,6 +71,7 @@ public:
 private:
 	void SetMovementSpeed(EMoveState NewState);
 	float CheckGroundDistance();
+	void UsedStamina(float DeltaTime);
 
 	// 벽 체크
 	bool CanWallRun(FHitResult& OutHit);
@@ -88,12 +93,14 @@ private:
 
 	// 수영
 	void CheckInWater();
+	void TickSwim();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
 	EMoveState CurrentMoveState;
 
 	ACharacter* MyPlayer;
+	AMyPlayer* MyPlayerOwner;
 
 	float WalkSpeed = 300.f;
 	float RunSpeed = 600.f;
@@ -109,6 +116,7 @@ private:
 	float LineTraceLength = 5000.f;
 
 	float WallRunSpeed = 600.0f;
+	float GetStaminaUsageRate() const;
 
 	FParkourTraceSettings WallTraceSettings;
 

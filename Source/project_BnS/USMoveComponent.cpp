@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "MyPlayer.h"
 #include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
@@ -18,9 +19,25 @@ void USMoveComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	MyPlayer = Cast<ACharacter>(GetOwner());
+	MyPlayerOwner = Cast<AMyPlayer>(GetOwner());
 	if (MyPlayer && MyPlayer->GetCharacterMovement())
 	{
 		MyPlayer->GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
+}
+
+void USMoveComponent::TickRunning()
+{
+	if (MyPlayer->GetVelocity().SizeSquared() < 1.0f)
+	{
+		SetMoveState(EMoveState::Idle);
+		return;
+	}
+
+	FHitResult WallHit;
+	if (CanWallRun(WallHit))
+	{
+		BeginWallRun(WallHit);
 	}
 }
 
@@ -37,41 +54,41 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		CheckInWater();
 	}
 
-	if (CurrentMoveState == EMoveState::Running)
-	{
-		FHitResult WallHit;
-		if (CanWallRun(WallHit))
-		{
-			BeginWallRun(WallHit);
-		}
-	}
-	else if (CurrentMoveState == EMoveState::WaterRunning)
-	{
-		TickWaterRun();
-	}
-	else if (CurrentMoveState == EMoveState::WallRunning)
-	{
-		TickWallRun();
-	}
-
 	if (MyPlayer->GetCharacterMovement()->IsFalling() && CurrentMoveState != EMoveState::WallRunning)
 	{
 		CheckWaterRun();
 	}
 
-	if (CurrentMoveState == EMoveState::Running && MyPlayer->GetVelocity().SizeSquared() < 1.0f)
+
+	switch (CurrentMoveState)
 	{
-		SetMoveState(EMoveState::Idle);
+	case EMoveState::Running:
+		TickRunning();
+		break;
+
+	case EMoveState::Gliding:
+	case EMoveState::FastGliding:
+		Glide(DeltaTime);
+		break;
+
+	case EMoveState::Swim:
+		TickSwim();
+		break;
+
+	case EMoveState::WaterRunning:
+		TickWaterRun();
+		break;
+
+	case EMoveState::WallRunning:
+		TickWallRun();
+		break;
+
+	case EMoveState::Idle:
+	case EMoveState::ClimbingLedge:
+	default:
+		break;
 	}
 
-	else if (CurrentMoveState == EMoveState::WallRunning)
-	{
-		TickWallRun();
-	}
-	else if (CurrentMoveState == EMoveState::Gliding || CurrentMoveState == EMoveState::FastGliding)
-	{
-		Glide(DeltaTime);
-	}
 
 	TickMeshTilt(DeltaTime);
 
@@ -80,6 +97,8 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		FString StateString = UEnum::GetValueAsString(CurrentMoveState);
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("MoveState: %s"), *StateString));
 	}
+
+	UsedStamina(DeltaTime);
 }
 
 void USMoveComponent::SetMoveState(EMoveState NewState)
@@ -119,10 +138,34 @@ void USMoveComponent::SetMovementSpeed(EMoveState NewState)
 	case EMoveState::WaterRunning:
 		MyPlayer->GetCharacterMovement()->MaxFlySpeed = RunSpeed;
 		break;
+	case EMoveState::Swim:
+		MyPlayer->GetCharacterMovement()->MaxFlySpeed = RunSpeed;
+		break;
 	default:
 		break;
 	}
 }
+
+float USMoveComponent::GetStaminaUsageRate() const
+{
+	switch (CurrentMoveState)
+	{
+	case EMoveState::Idle:
+		return -1.0f;
+	case EMoveState::Running:
+		return 2.0f;
+	case EMoveState::Gliding:
+		return 1.0f;
+	case EMoveState::FastGliding:
+		return 5.0f;
+	case EMoveState::WaterRunning:
+	case EMoveState::WallRunning:
+		return 3.0f;
+	default:
+		return 0.0f;
+	}
+}
+
 
 void USMoveComponent::SMoveToggle()
 {
@@ -262,6 +305,27 @@ float USMoveComponent::CheckGroundDistance()
 		return HitResult.Distance;
 	}
 	return -1.0f;
+}
+
+void USMoveComponent::UsedStamina(float DeltaTime)
+{
+	const float StaminaRate = GetStaminaUsageRate();
+
+	if (StaminaRate == 0.f || !MyPlayerOwner) return;
+
+	const float CurrentStamina = MyPlayerOwner->GetCurStamina();
+	const float MaxStamina = MyPlayerOwner->GetMaxStamina();
+
+	if (StaminaRate > 0.f && CurrentStamina <= 0.f)
+	{
+		return;
+	}
+
+	float NewStamina = CurrentStamina - (StaminaRate * DeltaTime * 100.f);
+
+	NewStamina = FMath::Clamp(NewStamina, 0.f, MaxStamina);
+
+	MyPlayerOwner->SetCurStamina(NewStamina);
 }
 
 bool USMoveComponent::CanWallRun(FHitResult& OutHit)
@@ -506,11 +570,34 @@ void USMoveComponent::CheckInWater()
 		if (WaterZ > PlayerZ)
 		{
 			SetMoveState(EMoveState::Swim);
-			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		}
 	}
 }
 
+void USMoveComponent::TickSwim()
+{
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation() + FVector(0, 0, 100.f);
+	FVector End = MyPlayer->GetActorLocation() - FVector(0, 0, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
+		WaterHitResult.GetActor() && WaterHitResult.GetActor()->ActorHasTag("Water"))
+	{
+		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
+
+		FVector NewLocation = MyPlayer->GetActorLocation();
+		NewLocation.Z = WaterHitResult.Location.Z - 50.f;
+		MyPlayer->SetActorLocation(NewLocation);
+	}
+	else
+	{
+		SetMoveState(EMoveState::Idle);
+		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
+}
 void USMoveComponent::JumpOnWater()
 {
 	SetMoveState(EMoveState::Idle);
