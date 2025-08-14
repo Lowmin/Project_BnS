@@ -27,5 +27,5 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FVector2D GetTargetCenter() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FVector2D GetTargetSize() const;
+	FVector2D GetTargetBoxSize() const;
 };

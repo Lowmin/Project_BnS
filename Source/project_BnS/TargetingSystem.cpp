@@ -69,21 +69,26 @@ void ATargetingSystem::Tick(float DeltaTime)
 		FVector2D screen;
 		UGameplayStatics::ProjectWorldToScreen(playerController, pos, screen);
 
+		// viewport 기준 계산 
 		float x = ((screen.X/ViewportSize.X) - 0.5f);
 		float y = ((screen.Y/ViewportSize.Y) - 0.5f);
 
+		// 실제 좌표 적용 
 		x *= UiViewportSize.X;
 		y *= UiViewportSize.Y;
 
 		// 크기 계산 
 		FVector camPos = CameraManager->GetCameraLocation();
-		float radius = 42.0f * 2.0f;
 		float distance = FVector::Distance(pos, camPos);
-		float fov = 90.0f * 0.5f;
-		float targetBoxSize = radius / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
-		targetBoxSize *= (UiViewportSize.Y);
+		float fov = CameraManager->GetFOVAngle() * 0.5f;
+		float targetBoxRatio = (UiViewportSize.Y) / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
 
-		bnsController->UIPresenter->OnTargetChange(true, FVector2D(x, y), FVector2D(targetBoxSize, targetBoxSize));
+		FVector2D targetCenter = ITargetAble::Execute_GetTargetCenter(obj);
+		FVector2D targetBoxSize = ITargetAble::Execute_GetTargetBoxSize(obj);
+
+		targetBoxSize *= targetBoxRatio;
+
+		bnsController->UIPresenter->OnTargetChange(true, targetCenter + FVector2D(x, y), targetBoxSize);
 	}
 }
 

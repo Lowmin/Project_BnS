@@ -8,6 +8,8 @@
 #include "HpBar.h"
 #include "StatComponent.h"
 
+#include "Components/CapsuleComponent.h"
+
 AEnemy::AEnemy()
 {
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
@@ -62,7 +64,8 @@ FVector2D AEnemy::GetTargetCenter_Implementation() const
 	return FVector2D::ZeroVector;
 }
 
-FVector2D AEnemy::GetTargetSize_Implementation() const
+FVector2D AEnemy::GetTargetBoxSize_Implementation() const
 {
-	return FVector2D(200.0f, 200.0f);
+	float radius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+	return FVector2D(radius*2, radius*2);
 }

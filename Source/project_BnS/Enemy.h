@@ -30,5 +30,5 @@ private:
 	// ITargetAble
 	FVector GetWorldLocation_Implementation() const;
 	FVector2D GetTargetCenter_Implementation() const;
-	FVector2D GetTargetSize_Implementation() const;
+	FVector2D GetTargetBoxSize_Implementation() const;
 };
