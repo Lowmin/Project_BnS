@@ -164,6 +164,12 @@ void AMyPlayer::SGlidingToggle()
 
 void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
 {
+    auto target = GetTarget();
+    if (target != nullptr)
+    {
+        target->OnDamaged(10);
+    }
+
     if (GetSkillSystemComponent())
     {
         GetSkillSystemComponent()->HandleBasicAttack();

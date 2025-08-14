@@ -88,6 +88,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 
 void ATargetingSystem::RemoveCurrentTarget()
 {
+	ITargetAble::Execute_OnTargeted(Target, false);
 	Target = nullptr;
 }
 
@@ -118,6 +119,7 @@ void ATargetingSystem::SetCurTarget()
 			if(characterBase != nullptr)
 			{
 				Target = targetAble;
+				ITargetAble::Execute_OnTargeted(Target, true);
 			}
 		}
 	}
