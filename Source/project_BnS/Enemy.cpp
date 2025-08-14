@@ -28,8 +28,9 @@ AEnemy::AEnemy()
 		HpBar->SetupAttachment(RootComponent);
 
 		HpBar->SetWidgetClass(hpBarClass.Class);
-		HpBar->SetDrawSize(FVector2D(80.f, 8.f));
+		HpBar->SetDrawSize(FVector2D(266.0f, 26.0f));
 		HpBar->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+		HpBar->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.3f));
 		HpBar->SetVisibility(false);
 	}
 
@@ -42,8 +43,7 @@ AEnemy::AEnemy()
 		Nameplate->SetWidgetClass(nameplateClass.Class);
 		Nameplate->SetWidgetSpace(EWidgetSpace::World);
 		Nameplate->SetDrawSize(FVector2D(250, 30.f));
-		Nameplate->SetRelativeLocation(FVector(0.f, 0.f, 10.f));
-		Nameplate->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.3f));
+		Nameplate->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 	}
 }
 

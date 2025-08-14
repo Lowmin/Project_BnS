@@ -16,8 +16,12 @@ class PROJECT_BNS_API UHpBar : public UUserWidget
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UProgressBar> Bg;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UProgressBar> HpBar;
 
 public:
 	void OnChangeHp(float current, float max);
+
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 };
