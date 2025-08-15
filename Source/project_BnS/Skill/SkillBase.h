@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "SkillInterface.h"
+#include "Curves/CurveFloat.h"
 #include "SkillBase.generated.h"
 
 struct FSkillCommonData;
@@ -18,8 +19,8 @@ UCLASS()
 class PROJECT_BNS_API ASkillBase : public AActor, public ISkillInterface
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	ASkillBase();
 
 	void InitSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle);
@@ -50,6 +51,14 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> TargetActor;
+
+	UPROPERTY()
+	UCurveFloat* DamageCurveCached = nullptr;
+
+	int32 GetDamageAmount() const;
+	void ApplyDamageToActor(AActor* Enemy) const;
+
+	void ReadyCommonAsset();
 
 public:
 	UFUNCTION(BlueprintCallable)

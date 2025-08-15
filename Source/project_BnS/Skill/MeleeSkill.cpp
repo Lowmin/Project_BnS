@@ -75,12 +75,23 @@ void AMeleeSkill::AttackMelee()
 
 	bool Multi = GetWorld()->SweepMultiByChannel(Hits, Start, End, FQuat::Identity, ECC_Pawn, Sphere, QP);
 
-	const float LifeTime = 1.5f;
-	const bool  bDepth = false;
-	const uint8 Thick = 0;
 	const FColor PathCol = Multi ? FColor::Green : FColor::Red;
+	DrawDebugSphere(GetWorld(), Start, AttackRadius, 16, PathCol, false, 1.5f, 0, 1.5f);
 
-	DrawDebugSphere(GetWorld(), Start, AttackRadius, 16, PathCol, false, LifeTime, 0, 1.5f);
+	// 대미지
+	TSet<AActor*> Touch;
+	for (const FHitResult& TouchEnemy : Hits)
+	{
+		AActor* Enemy = TouchEnemy.GetActor();
+		if (!Enemy || Enemy == Caster) continue;
+		if (Touch.Contains(Enemy)) continue;
+
+		ApplyDamageToActor(Enemy);
+		Touch.Add(Enemy);
+
+		// 단일 타겟
+		if (!bCanHitMultiTarget) break;
+	}
 
 }
 

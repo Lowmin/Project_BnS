@@ -2,6 +2,8 @@
 
 #include "SkillBase.h"
 #include "SkillCommonData.h"
+#include "../CharacterBase.h"
+#include "../StatComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -17,6 +19,7 @@ void ASkillBase::InitSkill(const FDataTableRowHandle& InCommonHandle, const FDat
 {
 	CommonHandle = InCommonHandle;
 	TypeHandle = InTypeHandle;
+	ReadyCommonAsset();
 }
 
 void ASkillBase::InitSkillExecute_Implementation()
@@ -107,6 +110,62 @@ void ASkillBase::OnMontageEnd(UAnimMontage* Montage, bool bInterrupted)
 
 	Destroy();
 }
+
+void ASkillBase::ReadyCommonAsset()
+{
+	if (DamageCurveCached) return;
+	if (const FSkillCommonData* Row = GetCommonRow())
+	{
+		DamageCurveCached = Row->DamageLevelCurve.Get();
+		if (!DamageCurveCached && !Row->DamageLevelCurve.IsNull())
+		{
+			DamageCurveCached = Row->DamageLevelCurve.LoadSynchronous();
+		}
+	}
+}
+
+int32 ASkillBase::GetDamageAmount() const
+{
+	const FSkillCommonData* Row = GetCommonRow();
+	if (!Row) return 1;
+
+	int32 Atk = 0;
+	int32 Level = 1;
+
+	if (const ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwner()))
+	{
+		if (const UStatComponent* Stat = OwnerCharacter->GetStatusComponent())
+		{
+			Atk = FMath::RoundToInt(Stat->GetAtk());
+			Level = Stat->GetLevel();
+		}
+	}
+
+	// 레벨 커브
+	int32 LevelBonus = 0;
+	if (DamageCurveCached)
+	{
+		LevelBonus = FMath::RoundToInt(DamageCurveCached->GetFloatValue(Level));
+	}
+
+	const int32 Base = FMath::RoundToInt(Row->DamageFlat + Row->DamageRatio * Atk);
+	const int32 Total = FMath::Max(1, Base + LevelBonus);
+
+	return Total;
+}
+
+void ASkillBase::ApplyDamageToActor(AActor* Enemy) const
+{
+	if (!Enemy) return;
+	if (Enemy == GetOwner()) return;
+
+	if (ACharacterBase* Hit = Cast<ACharacterBase>(Enemy))
+	{
+		Hit->OnDamaged(GetDamageAmount());
+	}
+
+}
+
 
 void ASkillBase::SetSkillTarget(AActor* InTarget)
 {
