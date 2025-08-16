@@ -41,7 +41,9 @@ void USkillSystemComponent::BeginPlay()
 
 void USkillSystemComponent::HandleBasicAttack()
 {
-	if (!Controller || !bCanInputNext)
+	if (!Controller) return;
+
+	if (ComboStep > 0 && !bCanInputNext)
 	{
 		return;
 	}
@@ -119,8 +121,8 @@ void USkillSystemComponent::TickCooldownUI()
 		const FCooldownInfo& Info = Pair.Value;
 		const float Remain = FMath::Max(0.f, Info.EndTime - Now);
 
-		OnSkillCooldownTick.Broadcast(Slot, Remain, Info.EndTime);
-		
+		OnSkillCooldownTick.Broadcast(Slot, Remain, Info.Duration);
+
 		if (Remain <= 0.f)
 		{
 			FinishedSlots.Add(Slot);
@@ -141,6 +143,7 @@ void USkillSystemComponent::TickCooldownUI()
 void USkillSystemComponent::StartComboWindow()
 {
 	bCanInputNext = true;
+	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(
 		ComboTimerHandle, this, &USkillSystemComponent::CloseComboWindow, ComboTimeLimit, false
 	);
@@ -148,7 +151,7 @@ void USkillSystemComponent::StartComboWindow()
 
 void USkillSystemComponent::CloseComboWindow()
 {
-	bCanInputNext = true;
+	bCanInputNext = false;
 	ComboStep = 0;
 
 	if (BasicAttackIcons.IsValidIndex(0))
