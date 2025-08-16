@@ -17,12 +17,29 @@ void UMainUi::NativeConstruct()
 	BossInfo->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UMainUi::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	HpEffect(InDeltaTime);
+}
+
 void UMainUi::SetHp(float current, float max)
 {
 	HpBar->SetPercent(current / max);
 
 	const FString formatString = FString::Printf(TEXT("%d/%d"), FMath::FloorToInt32(current), FMath::FloorToInt32(max));
 	HpText->SetText(FText::FromString(formatString));
+}
+
+void UMainUi::HpEffect(float InDeltaTime)
+{
+	float hpPercent = HpBar->GetPercent();
+	float bgPercent = HpBg->GetPercent();
+	if (FMath::IsNearlyEqual(hpPercent, bgPercent))
+		return;
+
+	HpBg->SetPercent(FMath::Lerp(bgPercent, hpPercent, InDeltaTime * 5.0f));
 }
 
 void UMainUi::SetStamina(float current, float max)

@@ -23,6 +23,8 @@ class PROJECT_BNS_API UMainUi : public UUserWidget
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UProgressBar> HpBg = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UProgressBar> HpBar = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> HpText = nullptr;
@@ -62,9 +64,13 @@ protected:
 
 public:
 	virtual void NativeConstruct() override;
+	
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetHp(float current, float max);
+
+	void HpEffect(float InDeltaTime);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetMp(int32 current);
