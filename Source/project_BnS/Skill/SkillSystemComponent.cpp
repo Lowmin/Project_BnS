@@ -96,8 +96,9 @@ void USkillSystemComponent::BroadcastSkillUI(const FName& SkillRowName, int32 Sl
 	// 쿨다운 UI 타이머 시작
 	if (Data->Cooldown > 0.f)
 	{
-		const float EndTime = Controller->GetCurrentTime() + Data->Cooldown;
-		CooldownEndTimes.FindOrAdd(SlotIndex) = EndTime;
+		FCooldownInfo& Info = CooldownInfo.FindOrAdd(SlotIndex);
+		Info.EndTime = Controller->GetCurrentTime() + Data->Cooldown;
+		Info.Duration = Data->Cooldown;
 
 		// UI 타이머 안 돌면 시작
 		if (!GetWorld()->GetTimerManager().IsTimerActive(CooldownUITimerHandle))
@@ -112,16 +113,14 @@ void USkillSystemComponent::TickCooldownUI()
 	const float Now = Controller->GetCurrentTime();
 	TArray<int32> FinishedSlots;
 
-	for (auto& Pair : CooldownEndTimes)
+	for (auto& Pair : CooldownInfo)
 	{
 		const int32 Slot = Pair.Key;
-		const float EndTime = Pair.Value;
-		const float Remain = FMath::Max(0.f, EndTime - Now);
+		const FCooldownInfo& Info = Pair.Value;
+		const float Remain = FMath::Max(0.f, Info.EndTime - Now);
 
-		float TotalCooldown = 1.f; // 임시값
-
-		OnSkillCooldownTick.Broadcast(Slot, Remain, TotalCooldown);
-
+		OnSkillCooldownTick.Broadcast(Slot, Remain, Info.EndTime);
+		
 		if (Remain <= 0.f)
 		{
 			FinishedSlots.Add(Slot);
@@ -130,10 +129,10 @@ void USkillSystemComponent::TickCooldownUI()
 
 	for (const int32 Slot : FinishedSlots)
 	{
-		CooldownEndTimes.Remove(Slot);
+		CooldownInfo.Remove(Slot);
 	}
 
-	if (CooldownEndTimes.IsEmpty())
+	if (CooldownInfo.IsEmpty())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(CooldownUITimerHandle);
 	}

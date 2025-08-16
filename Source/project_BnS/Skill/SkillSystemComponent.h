@@ -69,8 +69,14 @@ private:
 	void StartComboWindow();
 	void CloseComboWindow();
 
-	// UI 쿨다운 표시용 타이머
-	TMap<int32, float> CooldownEndTimes; // 슬롯별 쿨다운 종료 시간
+	// UI 쿨다운
+	struct FCooldownInfo
+	{
+		float EndTime = 0.f;
+		float Duration = 0.f;
+	};
+
+	TMap<int32, FCooldownInfo> CooldownInfo;
 	FTimerHandle CooldownUITimerHandle;
 	void TickCooldownUI();
 
