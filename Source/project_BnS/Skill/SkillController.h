@@ -2,9 +2,10 @@
 
 #pragma once
 
+#pragma once
+
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Engine/DataTable.h" 
 #include "SkillCommonData.h"
 #include "SkillController.generated.h"
 
@@ -15,37 +16,36 @@ class AActor;
 UCLASS()
 class PROJECT_BNS_API USkillController : public UObject
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    USkillController();
+	USkillController();
 
-    void Setup(UDataTable* InCommon);
-    void RegisterTypeTable(ESkill_Type Type, UDataTable* Table);
-    void SetOwnerActor(AActor* InOwner);
+	void Setup(UDataTable* InCommonDataTable);
+	void RegisterTypeTable(ESkill_Type Type, UDataTable* TypeDataTable);
+	void SetOwnerActor(AActor* InOwner);
 
-    bool Execute(FName CommonRowName);
-    bool Execute(FName CommonRowName, AActor* InTarget);
-    bool TryExecuteSkill(FName CommonRowName) { return Execute(CommonRowName); }
+	bool Execute(FName SkillRowName, AActor* Target = nullptr);
 
-    float GetChainInputTimeFor(FName CommonRowName) const;
-
-private:
-    const FSkillCommonData* FindCommon(FName Row) const;
-    UDataTable* GetTypeTable(uint8 Type) const;
-
-    float Now() const;
-    bool IsCooldownReady(FName Row, float CooldownSec) const;
-    void StampCooldown(FName Row);
+	// 데이터 조회
+	const FSkillCommonData* FindCommonData(FName SkillRowName) const;
+	float GetCurrentTime() const;
 
 private:
-    UPROPERTY()
-    UDataTable* DT_SkillCommon = nullptr;
-    UPROPERTY()
-    TMap<uint8, UDataTable*> TypeTables;
-    UPROPERTY()
-    AActor* OwnerActor = nullptr;
-    UPROPERTY()
-    TMap<FName, float> LastUsedAt;
+	UDataTable* GetTypeTable(ESkill_Type Type) const;
+	bool IsCooldownReady(FName SkillRowName) const;
+	void StampCooldown(FName SkillRowName, float CooldownDuration);
+
+private:
+	UPROPERTY()
+	TObjectPtr<UDataTable> DT_SkillCommon = nullptr;
+
+	UPROPERTY()
+	TMap<ESkill_Type, TObjectPtr<UDataTable>> TypeTables;
+
+	UPROPERTY()
+	TObjectPtr<AActor> OwnerActor = nullptr;
+
+	UPROPERTY()
+	TMap<FName, float> LastUsedTimestamps;
 };
-

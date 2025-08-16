@@ -28,7 +28,7 @@ void AMeleeSkill::ExecuteSkill_Implementation()
 	Super::ExecuteSkill_Implementation();
 
 	// 재생 실패 처리
-	if (!bExecuting)
+	if (!bIsExecuting)
 	{
 		if (UAnimInstance* Anim = GetOwnerAnimInstance())
 		{
@@ -79,15 +79,21 @@ void AMeleeSkill::AttackMelee()
 	DrawDebugSphere(GetWorld(), Start, AttackRadius, 16, PathCol, false, 1.5f, 0, 1.5f);
 
 	// 대미지
-	TSet<AActor*> Touch;
-	for (const FHitResult& TouchEnemy : Hits)
+	TSet<AActor*> DamagedActors;
+	for (const FHitResult& Hit : Hits)
 	{
-		AActor* Enemy = TouchEnemy.GetActor();
-		if (!Enemy || Enemy == Caster) continue;
-		if (Touch.Contains(Enemy)) continue;
+		AActor* HitActor = Hit.GetActor();
 
-		ApplyDamageToActor(Enemy);
-		Touch.Add(Enemy);
+		if (!HitActor || HitActor == Caster || DamagedActors.Contains(HitActor))
+		{
+			continue;
+		}
+
+		if (ACharacter* HitCharacter = Cast<ACharacter>(HitActor))
+		{
+			ApplyDamageToCharacter(HitCharacter);
+			DamagedActors.Add(HitActor);
+		}
 
 		// 단일 타겟
 		if (!bCanHitMultiTarget) break;

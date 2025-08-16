@@ -1,11 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SkillSystemComponent.h"
 #include "SkillController.h"
-#include "Engine/DataTable.h"
-#include "Engine/Engine.h" 
-#include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "../TargetingSystem.h"
 
@@ -21,74 +17,145 @@ void USkillSystemComponent::BeginPlay()
 	if (!Controller)
 	{
 		Controller = NewObject<USkillController>(this);
-		if (!Controller) return;
-
 		Controller->SetOwnerActor(GetOwner());
 		Controller->Setup(DT_SkillCommon);
 		Controller->RegisterTypeTable(ESkill_Type::Melee, DT_Melee);
 		Controller->RegisterTypeTable(ESkill_Type::Projectile, DT_Projectile);
 	}
 
-	ComboStep = 0;
-	CanInputNext = true;
-}
+	if (BasicAttackIcons.IsValidIndex(0))
+		OnSkillIconChanged.Broadcast(BasicAttackSlotIndex, BasicAttackIcons[0]);
 
-void USkillSystemComponent::OnRegister()
-{
-	Super::OnRegister();
+	if (DT_SkillCommon)
+	{
+		const FSkillCommonData* Data = DT_SkillCommon->FindRow<FSkillCommonData>(ProjectileRowName, TEXT("InitialIcon"));
+		if (Data && !Data->SkillIcon.IsNull())
+		{
+			UTexture2D* Icon = Data->SkillIcon.LoadSynchronous();
+			OnSkillIconChanged.Broadcast(ProjectileSlotIndex, Icon);
+		}
+	}
+	bCanInputNext = true;
+	ComboStep = 0;
 }
 
 void USkillSystemComponent::HandleBasicAttack()
 {
-	if (!Controller) return;
-
-	if (!CanInputNext) return;
-
-	if (ComboStep <= 0)
-		ComboStep = 1;
-	else
-		ComboStep++;
-
-	if (ComboStep > ComboMax) ComboStep = 1;
-
-	const FName SkillName = FName(*FString::Printf(TEXT("BasicAttack_%d"), ComboStep));
-
-	if (GEngine)
+	if (!Controller || !bCanInputNext)
 	{
-		const FString Msg = FString::Printf(TEXT("%s : (%d)"), *SkillName.ToString(), ComboStep);
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, Msg);
+		return;
 	}
 
-	// 타겟
-	AActor* CurrentTarget = FindCurrentTarget();
-	Controller->Execute(SkillName, CurrentTarget);
+	// 콤보 단계
+	const int32 NextStep = (ComboStep % ComboMax) + 1;
+	const FName SkillRowName = FName(*FString::Printf(TEXT("BasicAttack_%d"), NextStep));
 
-	// 타이머 시작
-	StartComboWindow(ComboTimeLimit);
+	if (Controller->Execute(SkillRowName, FindCurrentTarget()))
+	{
+		ComboStep = NextStep;
+		StartComboWindow();
+		BroadcastSkillUI(SkillRowName, BasicAttackSlotIndex);
+	}
 }
 
 void USkillSystemComponent::UseProjectileSkill()
 {
 	if (!Controller) return;
-	AActor* CurrentTarget = FindCurrentTarget();
-	Controller->Execute(ProjectileRowName, CurrentTarget);
-	// 수정 필요
-	StartComboWindow(ComboTimeLimit);
+
+	if (Controller->Execute(ProjectileRowName, FindCurrentTarget()))
+	{
+		BroadcastSkillUI(ProjectileRowName, ProjectileSlotIndex);
+	}
 }
 
-void USkillSystemComponent::StartComboWindow(float TimeSec)
+void USkillSystemComponent::BroadcastSkillUI(const FName& SkillRowName, int32 SlotIndex)
 {
-	CanInputNext = true;
-	GetWorld()->GetTimerManager().ClearTimer(ComboTimer);
+	if (!DT_SkillCommon) return;
+
+	const FSkillCommonData* Data = DT_SkillCommon->FindRow<FSkillCommonData>(SkillRowName, TEXT("UIBroadcast"));
+	if (!Data) return;
+
+	// Icon
+	if (SkillRowName.ToString().StartsWith(TEXT("BasicAttack_")))
+	{
+		const int32 IconIndex = FMath::Clamp(ComboStep - 1, 0, 2);
+		if (BasicAttackIcons.IsValidIndex(IconIndex))
+		{
+			OnSkillIconChanged.Broadcast(SlotIndex, BasicAttackIcons[IconIndex]);
+		}
+	}
+	else
+	{
+		if (!Data->SkillIcon.IsNull())
+		{
+			UTexture2D* Icon = Data->SkillIcon.LoadSynchronous();
+			OnSkillIconChanged.Broadcast(SlotIndex, Icon);
+		}
+	}
+
+	// 쿨다운 UI 타이머 시작
+	if (Data->Cooldown > 0.f)
+	{
+		const float EndTime = Controller->GetCurrentTime() + Data->Cooldown;
+		CooldownEndTimes.FindOrAdd(SlotIndex) = EndTime;
+
+		// UI 타이머 안 돌면 시작
+		if (!GetWorld()->GetTimerManager().IsTimerActive(CooldownUITimerHandle))
+		{
+			GetWorld()->GetTimerManager().SetTimer(CooldownUITimerHandle, this, &USkillSystemComponent::TickCooldownUI, 0.1f, true);
+		}
+	}
+}
+
+void USkillSystemComponent::TickCooldownUI()
+{
+	const float Now = Controller->GetCurrentTime();
+	TArray<int32> FinishedSlots;
+
+	for (auto& Pair : CooldownEndTimes)
+	{
+		const int32 Slot = Pair.Key;
+		const float EndTime = Pair.Value;
+		const float Remain = FMath::Max(0.f, EndTime - Now);
+
+		float TotalCooldown = 1.f; // 임시값
+
+		OnSkillCooldownTick.Broadcast(Slot, Remain, TotalCooldown);
+
+		if (Remain <= 0.f)
+		{
+			FinishedSlots.Add(Slot);
+		}
+	}
+
+	for (const int32 Slot : FinishedSlots)
+	{
+		CooldownEndTimes.Remove(Slot);
+	}
+
+	if (CooldownEndTimes.IsEmpty())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(CooldownUITimerHandle);
+	}
+}
+
+void USkillSystemComponent::StartComboWindow()
+{
+	bCanInputNext = true;
 	GetWorld()->GetTimerManager().SetTimer(
-		ComboTimer, this, &USkillSystemComponent::CloseComboWindow, TimeSec, false
+		ComboTimerHandle, this, &USkillSystemComponent::CloseComboWindow, ComboTimeLimit, false
 	);
 }
 
 void USkillSystemComponent::CloseComboWindow()
 {
-	CanInputNext = true;
+	bCanInputNext = true;
 	ComboStep = 0;
+
+	if (BasicAttackIcons.IsValidIndex(0))
+	{
+		OnSkillIconChanged.Broadcast(BasicAttackSlotIndex, BasicAttackIcons[0]);
+	}
 }
 
 AActor* USkillSystemComponent::FindCurrentTarget() const
@@ -97,15 +164,11 @@ AActor* USkillSystemComponent::FindCurrentTarget() const
 	{
 		return TargetSysOwner->GetTarget();
 	}
-
-	// 월드의 TargetingSystem에서 현재 타겟 가져옴
 	if (ATargetingSystem* TargetSys = Cast<ATargetingSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ATargetingSystem::StaticClass())))
 	{
 		return TargetSys->GetTarget();
 	}
 	return nullptr;
 }
-
-
 
 

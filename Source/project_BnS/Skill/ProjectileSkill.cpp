@@ -54,7 +54,7 @@ void AProjectileSkill::SpawnProjectile(const FProjectileData& Data)
 
 	if (AProjectileBall* Ball = Cast<AProjectileBall>(NewProjectile))
 	{
-		Ball->SetupFromData(Data, Player);
+		Ball->SetupProjectileData(Data, Player, CalculateDamage());
 	}
 
 }

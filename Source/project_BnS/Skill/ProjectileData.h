@@ -16,7 +16,7 @@ public:
 	TSoftClassPtr<AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float ProejectileSpeed = 1000.f;
+	float ProjectileSpeed = 1000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ProjectileLifeTime = 5.f;

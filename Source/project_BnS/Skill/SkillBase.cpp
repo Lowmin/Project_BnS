@@ -12,160 +12,99 @@
 ASkillBase::ASkillBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 }
 
-void ASkillBase::InitSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle)
+void ASkillBase::InitializeSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle, UAnimMontage* PreloadedMontage, UCurveFloat* PreloadedDamageCurve)
 {
 	CommonHandle = InCommonHandle;
 	TypeHandle = InTypeHandle;
-	ReadyCommonAsset();
-}
-
-void ASkillBase::InitSkillExecute_Implementation()
-{
+	SkillMontage = PreloadedMontage;
+	DamageCurve = PreloadedDamageCurve;
 }
 
 void ASkillBase::ExecuteSkill_Implementation()
 {
-	// 스킬 실행
-	if (bExecuting) return;
+	if (bIsExecuting || !SkillMontage) return;
 
-	UAnimInstance* Anim = GetOwnerAnimInstance();
-	if (!Anim) return;
-
-	UAnimMontage* Montage = LoadMontage();
-	if (!Montage) return;
-
-	FOnMontageEnded OnEnd;
-	OnEnd.BindUObject(this, &ASkillBase::OnMontageEnd);
-
-	const float PlayLength = Anim->Montage_Play(Montage);
-
-	if (PlayLength <= 0.f) return;
-
-	Anim->Montage_SetEndDelegate(OnEnd, Montage);
-
-	bExecuting = true;
+	if (UAnimInstance* AnimInstance = GetOwnerAnimInstance())
+	{
+		bIsExecuting = true;
+		FOnMontageEnded OnEndDelegate;
+		OnEndDelegate.BindUObject(this, &ASkillBase::OnMontageEnded);
+		AnimInstance->Montage_Play(SkillMontage);
+		AnimInstance->Montage_SetEndDelegate(OnEndDelegate, SkillMontage);
+	}
 }
 
 void ASkillBase::CancelSkill_Implementation()
 {
-	UAnimInstance* Anim = GetOwnerAnimInstance();
-	UAnimMontage* Mont = LoadMontage();
-	if (Anim && Mont)
+	if (bIsExecuting && SkillMontage)
 	{
-		FOnMontageEnded Empty;
-		Anim->Montage_SetEndDelegate(Empty, Mont);
-		Anim->Montage_Stop(0.1f, Mont);
+		if (UAnimInstance* AnimInstance = GetOwnerAnimInstance())
+		{
+			AnimInstance->Montage_Stop(0.1f, SkillMontage);
+		}
 	}
-	bExecuting = false;
+	bIsExecuting = false;
+}
+
+void ASkillBase::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsExecuting = false;
 	Destroy();
 }
 
-const FSkillCommonData* ASkillBase::GetCommonRow() const
+const FSkillCommonData* ASkillBase::GetCommonData() const
 {
-	if (!CommonHandle.DataTable) return nullptr;
-
-	return CommonHandle.GetRow<FSkillCommonData>(TEXT("SkillBase_CommonData"));
+	return CommonHandle.GetRow<FSkillCommonData>(TEXT("ASkillBase::GetCommonData"));
 }
 
-UAnimMontage* ASkillBase::LoadMontage() const
+int32 ASkillBase::CalculateDamage() const
 {
-	const FSkillCommonData* Row = GetCommonRow();
+	const FSkillCommonData* Data = GetCommonData();
+	if (!Data) return 1; // 최소 대미지
 
-	if (Row == nullptr) return nullptr;
-	if (Row->AnimMontage.IsNull()) return nullptr;
+	const ACharacterBase* OwnerChar = Cast<ACharacterBase>(GetOwner());
+	const UStatComponent* StatComp = OwnerChar ? OwnerChar->GetStatusComponent() : nullptr;
+	if (!StatComp) return 1; // 최소 대미지
 
-	return Row->AnimMontage.LoadSynchronous();
+	const float Atk = StatComp->GetAtk();
+	const int32 Level = StatComp->GetLevel();
+
+	// 레벨 커브
+	const float LevelBonus = DamageCurve ? DamageCurve->GetFloatValue(static_cast<float>(Level)) : 0.f;
+
+	const float RawDamage = Data->DamageFlat + (Data->DamageRatio * Atk) + LevelBonus;
+	return FMath::Max(1, FMath::RoundToInt(RawDamage));
+}
+
+void ASkillBase::ApplyDamageToCharacter(ACharacter* DamagedCharacter) const
+{
+	if (!DamagedCharacter || DamagedCharacter == GetOwner()) return;
+
+	if (ACharacterBase* HitCharacter = Cast<ACharacterBase>(DamagedCharacter))
+	{
+		const int32 FinalDamage = CalculateDamage();
+		HitCharacter->OnDamaged(FinalDamage);
+	}
 }
 
 ACharacter* ASkillBase::GetOwnerCharacter() const
 {
-	return Cast<ACharacter>(GetOwner());
+	return GetOwner<ACharacter>();
 }
 
 UAnimInstance* ASkillBase::GetOwnerAnimInstance() const
 {
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (!OwnerCharacter) return nullptr;
-
-	USkeletalMeshComponent* Mesh = OwnerCharacter->GetMesh();
-	if (!Mesh) return nullptr;
-
-	return Mesh->GetAnimInstance();
-}
-
-void ASkillBase::OnMontageEnd(UAnimMontage* Montage, bool bInterrupted)
-{
-	bExecuting = false;
-
-	//if (ACharacter* OwnerCharacter = GetOwnerCharacter())
-	//{
-	//	if (auto* Comp = OwnerCharacter->GetComponentByClass<USkill_System_Component>)
-	//	{
-	//		Comp->OnSkillMontageEnd();
-	//	}
-	//}
-
-	Destroy();
-}
-
-void ASkillBase::ReadyCommonAsset()
-{
-	if (DamageCurveCached) return;
-	if (const FSkillCommonData* Row = GetCommonRow())
+	if (ACharacter* OwnerChar = GetOwnerCharacter())
 	{
-		DamageCurveCached = Row->DamageLevelCurve.Get();
-		if (!DamageCurveCached && !Row->DamageLevelCurve.IsNull())
+		if (USkeletalMeshComponent* Mesh = OwnerChar->GetMesh())
 		{
-			DamageCurveCached = Row->DamageLevelCurve.LoadSynchronous();
+			return Mesh->GetAnimInstance();
 		}
 	}
+	return nullptr;
 }
-
-int32 ASkillBase::GetDamageAmount() const
-{
-	const FSkillCommonData* Row = GetCommonRow();
-	if (!Row) return 1;
-
-	int32 Atk = 0;
-	int32 Level = 1;
-
-	if (const ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwner()))
-	{
-		if (const UStatComponent* Stat = OwnerCharacter->GetStatusComponent())
-		{
-			Atk = FMath::RoundToInt(Stat->GetAtk());
-			Level = Stat->GetLevel();
-		}
-	}
-
-	// 레벨 커브
-	int32 LevelBonus = 0;
-	if (DamageCurveCached)
-	{
-		LevelBonus = FMath::RoundToInt(DamageCurveCached->GetFloatValue(Level));
-	}
-
-	const int32 Base = FMath::RoundToInt(Row->DamageFlat + Row->DamageRatio * Atk);
-	const int32 Total = FMath::Max(1, Base + LevelBonus);
-
-	return Total;
-}
-
-void ASkillBase::ApplyDamageToActor(AActor* Enemy) const
-{
-	if (!Enemy) return;
-	if (Enemy == GetOwner()) return;
-
-	if (ACharacterBase* Hit = Cast<ACharacterBase>(Enemy))
-	{
-		Hit->OnDamaged(GetDamageAmount());
-	}
-
-}
-
 
 void ASkillBase::SetSkillTarget(AActor* InTarget)
 {
@@ -176,4 +115,3 @@ AActor* ASkillBase::GetSkillTarget() const
 {
 	return TargetActor.Get();
 }
-

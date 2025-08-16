@@ -8,58 +8,74 @@
 
 class USkillController;
 class UDataTable;
+class UTexture2D;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSkillIconChanged, int32, SlotIndex, UTexture2D*, NewIcon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSkillCooldownTick, int32, SlotIndex, float, RemainTime, float, CooldownDuration);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECT_BNS_API USkillSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY()
-	USkillController* Controller = nullptr;
-
-
-	// Combo
-	UPROPERTY(EditAnywhere)
-	int32 ComboMax = 3;
-
-	int32 ComboStep = 0;
-	FTimerHandle ComboTimer;
-	bool CanInputNext = true;
-
-	UPROPERTY(EditAnywhere)
-	float ComboTimeLimit = 1.0f;
-
-	void StartComboWindow(float TimeSec);
-	void CloseComboWindow();
-
-	// Target
-	AActor* FindCurrentTarget() const;
-
 public:
 	USkillSystemComponent();
-	// 실행 테스트
-	virtual void OnRegister() override;
-	virtual void BeginPlay() override;
 
-	// Input
+	// 플레이어에서 호출
 	void HandleBasicAttack();
-	UPROPERTY(EditAnywhere)
-	FName ProjectileRowName = TEXT("Fireball_Skill");
 	void UseProjectileSkill();
 
-	void BlockNextInput() { CanInputNext = false; }
-	void AllowNextInput(float Seconds) { StartComboWindow(Seconds); }
+	// UI 연결
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillIconChanged OnSkillIconChanged;
 
-public:
-	UPROPERTY(EditAnywhere)
-	UDataTable* DT_SkillCommon = nullptr;
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillCooldownTick OnSkillCooldownTick;
 
-	UPROPERTY(EditAnywhere)
-	UDataTable* DT_Melee = nullptr;
+protected:
+	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere)
-	UDataTable* DT_Projectile = nullptr;
+	// 데이터
+	UPROPERTY(EditAnywhere, Category = "Skill UI")
+	TArray<TObjectPtr<UTexture2D>> BasicAttackIcons;
 
+	UPROPERTY(EditAnywhere, Category = "Skill UI")
+	int32 BasicAttackSlotIndex = 0;
 
+	UPROPERTY(EditAnywhere, Category = "Skill Data")
+	FName ProjectileRowName = TEXT("Fireball_Skill");
+
+	UPROPERTY(EditAnywhere, Category = "Skill Data")
+	int32 ProjectileSlotIndex = 1;
+
+	UPROPERTY(EditAnywhere, Category = "Skill Data")
+	TObjectPtr<UDataTable> DT_SkillCommon;
+	UPROPERTY(EditAnywhere, Category = "Skill Data")
+	TObjectPtr<UDataTable> DT_Melee;
+	UPROPERTY(EditAnywhere, Category = "Skill Data")
+	TObjectPtr<UDataTable> DT_Projectile;
+
+private:
+	UPROPERTY()
+	TObjectPtr<USkillController> Controller;
+
+	// 콤보 상태
+	int32 ComboStep = 0;
+	int32 ComboMax = 3;
+	bool bCanInputNext = true;
+	FTimerHandle ComboTimerHandle;
+	float ComboTimeLimit = 1.0f;
+
+	void StartComboWindow();
+	void CloseComboWindow();
+
+	// UI 쿨다운 표시용 타이머
+	TMap<int32, float> CooldownEndTimes; // 슬롯별 쿨다운 종료 시간
+	FTimerHandle CooldownUITimerHandle;
+	void TickCooldownUI();
+
+	AActor* FindCurrentTarget() const;
+	// UI 이벤트
+	void BroadcastSkillUI(const FName& SkillRowName, int32 SlotIndex);
 };
+

@@ -6,14 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "Engine/DataTable.h"
 #include "SkillInterface.h"
-#include "Curves/CurveFloat.h"
 #include "SkillBase.generated.h"
 
-struct FSkillCommonData;
-struct FMeleeData;
 class UAnimMontage;
-class UAnimInstance;
+class UCurveFloat;
 class ACharacter;
+class UAnimInstance;
+struct FSkillCommonData;
 
 UCLASS()
 class PROJECT_BNS_API ASkillBase : public AActor, public ISkillInterface
@@ -23,13 +22,28 @@ class PROJECT_BNS_API ASkillBase : public AActor, public ISkillInterface
 public:
 	ASkillBase();
 
-	void InitSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle);
+	// --- 초기화 ---
+	// Controller가 데이터 핸들과 '미리 로드된' 에셋을 전달하도록 변경
+	void InitializeSkill(
+		const FDataTableRowHandle& InCommonHandle,
+		const FDataTableRowHandle& InTypeHandle,
+		UAnimMontage* PreloadedMontage,
+		UCurveFloat* PreloadedDamageCurve
+	);
 
-	virtual void InitSkillExecute_Implementation() override;
+	// --- 인터페이스 구현 ---
 	virtual void ExecuteSkill_Implementation() override;
 	virtual void CancelSkill_Implementation() override;
 
+	// --- Public API ---
+	UFUNCTION(BlueprintCallable)
+	void SetSkillTarget(AActor* InTarget);
+
+	UFUNCTION(BlueprintPure)
+	AActor* GetSkillTarget() const;
+
 protected:
+	// 내부 상태 및 데이터
 	UPROPERTY()
 	FDataTableRowHandle CommonHandle;
 
@@ -37,33 +51,31 @@ protected:
 	FDataTableRowHandle TypeHandle;
 
 	UPROPERTY()
-	bool bExecuting = false;
+	bool bIsExecuting = false;
 
-	const FSkillCommonData* GetCommonRow() const;
-	UAnimMontage* LoadMontage() const;
-	UFUNCTION(BlueprintCallable)
-	ACharacter* GetOwnerCharacter() const;
-	UFUNCTION(BlueprintCallable)
-	UAnimInstance* GetOwnerAnimInstance() const;
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> SkillMontage;
 
-	UFUNCTION()
-	void OnMontageEnd(UAnimMontage* Montage, bool bInterrupted);
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> DamageCurve;
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> TargetActor;
 
-	UPROPERTY()
-	UCurveFloat* DamageCurveCached = nullptr;
+	// GetRow의 성공 여부 확인
+	const FSkillCommonData* GetCommonData() const;
 
-	int32 GetDamageAmount() const;
-	void ApplyDamageToActor(AActor* Enemy) const;
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	ACharacter* GetOwnerCharacter() const;
 
-	void ReadyCommonAsset();
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	UAnimInstance* GetOwnerAnimInstance() const;
 
-public:
-	UFUNCTION(BlueprintCallable)
-	void SetSkillTarget(AActor* InTarget);
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	UFUNCTION(BlueprintPure)
-	AActor* GetSkillTarget() const;
+	// 대미지 계산 및 적용
+	virtual int32 CalculateDamage() const;
+	// 함수 이름을 더 명확하게 변경
+	void ApplyDamageToCharacter(ACharacter* DamagedCharacter) const;
 };

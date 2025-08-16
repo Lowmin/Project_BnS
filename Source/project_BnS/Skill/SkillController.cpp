@@ -2,26 +2,29 @@
 
 
 #include "SkillController.h"
-#include "SkillCommonData.h" 
-#include "MeleeData.h"				// 체인 시간용
 #include "SkillBase.h"
 #include "GameFramework/Actor.h"         
 #include "GameFramework/Pawn.h"      
 #include "Engine/World.h" 
+#include "Animation/AnimMontage.h"
+#include "Curves/CurveFloat.h"
 
 USkillController::USkillController()
 {
 }
 
-void USkillController::Setup(UDataTable* InCommon)
+void USkillController::Setup(UDataTable* InCommonDataTable)
 {
-	DT_SkillCommon = InCommon;
+	DT_SkillCommon = InCommonDataTable;
 	TypeTables.Empty();
 }
 
-void USkillController::RegisterTypeTable(ESkill_Type Type, UDataTable* Table)
+void USkillController::RegisterTypeTable(ESkill_Type Type, UDataTable* TypeDataTable)
 {
-	TypeTables.Add(static_cast<uint8>(Type), Table);
+	if (TypeDataTable)
+	{
+		TypeTables.Add(Type, TypeDataTable);
+	}
 }
 
 void USkillController::SetOwnerActor(AActor* InOwner)
@@ -29,149 +32,99 @@ void USkillController::SetOwnerActor(AActor* InOwner)
 	OwnerActor = InOwner;
 }
 
-bool USkillController::Execute(FName CommonRowName)
+bool USkillController::Execute(FName SkillRowName, AActor* Target)
 {
-	if (!DT_SkillCommon || !OwnerActor) return false;
+	UWorld* World = OwnerActor ? OwnerActor->GetWorld() : nullptr;
+	if (!World) return false;
 
-	const FSkillCommonData* CommonRow = FindCommon(CommonRowName);
-	if (!CommonRow) return false;
-	if (!IsCooldownReady(CommonRowName, CommonRow->Cooldown)) return false;
+	const FSkillCommonData* CommonData = FindCommonData(SkillRowName);
+	if (!CommonData) return false;
+	if (!CommonData->SkillClass) return false;
 
-	if (!CommonRow->SkillClass) return false;
+	if (!IsCooldownReady(SkillRowName)) return false;
 
-	UWorld* WorldPtr = OwnerActor->GetWorld();
-	if (!WorldPtr) return false;
+	UAnimMontage* PreloadedMontage = CommonData->AnimMontage.LoadSynchronous();
+	UCurveFloat* PreloadedCurve = CommonData->DamageLevelCurve.LoadSynchronous();
 
-	FActorSpawnParameters SpawnParam;
-	SpawnParam.Owner = OwnerActor;
-	SpawnParam.Instigator = Cast<APawn>(OwnerActor);
+	// 스킬 액터 스폰
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = OwnerActor;
+	SpawnParams.Instigator = Cast<APawn>(OwnerActor);
 
-	// 스킬 액터 스폰, 위치
-	ASkillBase* SpawnSkill =
-		WorldPtr->SpawnActor<ASkillBase>(CommonRow->SkillClass.Get(), OwnerActor->GetActorLocation(), OwnerActor->GetActorRotation(), SpawnParam);
+	ASkillBase* SpawnedSkill =
+		World->SpawnActor<ASkillBase>(CommonData->SkillClass.Get(), OwnerActor->GetActorLocation(), OwnerActor->GetActorRotation(), SpawnParams);
 
-	if (!SpawnSkill) return false;
-
-	// 공통 데이터 핸들
-	FDataTableRowHandle CommonHandle;
-	CommonHandle.DataTable = DT_SkillCommon;
-	CommonHandle.RowName = CommonRowName;
-
-	// 타입 데이터 핸들
-	FDataTableRowHandle TypeHandle;
-	if (UDataTable* TypeDataTable = GetTypeTable(static_cast<uint8>(CommonRow->SkillType)))
-	{
-		TypeHandle.DataTable = TypeDataTable;
-		TypeHandle.RowName = CommonRow->TypeDataRow;
-	}
-
-	SpawnSkill->InitSkill(CommonHandle, TypeHandle);
-	ISkillInterface::Execute_InitSkillExecute(SpawnSkill);
-	ISkillInterface::Execute_ExecuteSkill(SpawnSkill);
-
-	// 마지막 사용 시간 저장
-	StampCooldown(CommonRowName);
-	return Execute(CommonRowName, nullptr);
-}
-
-bool USkillController::Execute(FName CommonRowName, AActor* InTarget)
-{
-	if (!DT_SkillCommon || !OwnerActor) return false;
-
-	const FSkillCommonData* CommonRow = FindCommon(CommonRowName);
-	if (!CommonRow) return false;
-	if (!IsCooldownReady(CommonRowName, CommonRow->Cooldown)) return false;
-	if (!CommonRow->SkillClass) return false;
-
-	UWorld* WorldPtr = OwnerActor->GetWorld();
-	if (!WorldPtr) return false;
-
-	FActorSpawnParameters SpawnParam;
-	SpawnParam.Owner = OwnerActor;
-	SpawnParam.Instigator = Cast<APawn>(OwnerActor);
-
-	ASkillBase* SpawnSkill =
-		WorldPtr->SpawnActor<ASkillBase>(CommonRow->SkillClass.Get(), OwnerActor->GetActorLocation(), OwnerActor->GetActorRotation(), SpawnParam);
-	if (!SpawnSkill) return false;
-
-	// 타겟 전달
-	SpawnSkill->SetSkillTarget(InTarget);
+	if (!SpawnedSkill) return false;
 
 	FDataTableRowHandle CommonHandle;
 	CommonHandle.DataTable = DT_SkillCommon;
-	CommonHandle.RowName = CommonRowName;
+	CommonHandle.RowName = SkillRowName;
 
 	FDataTableRowHandle TypeHandle;
-	if (UDataTable* TypeDataTable = GetTypeTable(static_cast<uint8>(CommonRow->SkillType)))
+	if (UDataTable* TypeTable = GetTypeTable(CommonData->SkillType))
 	{
-		TypeHandle.DataTable = TypeDataTable;
-		TypeHandle.RowName = CommonRow->TypeDataRow;
+		TypeHandle.DataTable = TypeTable;
+		TypeHandle.RowName = CommonData->TypeDataRow;
 	}
 
-	SpawnSkill->InitSkill(CommonHandle, TypeHandle);
-	ISkillInterface::Execute_InitSkillExecute(SpawnSkill);
-	ISkillInterface::Execute_ExecuteSkill(SpawnSkill);
+	SpawnedSkill->InitializeSkill(CommonHandle, TypeHandle, PreloadedMontage, PreloadedCurve);
 
-	StampCooldown(CommonRowName);
+	if (Target)
+	{
+		SpawnedSkill->SetSkillTarget(Target);
+	}
+
+	ISkillInterface::Execute_ExecuteSkill(SpawnedSkill);
+
+	StampCooldown(SkillRowName, CommonData->Cooldown);
 
 	return true;
 }
 
-float USkillController::GetChainInputTimeFor(FName CommonRowName) const
-{
-	// 콤보 입력 대기 시간
-	const FSkillCommonData* CommonRow = FindCommon(CommonRowName);
-	if (!CommonRow) return 0.f;
-
-	if (CommonRow->SkillType == ESkill_Type::Melee)
-	{
-		if (UDataTable* DataTable = GetTypeTable(static_cast<uint8>(CommonRow->SkillType)))
-		{
-			if (const FMeleeData* NextMelee = DataTable->FindRow<FMeleeData>(CommonRow->TypeDataRow, TEXT("ChainLookup")))
-			{
-				return NextMelee->ChainInput;
-			}
-		}
-	}
-
-	return 0.0f;
-}
-
-const FSkillCommonData* USkillController::FindCommon(FName Row) const
+const FSkillCommonData* USkillController::FindCommonData(FName SkillRowName) const
 {
 	if (!DT_SkillCommon) return nullptr;
-	return DT_SkillCommon->FindRow<FSkillCommonData>(Row, TEXT("SkillCommonLookup"));
+	return DT_SkillCommon->FindRow<FSkillCommonData>(SkillRowName, TEXT("FindCommonData"));
 }
 
-UDataTable* USkillController::GetTypeTable(uint8 Type) const
+float USkillController::GetCurrentTime() const
 {
-	if (UDataTable* const* Found = TypeTables.Find(Type))
+	return GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+}
+
+UDataTable* USkillController::GetTypeTable(ESkill_Type Type) const
+{
+	if (const TObjectPtr<UDataTable>* FoundTable = TypeTables.Find(Type))
 	{
-		return *Found;
+		return *FoundTable;
 	}
 	return nullptr;
 }
 
-float USkillController::Now() const
+bool USkillController::IsCooldownReady(FName SkillRowName) const
 {
-	const UWorld* WorldExist = GetWorld();
-	return WorldExist ? WorldExist->GetTimeSeconds() : 0.f;
+	// 쿨다운중인지
+	const FSkillCommonData* Data = FindCommonData(SkillRowName);
+	if (!Data || Data->Cooldown <= 0.f)
+	{
+		return true;
+	}
+
+	// 사용 기록 있는지
+	const float* LastUsedTime = LastUsedTimestamps.Find(SkillRowName);
+	if (!LastUsedTime)
+	{
+		return true;
+	}
+
+	return GetCurrentTime() >= (*LastUsedTime + Data->Cooldown);
 }
 
-bool USkillController::IsCooldownReady(FName Row, float CooldownSec) const
+void USkillController::StampCooldown(FName SkillRowName, float CooldownDuration)
 {
-	if (CooldownSec <= 0.f) return true;
-	const float* Last = LastUsedAt.Find(Row);
-	if (!Last) return true;
-	return Now() >= (*Last + CooldownSec);
+	if (CooldownDuration > 0.f)
+	{
+		LastUsedTimestamps.FindOrAdd(SkillRowName) = GetCurrentTime();
+	}
 }
-
-void USkillController::StampCooldown(FName Row)
-{
-	// 쿨타임 시작 시간
-	LastUsedAt.FindOrAdd(Row) = Now();
-}
-
-
-
 

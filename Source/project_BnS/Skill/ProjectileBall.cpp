@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "../CharacterBase.h"
 
 AProjectileBall::AProjectileBall()
 {
@@ -68,27 +69,37 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 
 void AProjectileBall::OnOverlap(UPrimitiveComponent* OverComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHit)
 {
-	if (!Other || Other == GetOwner())
-	{
-		Destroy();
-		return;
-	}
-	const FVector Impact = FVector(SweepHit.ImpactPoint);
-	const FVector Self = GetActorLocation();
-	const FVector Position = bFromSweep ? Impact : Self;
+	if (IsDamage) { Destroy(); return; }
+	if (!Other || Other == GetOwner()) { Destroy(); return; }
+
+	ProjectileDamage(Other);
+	IsDamage = true;
+
+	const FVector Position = bFromSweep ? FVector(SweepHit.ImpactPoint) : GetActorLocation();
 	DoExplore(Position);
+	Destroy();
+}
+
+void AProjectileBall::ProjectileDamage(AActor* Enemy)
+{
+	if (!Enemy || Enemy == GetOwner()) return;
+	if (ACharacterBase* Character = Cast<ACharacterBase>(Enemy))
+	{
+		const int32 TotalDamage = FMath::Max(1, DamageValue);
+		Character->OnDamaged(TotalDamage);
+	}
 }
 
 
-void AProjectileBall::SetupFromData(const FProjectileData& InData, AActor* InOwner)
+void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage)
 {
 	CurrentData = InData;
 	SetOwner(InOwner);
 	if (APawn* Pawn = Cast<APawn>(InOwner)) SetInstigator(Pawn);
 
 	// 속도, 수명, 중력
-	MoveSphere->InitialSpeed = CurrentData.ProejectileSpeed;
-	MoveSphere->MaxSpeed = CurrentData.ProejectileSpeed;
+	MoveSphere->InitialSpeed = CurrentData.ProjectileSpeed;
+	MoveSphere->MaxSpeed = CurrentData.ProjectileSpeed;
 	SetLifeSpan(CurrentData.ProjectileLifeTime);
 	MoveSphere->ProjectileGravityScale = CurrentData.GravityAffects ? 1.f : 0.f;
 
@@ -98,4 +109,5 @@ void AProjectileBall::SetupFromData(const FProjectileData& InData, AActor* InOwn
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 200.f, FColor::Cyan, false, 2.f, 0, 2.f);
 
+	DamageValue = (InDamage == INDEX_NONE) ? 0 : FMath::Max(1, InDamage);
 }

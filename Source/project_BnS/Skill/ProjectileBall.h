@@ -9,6 +9,7 @@
 #include "ProjectileBall.generated.h"
 
 class UProjectileMovementComponent;
+class ACharacterBase;
 
 UCLASS()
 class PROJECT_BNS_API AProjectileBall : public AActor
@@ -33,14 +34,23 @@ protected:
 	UFUNCTION()
 	void DoExplore(const FVector& HitPos);
 
+
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHit);
 
+	UFUNCTION()
+	void ProjectileDamage(AActor* Enemy);
+
+	UPROPERTY()
+	int32 DamageValue = 0;
+
+	UPROPERTY()
+	bool IsDamage = false;
 
 public:
-	void SetupFromData(const FProjectileData& InData, AActor* InOwner);
+	void SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage = INDEX_NONE);
 
 };
