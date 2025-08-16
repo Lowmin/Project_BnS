@@ -6,6 +6,7 @@
 #include "MainUi.h"
 #include "MyPlayer.h"
 #include "StatComponent.h"
+#include "Skill/SkillSystemComponent.h"
 
 void AMainUIPresenter::SetMainUI(UMainUi* ui)
 {
@@ -18,6 +19,12 @@ void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 	MyPlayer = player;
 	
 	Bind(MyPlayer->GetStatusComponent());
+
+	if (USkillSystemComponent* Skill = MyPlayer->GetSkillSystemComponent())
+	{
+		Skill->OnSkillIconChanged.AddDynamic(this, &AMainUIPresenter::SetSkillIcon);
+		Skill->OnSkillCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
+	}
 }
 
 void AMainUIPresenter::Bind(UStatComponent* stat)

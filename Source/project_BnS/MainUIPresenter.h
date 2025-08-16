@@ -52,6 +52,7 @@ public:
 	/// ㄴ0 : 기본공격  <para/>
 	/// ㄴ1 : 1번스킬</param>
 	/// <param name="texture"> 스킬 아이콘 텍스쳐 </param>
+	UFUNCTION()
 	void SetSkillIcon(int index, UTexture2D* texture);
 	/// <summary>
 	/// 스킬 쿨타임 표시
@@ -62,5 +63,6 @@ public:
 	/// </param>
 	/// <param name="remain"> 남은 시간 </param>
 	/// <param name="cooldown"> 총 쿨타임 시간 </param>
+	UFUNCTION()
 	void OnCooldownChange(int index, float remain, float cooldown);
 };
