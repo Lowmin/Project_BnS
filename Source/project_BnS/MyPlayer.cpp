@@ -20,8 +20,9 @@ AMyPlayer::AMyPlayer()
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
-    CameraBoom->TargetArmLength = 300.0f;
+    CameraBoom->TargetArmLength = 500.0f;
     CameraBoom->bUsePawnControlRotation = true;
+    CameraBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
