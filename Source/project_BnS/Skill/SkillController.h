@@ -2,8 +2,6 @@
 
 #pragma once
 
-#pragma once
-
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "SkillCommonData.h"
@@ -12,6 +10,7 @@
 class UDataTable;
 class ASkillBase;
 class AActor;
+class UStatComponent;
 
 UCLASS()
 class PROJECT_BNS_API USkillController : public UObject
@@ -36,6 +35,7 @@ private:
 	bool IsCooldownReady(FName SkillRowName) const;
 	void StampCooldown(FName SkillRowName, float CooldownDuration);
 
+
 private:
 	UPROPERTY()
 	TObjectPtr<UDataTable> DT_SkillCommon = nullptr;
@@ -48,4 +48,7 @@ private:
 
 	UPROPERTY()
 	TMap<FName, float> LastUsedTimestamps;
+
+	UPROPERTY()
+	TWeakObjectPtr<UStatComponent> OwnerStatComponent;
 };

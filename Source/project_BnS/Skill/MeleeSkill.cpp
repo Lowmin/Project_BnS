@@ -14,6 +14,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
+#include "../Enemy.h"
 
 void AMeleeSkill::ExecuteSkill_Implementation()
 {
@@ -61,7 +62,7 @@ bool AMeleeSkill::LoadMeleeData()
 
 void AMeleeSkill::AttackMelee()
 {
-	ACharacter* Caster = GetOwnerCharacter();
+	ACharacterBase* Caster = Cast<ACharacterBase>(GetOwnerCharacter());
 	if (!Caster) return;
 
 	const FVector Start = Caster->GetActorLocation();
@@ -80,6 +81,7 @@ void AMeleeSkill::AttackMelee()
 
 	// 대미지
 	TSet<AActor*> DamagedActors;
+	bool bHitActiveEnemy = false;
 	for (const FHitResult& Hit : Hits)
 	{
 		AActor* HitActor = Hit.GetActor();
@@ -87,6 +89,14 @@ void AMeleeSkill::AttackMelee()
 		if (!HitActor || HitActor == Caster || DamagedActors.Contains(HitActor))
 		{
 			continue;
+		}
+
+		if (AEnemy* HitEnemy = Cast<AEnemy>(HitActor))
+		{
+			if (!HitEnemy->IsDead())
+			{
+				bHitActiveEnemy = true;
+			}
 		}
 
 		if (ACharacter* HitCharacter = Cast<ACharacter>(HitActor))
@@ -97,6 +107,20 @@ void AMeleeSkill::AttackMelee()
 
 		// 단일 타겟
 		if (!bCanHitMultiTarget) break;
+	}
+
+	// 3타에서 MP 회복
+	if (bHitActiveEnemy && ComboStepLocal == 3 && RecoverMPOnThird > 0)
+	{
+		UStatComponent* StatComp = Caster->GetStatusComponent();
+		if (StatComp)
+		{
+			const int32 CurrentMP = StatComp->GetCurMp();
+			const int32 MaxMP = StatComp->GetMaxMp();
+			const int32 NewMP = FMath::Min(CurrentMP + RecoverMPOnThird, MaxMP);
+
+			StatComp->SetCurMp(NewMP);
+		}
 	}
 
 }

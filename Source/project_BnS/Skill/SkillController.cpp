@@ -8,6 +8,8 @@
 #include "Engine/World.h" 
 #include "Animation/AnimMontage.h"
 #include "Curves/CurveFloat.h"
+#include "../CharacterBase.h"
+#include "../StatComponent.h"
 
 USkillController::USkillController()
 {
@@ -30,16 +32,32 @@ void USkillController::RegisterTypeTable(ESkill_Type Type, UDataTable* TypeDataT
 void USkillController::SetOwnerActor(AActor* InOwner)
 {
 	OwnerActor = InOwner;
+	//
+	if (OwnerActor)
+	{
+		OwnerStatComponent = OwnerActor->FindComponentByClass<UStatComponent>();
+	}
 }
 
 bool USkillController::Execute(FName SkillRowName, AActor* Target)
 {
 	UWorld* World = OwnerActor ? OwnerActor->GetWorld() : nullptr;
 	if (!World) return false;
+	//
+	if (!OwnerStatComponent.IsValid()) return false;
 
 	const FSkillCommonData* CommonData = FindCommonData(SkillRowName);
 	if (!CommonData) return false;
 	if (!CommonData->SkillClass) return false;
+
+	//
+	if (CommonData->CostMP > 0)
+	{
+		if (OwnerStatComponent->GetCurMp() < CommonData->CostMP)
+		{
+			return false;
+		}
+	}
 
 	if (!IsCooldownReady(SkillRowName)) return false;
 
@@ -75,6 +93,13 @@ bool USkillController::Execute(FName SkillRowName, AActor* Target)
 	}
 
 	ISkillInterface::Execute_ExecuteSkill(SpawnedSkill);
+
+	//
+	if (CommonData->CostMP > 0)
+	{
+		const int32 NewMP = OwnerStatComponent->GetCurMp() - CommonData->CostMP;
+		OwnerStatComponent->SetCurMp(NewMP);
+	}
 
 	StampCooldown(SkillRowName, CommonData->Cooldown);
 
