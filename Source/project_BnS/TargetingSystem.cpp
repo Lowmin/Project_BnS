@@ -21,6 +21,7 @@ ATargetingSystem::ATargetingSystem()
 	TargetSensor->SetSphereRadius(1000);
 	TargetSensor->SetHiddenInGame(false);
 	TargetSensor->SetupAttachment(RootComponent);
+	TargetSensor->SetCollisionProfileName(TEXT("TargetingSensor"));
 
 	TargetSensor->OnComponentBeginOverlap.AddDynamic(this, &ATargetingSystem::OnOverlapBegin);
 	TargetSensor->OnComponentEndOverlap.AddDynamic(this, &ATargetingSystem::OnOverlapEnd);
@@ -114,12 +115,16 @@ void ATargetingSystem::SetCurTarget()
 		// 45도 이내, 가장 짧은 거리 타겟 설정 
 		if(dot > 0.5f && distSqrt < distance)
 		{
-			distance = distSqrt;
-			const ACharacterBase*  characterBase = Cast<ACharacterBase>(targetAble);
-			if(characterBase != nullptr)
+			// 대상이 가려져있지 않은경우 등록 
+			if(!IsTargetBlocked(targetPos))
 			{
-				Target = targetAble;
-				ITargetAble::Execute_OnTargeted(Target, true);
+				distance = distSqrt;
+				const ACharacterBase*  characterBase = Cast<ACharacterBase>(targetAble);
+				if(characterBase != nullptr)
+				{
+					Target = targetAble;
+					ITargetAble::Execute_OnTargeted(Target, true);
+				}
 			}
 		}
 	}
@@ -151,6 +156,23 @@ void ATargetingSystem::ValidateTarget()
 	{
 		RemoveCurrentTarget();
 	}
+
+	// 대상이 가려져있는경우 타게팅 해제 
+	if(IsTargetBlocked(targetPos))
+	{
+		RemoveCurrentTarget();
+	}
+}
+
+bool ATargetingSystem::IsTargetBlocked(FVector targetPos)
+{
+	FVector pos = CameraManager->GetCameraLocation();
+	FHitResult result;
+	if(GetWorld()->LineTraceSingleByChannel(result, pos, targetPos, ECC_GameTraceChannel4))
+	{
+		return true;
+	}
+	return false;
 }
 
 bool ATargetingSystem::IsTarget() const

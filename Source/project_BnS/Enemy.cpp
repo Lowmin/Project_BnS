@@ -12,6 +12,9 @@
 
 AEnemy::AEnemy()
 {
+	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
+	capsuleComponent->SetCollisionProfileName(TEXT("Enemy"));
+	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
 	if (skMeshRes.Succeeded())
 	{
@@ -25,7 +28,7 @@ AEnemy::AEnemy()
 	if (hpBarClass.Succeeded())
 	{
 		HpBar = CreateDefaultSubobject<UWorldFloatingUiComponent>(TEXT("HpBar"));
-		HpBar->SetupAttachment(RootComponent);
+		HpBar->SetupAttachment(capsuleComponent);
 
 		HpBar->SetWidgetClass(hpBarClass.Class);
 		HpBar->SetDrawSize(FVector2D(266.0f, 26.0f));

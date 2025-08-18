@@ -50,6 +50,9 @@ private:
 	// 타겟 유효성 검사 
 	void ValidateTarget();
 
+	// 대상과 캐릭터 사이 벽 검사 
+	bool IsTargetBlocked(FVector targetPos);
+
 public:
 	/// <summary>
 	/// 현재 조준한 타겟 존재 여부 
