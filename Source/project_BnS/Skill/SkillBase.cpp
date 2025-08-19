@@ -14,12 +14,11 @@ ASkillBase::ASkillBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void ASkillBase::InitializeSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle, UAnimMontage* PreloadedMontage, UCurveFloat* PreloadedDamageCurve)
+void ASkillBase::InitializeSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle, UAnimMontage* PreloadedMontage)
 {
 	CommonHandle = InCommonHandle;
 	TypeHandle = InTypeHandle;
 	SkillMontage = PreloadedMontage;
-	DamageCurve = PreloadedDamageCurve;
 }
 
 void ASkillBase::ExecuteSkill_Implementation()
@@ -69,12 +68,8 @@ int32 ASkillBase::CalculateDamage() const
 	if (!StatComp) return 1; // 최소 대미지
 
 	const float Atk = StatComp->GetAtk();
-	const int32 Level = StatComp->GetLevel();
 
-	// 레벨 커브
-	const float LevelBonus = DamageCurve ? DamageCurve->GetFloatValue(static_cast<float>(Level)) : 0.f;
-
-	const float RawDamage = Data->DamageFlat + (Data->DamageRatio * Atk) + LevelBonus;
+	const float RawDamage = Data->DamageFlat + (Data->DamageRatio * Atk);
 	return FMath::Max(1, FMath::RoundToInt(RawDamage));
 }
 

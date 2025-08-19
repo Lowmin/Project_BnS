@@ -62,7 +62,6 @@ bool USkillController::Execute(FName SkillRowName, AActor* Target)
 	if (!IsCooldownReady(SkillRowName)) return false;
 
 	UAnimMontage* PreloadedMontage = CommonData->AnimMontage.LoadSynchronous();
-	UCurveFloat* PreloadedCurve = CommonData->DamageLevelCurve.LoadSynchronous();
 
 	// 스킬 액터 스폰
 	FActorSpawnParameters SpawnParams;
@@ -85,7 +84,7 @@ bool USkillController::Execute(FName SkillRowName, AActor* Target)
 		TypeHandle.RowName = CommonData->TypeDataRow;
 	}
 
-	SpawnedSkill->InitializeSkill(CommonHandle, TypeHandle, PreloadedMontage, PreloadedCurve);
+	SpawnedSkill->InitializeSkill(CommonHandle, TypeHandle, PreloadedMontage);
 
 	if (Target)
 	{

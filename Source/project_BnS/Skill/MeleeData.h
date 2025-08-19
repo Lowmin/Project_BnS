@@ -13,7 +13,7 @@ struct FMeleeData : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackRange = 100.f;
+	float AttackRange = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackRadius = 50.f;
@@ -24,16 +24,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 ComboStep = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName NextComboRow;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) 
+	FName HitNotifyName = TEXT("Hit");
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float ChainInput = 1.0f;	// 다음 입력 대기 시간
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 RecoverMPOnThird = 2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 BossCCOnThird = 1;	// 보스 합격기 카운트
 
 };

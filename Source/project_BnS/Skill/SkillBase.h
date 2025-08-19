@@ -25,8 +25,7 @@ public:
 	void InitializeSkill(
 		const FDataTableRowHandle& InCommonHandle,
 		const FDataTableRowHandle& InTypeHandle,
-		UAnimMontage* PreloadedMontage,
-		UCurveFloat* PreloadedDamageCurve
+		UAnimMontage* PreloadedMontage
 	);
 
 	virtual void ExecuteSkill_Implementation() override;
@@ -51,9 +50,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> SkillMontage;
-
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> DamageCurve;
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> TargetActor;

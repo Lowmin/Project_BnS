@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Curves/CurveFloat.h"
+#include "../CrowdControlComponent.h"
 #include "Engine/DataTable.h"
 #include "SkillCommonData.generated.h"
 
@@ -27,6 +27,17 @@ enum class ETargeting_Type : uint8
     Ground
 };
 
+USTRUCT(BlueprintType)
+struct FSkillCCOption
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    bool bUseCC = false; 
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "bUseCC"))
+    ECrowdControlType CCType = ECrowdControlType::None;     // None, Down, Sturn
+};
 
 USTRUCT(BlueprintType)
 struct FSkillCommonData : public FTableRowBase
@@ -38,16 +49,13 @@ public:
     int32 Index = 0;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    FText SkillName;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     ESkill_Type SkillType = ESkill_Type::Melee;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     ETargeting_Type TargetingType = ETargeting_Type::Self;
 
-    //UPROPERTY(EditAnywhere, BlueprintReadOnly) 
-    //bool bRequireLineOfSight = false;             // 시야 체크
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FSkillCCOption CC;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float Cooldown = 0.f;
@@ -61,15 +69,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSoftObjectPtr<UAnimMontage> AnimMontage;
 
-
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float DamageFlat = 0.f;     // 고정 대미지
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float DamageRatio = 0.f;    // 공격력 계수
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TSoftObjectPtr<UCurveFloat> DamageLevelCurve;   // 레벨별 대미지
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     float CastRange = 0.f;      // 스킬 시전 최대 거리

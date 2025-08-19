@@ -4,88 +4,107 @@
 #include "MeleeSkill.h"
 #include "MeleeData.h"
 #include "SkillCommonData.h"
+
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
+
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
-#include "Kismet/KismetSystemLibrary.h" 
-#include "Engine/World.h"
 #include "DrawDebugHelpers.h"
-#include "TimerManager.h"
 #include "../Enemy.h"
 
 void AMeleeSkill::ExecuteSkill_Implementation()
 {
-	if (!LoadMeleeData()) return;
+	if (!CacheMeleeData())
+	{
+		Destroy();
+		return;
+	}
 
 	if (UAnimInstance* Anim = GetOwnerAnimInstance())
 	{
-		Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin); // 중복 방지
-		Anim->OnPlayMontageNotifyBegin.AddDynamic(this, &AMeleeSkill::OnNotifyBegin);
+		Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin);
+		Anim->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &AMeleeSkill::OnNotifyBegin);
+	}
+	else
+	{
+		Destroy();
+		return;
 	}
 
 	Super::ExecuteSkill_Implementation();
 
-	// 재생 실패 처리
 	if (!bIsExecuting)
 	{
-		if (UAnimInstance* Anim = GetOwnerAnimInstance())
-		{
-			Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin);
-		}
+		CleanUp();
 	}
-	FTimerHandle onceHandle;
-	GetWorld()->GetTimerManager().SetTimer(onceHandle, this, &AMeleeSkill::AttackMelee, 0.20f, false);
 }
 
-bool AMeleeSkill::LoadMeleeData()
+void AMeleeSkill::CancelSkill_Implementation()
+{
+	Super::CancelSkill_Implementation();
+	CleanUp();
+}
+
+void AMeleeSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	CleanUp();
+	Super::OnMontageEnded(Montage, bInterrupted);
+}
+
+void AMeleeSkill::CleanUp()
+{
+	if (UAnimInstance* Anim = GetOwnerAnimInstance())
+	{
+		Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin);
+	}
+}
+
+bool AMeleeSkill::CacheMeleeData()
 {
 	if (!TypeHandle.DataTable) return false;
 
-	const FMeleeData* Row = TypeHandle.GetRow<FMeleeData>(TEXT("Melee"));
-	if (Row == nullptr) return false;
+	MeleeData = TypeHandle.GetRow<FMeleeData>(TEXT("CacheMeleeData"));
 
-	AttackRange = Row->AttackRange;
-	AttackRadius = Row->AttackRadius;
-	bCanHitMultiTarget = Row->bCanHitMultiTarget;
-	ComboStepLocal = Row->ComboStep;
-	ChainInputSeconds = Row->ChainInput;
-	RecoverMPOnThird = Row->RecoverMPOnThird;
-	BossCCOnThird = Row->BossCCOnThird;
-	NextComboRow = Row->NextComboRow;
-
-	return true;
+	return MeleeData != nullptr;
 }
 
 
-void AMeleeSkill::AttackMelee()
+void AMeleeSkill::OnNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
+{
+	if (NotifyName == TEXT("Hit"))
+	{
+		PerformMeleeAttack();
+	}
+}
+
+void AMeleeSkill::PerformMeleeAttack()
 {
 	ACharacterBase* Caster = Cast<ACharacterBase>(GetOwnerCharacter());
-	if (!Caster) return;
+	if (!Caster || !MeleeData) return;
 
 	const FVector Start = Caster->GetActorLocation();
 	const FVector Dir = Caster->GetActorForwardVector();
-	const FVector End = Start + Dir * AttackRange;
+	const FVector End = Start + Dir * MeleeData->AttackRange;
 
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(AttackRadius);
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(MeleeData->AttackRadius);
 	TArray<FHitResult> Hits;
-
 	FCollisionQueryParams QP(SCENE_QUERY_STAT(MeleeTrace), false, Caster);
 
-	bool Multi = GetWorld()->SweepMultiByChannel(Hits, Start, End, FQuat::Identity, ECC_Pawn, Sphere, QP);
+	FCollisionObjectQueryParams ObjectParam;
+	ObjectParam.AddObjectTypesToQuery(ECC_Pawn);
+	ObjectParam.AddObjectTypesToQuery(ECC_GameTraceChannel6);
 
-	const FColor PathCol = Multi ? FColor::Green : FColor::Red;
-	DrawDebugSphere(GetWorld(), Start, AttackRadius, 16, PathCol, false, 1.5f, 0, 1.5f);
+	bool bHitSomething = GetWorld()->SweepMultiByObjectType(Hits, Start, End, FQuat::Identity, ObjectParam, Sphere, QP);
 
-	// 대미지
+	DrawDebugSphere(GetWorld(), Start, MeleeData->AttackRadius, 16, bHitSomething ? FColor::Green : FColor::Red, false, 1.5f, 0, 1.5f);
+
 	TSet<AActor*> DamagedActors;
 	bool bHitActiveEnemy = false;
 	for (const FHitResult& Hit : Hits)
 	{
 		AActor* HitActor = Hit.GetActor();
-
 		if (!HitActor || HitActor == Caster || DamagedActors.Contains(HitActor))
 		{
 			continue;
@@ -97,38 +116,13 @@ void AMeleeSkill::AttackMelee()
 			{
 				bHitActiveEnemy = true;
 			}
+
 		}
 
-		if (ACharacter* HitCharacter = Cast<ACharacter>(HitActor))
-		{
-			ApplyDamageToCharacter(HitCharacter);
-			DamagedActors.Add(HitActor);
-		}
+		ApplyDamageToCharacter(Cast<ACharacter>(HitActor));
+		DamagedActors.Add(HitActor);
 
-		// 단일 타겟
-		if (!bCanHitMultiTarget) break;
+		if (!MeleeData->bCanHitMultiTarget) break;
 	}
 
-	// 3타에서 MP 회복
-	if (bHitActiveEnemy && ComboStepLocal == 3 && RecoverMPOnThird > 0)
-	{
-		UStatComponent* StatComp = Caster->GetStatusComponent();
-		if (StatComp)
-		{
-			const int32 CurrentMP = StatComp->GetCurMp();
-			const int32 MaxMP = StatComp->GetMaxMp();
-			const int32 NewMP = FMath::Min(CurrentMP + RecoverMPOnThird, MaxMP);
-
-			StatComp->SetCurMp(NewMP);
-		}
-	}
-
-}
-
-void AMeleeSkill::OnNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
-{
-	if (NotifyName == FName("Hit"))
-	{
-		AttackMelee();
-	}
 }

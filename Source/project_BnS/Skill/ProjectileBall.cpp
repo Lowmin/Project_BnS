@@ -15,10 +15,11 @@ AProjectileBall::AProjectileBall()
 	HitSphere = CreateDefaultSubobject<USphereComponent>(TEXT("HitSphere"));
 	HitSphere->InitSphereRadius(30.f);
 	// 콜리전 채널 세팅 필요
-	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HitSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HitSphere->SetCollisionObjectType(ECC_WorldDynamic);
 	HitSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HitSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	HitSphere->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Overlap);
 	HitSphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	HitSphere->SetGenerateOverlapEvents(true);
 	RootComponent = HitSphere;
@@ -61,10 +62,12 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 		Destroy();
 		return;
 	}
+	ProjectileDamage(Other);
 	const FVector Impact = FVector(Hit.ImpactPoint);
 	const FVector Self = GetActorLocation();
 	const FVector Position = Hit.bBlockingHit ? Impact : Self;
 	DoExplore(Position);
+	Destroy();
 }
 
 void AProjectileBall::OnOverlap(UPrimitiveComponent* OverComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHit)
@@ -110,4 +113,5 @@ void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor*
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 200.f, FColor::Cyan, false, 2.f, 0, 2.f);
 
 	DamageValue = (InDamage == INDEX_NONE) ? 0 : FMath::Max(1, InDamage);
+	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
