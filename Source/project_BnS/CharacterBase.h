@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "StatComponent.h"
 #include "CharacterBase.generated.h"
 
 enum class ECrowdControlType : uint8;

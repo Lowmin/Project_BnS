@@ -6,14 +6,14 @@
 #include "WorldFloatingUiComponent.h"
 #include "Nameplate.h"
 #include "HpBar.h"
-#include "StatComponent.h"
+#include "EnemyData.h"
 
 #include "Components/CapsuleComponent.h"
 
 AEnemy::AEnemy()
 {
 	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
-	capsuleComponent->SetCollisionProfileName(TEXT("Enemy"));
+	capsuleComponent->SetCollisionProfileName(TEXT("AAA"));
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
 	if (skMeshRes.Succeeded())
@@ -54,7 +54,24 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(TEXT("Enemy"));
+	if (EnemyDataTable && !EnemyRowName.IsNone())
+	{
+		const FEnemyData* Data = EnemyDataTable->FindRow<FEnemyData>(EnemyRowName, TEXT(""));
+
+		if (Data)
+		{
+			GetMesh()->SetSkeletalMesh(Data->Mesh);
+			GetMesh()->SetAnimClass(Data->AnimBP);
+
+			Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(Data->D_EnemyName);
+			Status->SetMaxHp(Data->D_MaxHP);
+			Status->SetCurHp(Data->D_MaxHP);
+			Status->SetLevel(Data->D_Level);
+			Status->SetAtk(Data->D_Atk);
+			Status->SetDef(Data->D_Def);
+		}
+	}
+
 	Status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
 }
 

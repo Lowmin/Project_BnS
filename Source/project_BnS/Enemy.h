@@ -21,11 +21,19 @@ public:
 
 	virtual void BeginPlay() override;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "AI Data")
+	TObjectPtr<class UDataTable> EnemyDataTable;
+
+	UPROPERTY(EditAnywhere, Category = "AI Data")
+	FName EnemyRowName;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWorldFloatingUiComponent> HpBar = nullptr;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
+	FText Name;
 
 	// ITargetAble
 	bool IsActiveTarget_Implementation() const;

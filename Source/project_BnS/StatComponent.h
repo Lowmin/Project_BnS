@@ -51,6 +51,7 @@ public:
 	float GetCurHp() const;
 	void SetCurHp(float hp);
 	float GetMaxHp() const;
+	void SetMaxHp(float hp);
 
 	// MP
 	int32 GetCurMp() const;
@@ -63,8 +64,10 @@ public:
 
 	// Atk
 	float GetAtk() const;
+	void SetAtk(float atk);
 
 	// def
 	float GetDef() const;
+	void SetDef(float def);
 
 };
