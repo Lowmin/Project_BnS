@@ -53,7 +53,6 @@ void ACharacterBase::OnDamaged(int32 damage)
 {
 
 	Status->SetCurHp(Status->GetCurHp() - damage);
-	UE_LOG(LogTemp, Log, TEXT("현재 체력: %f"), Status->GetCurHp());
 }
 
 UStatComponent* ACharacterBase::GetStatusComponent() const

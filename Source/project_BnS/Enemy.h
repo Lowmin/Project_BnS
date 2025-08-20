@@ -11,6 +11,8 @@
 /**
  * 
  */
+class USphereComponent;
+
 UCLASS()
 class PROJECT_BNS_API AEnemy : public ACharacterBase, public ITargetAble
 {
@@ -21,12 +23,20 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void OnDamaged(int32 damage) override;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "AI Data")
 	TObjectPtr<class UDataTable> EnemyDataTable;
 
 	UPROPERTY(EditAnywhere, Category = "AI Data")
 	FName EnemyRowName;
+
+	UPROPERTY(EditAnywhere, Category = "AI Data")
+	TObjectPtr<USphereComponent> AttackRangeSphere;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<class UAnimMontage> HitReactMontage;
 
 private:
 	UPROPERTY(VisibleAnywhere)

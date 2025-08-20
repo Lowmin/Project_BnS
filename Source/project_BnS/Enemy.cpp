@@ -61,7 +61,9 @@ void AEnemy::BeginPlay()
 		if (Data)
 		{
 			GetMesh()->SetSkeletalMesh(Data->Mesh);
-			GetMesh()->SetAnimClass(Data->AnimBP);
+			GetMesh()->SetAnimInstanceClass(Data->AnimBP);
+
+			HitReactMontage = Data->HitReactMontage;
 
 			Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(Data->D_EnemyName);
 			Status->SetMaxHp(Data->D_MaxHP);
@@ -73,6 +75,20 @@ void AEnemy::BeginPlay()
 	}
 
 	Status->OnHpChange.AddUObject(Cast<UHpBar>(HpBar->GetWidget()), &UHpBar::OnChangeHp);
+}
+
+void AEnemy::OnDamaged(int32 damage)
+{
+	Super::OnDamaged(damage);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		if (!AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->Montage_Play(HitReactMontage, 1.0f);
+		}
+	}
 }
 
 bool AEnemy::IsActiveTarget_Implementation() const
