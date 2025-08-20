@@ -93,12 +93,28 @@ void AMainUIPresenter::OnExpChange(float current, float max) const
 	MainUI->SetExp(current, max);
 }
 
-void AMainUIPresenter::OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const
+void AMainUIPresenter::OnTargetChange(FVector2D center, FVector2D size) const
 {
 	if(MainUI == nullptr)
 		return;
 
-	MainUI->SetTarget(isTarget, center, size);
+	MainUI->SetTargetBox(center, size);
+}
+
+void AMainUIPresenter::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)
+{
+	if(MainUI == nullptr)
+		return;
+
+	MainUI->ChangeSkillIcon(index, prevTexture, texture);
+}
+
+void AMainUIPresenter::ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture)
+{
+	if(MainUI == nullptr)
+		return;
+
+	MainUI->ChangeSkillIconStep(index, prevTexture, texture);
 }
 
 void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)

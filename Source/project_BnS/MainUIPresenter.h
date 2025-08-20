@@ -43,8 +43,13 @@ public:
  	UFUNCTION()
 	void OnExpChange(float current, float max) const;
 
-	void OnTargetChange(bool isTarget, FVector2D center, FVector2D size) const;
+	void OnTargetChange(FVector2D center, FVector2D size) const;
 
+ 	UFUNCTION()
+ 	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
+	UFUNCTION()
+ 	void ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture);
+ 	
 	/// <summary>
 	/// 스킬 아이콘 변경 
 	/// </summary>

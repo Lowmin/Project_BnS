@@ -55,7 +55,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 	
 	if(Target == nullptr)
 	{
-		BnsController->UIPresenter->OnTargetChange(true, FVector2D::ZeroVector, FVector2D(100, 100));
+		BnsController->UIPresenter->OnTargetChange(FVector2D::ZeroVector, FVector2D(100, 100));
 	}
 	else
 	{
@@ -83,7 +83,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 
 		targetBoxSize *= targetBoxRatio;
 
-		BnsController->UIPresenter->OnTargetChange(true, targetCenter + FVector2D(x, y), targetBoxSize);
+		BnsController->UIPresenter->OnTargetChange(targetCenter + FVector2D(x, y), targetBoxSize);
 	}
 }
 

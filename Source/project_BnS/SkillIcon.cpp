@@ -12,6 +12,14 @@ void USkillIcon::NativeConstruct()
 	Block->SetBrushFromMaterial(UmatInstance);
 }
 
+void USkillIcon::ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture)
+{
+}
+
+void USkillIcon::ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture)
+{
+}
+
 void USkillIcon::SetIcon(UTexture2D* texture)
 {
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);

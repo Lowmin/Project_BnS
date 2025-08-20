@@ -35,6 +35,8 @@ protected:
 	UPROPERTY()
 	UMaterialInstanceDynamic* UmatInstance = nullptr;
 public:
+	void ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture);
+	void ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture);
 	void SetIcon(UTexture2D* texture);
 	void SetCooldown(float remain, float cooldown);
 };

@@ -48,6 +48,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UCanvasPanelSlot> TargetSlot = nullptr;
 
+	UPROPERTY()
+	TArray<TObjectPtr<USkillIcon>> SkillIcons;
+	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<USkillIcon> Skill_0 = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
@@ -91,7 +94,13 @@ public:
 	void SetLevel(int level);
 
 	UFUNCTION(BlueprintCallable)
-	void SetTarget(bool isTarget, FVector2D center, FVector2D size);
+	void SetTargetBox(FVector2D center, FVector2D size);
+
+	UFUNCTION()
+	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
+	
+    UFUNCTION()
+    void ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture);
 
 	UFUNCTION()
 	void SetSkillIcon(int index, UTexture2D* texture);

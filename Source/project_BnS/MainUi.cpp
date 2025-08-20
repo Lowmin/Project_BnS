@@ -15,6 +15,13 @@ void UMainUi::NativeConstruct()
 	Super::NativeConstruct();
 
 	BossInfo->SetVisibility(ESlateVisibility::Hidden);
+
+	SkillIcons.Emplace(Skill_0);
+	
+	SkillIcons.Emplace(Skill_1);
+	SkillIcons.Emplace(Skill_2);
+	SkillIcons.Emplace(Skill_3);
+	SkillIcons.Emplace(Skill_4);
 }
 
 void UMainUi::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -70,7 +77,7 @@ void UMainUi::SetLevel(int level)
 	LevelText->SetText(FText::AsNumber(level));
 }
 
-void UMainUi::SetTarget(bool isTarget, FVector2D center, FVector2D size)
+void UMainUi::SetTargetBox(FVector2D center, FVector2D size)
 {
 	if (TargetSlot == nullptr)
 	{
@@ -80,57 +87,25 @@ void UMainUi::SetTarget(bool isTarget, FVector2D center, FVector2D size)
 	if (TargetSlot == nullptr)
 		return;
 
-	float viewportScale = 1.f;
-	FVector2D viewportSize = FVector2D::UnitVector;
-
 	TargetSlot->SetPosition(center);
 	TargetSlot->SetSize(size);
 }
 
+void UMainUi::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)
+{
+}
+
+void UMainUi::ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture)
+{
+	SkillIcons[index]->ChangeSkillIconStep(prevTexture, texture);
+}
+
 void UMainUi::SetSkillIcon(int index, UTexture2D* texture)
 {
-	switch (index)
-	{
-	case 0:
-		Skill_0->SetIcon(texture);
-		break;
-	case 1:
-		Skill_1->SetIcon(texture);
-		break;
-	case 2:
-		Skill_2->SetIcon(texture);
-		break;
-	case 3:
-		Skill_3->SetIcon(texture);
-		break;
-	case 4:
-		Skill_4->SetIcon(texture);
-		break;
-	default:
-		break;
-	}
+	SkillIcons[index]->SetIcon(texture);
 }
 
 void UMainUi::SetSkillCooldown(int index, float remain, float cooldown)
 {
-	switch (index)
-	{
-	case 0:
-		Skill_0->SetCooldown(remain, cooldown);
-		break;
-	case 1:
-		Skill_1->SetCooldown(remain, cooldown);
-		break;
-	case 2:
-		Skill_2->SetCooldown(remain, cooldown);
-		break;
-	case 3:
-		Skill_3->SetCooldown(remain, cooldown);
-		break;
-	case 4:
-		Skill_4->SetCooldown(remain, cooldown);
-		break;
-	default:
-		break;
-	}
+	SkillIcons[index]->SetCooldown(remain, cooldown);
 }
