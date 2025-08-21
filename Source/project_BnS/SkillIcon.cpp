@@ -5,6 +5,7 @@
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Animation/WidgetAnimation.h"
 
 void USkillIcon::NativeConstruct()
 {
@@ -12,6 +13,9 @@ void USkillIcon::NativeConstruct()
 
 	UmatInstance = UMaterialInstanceDynamic::Create(UmatBase, this);
 	Block->SetBrushFromMaterial(UmatInstance);
+
+	TObjectPtr<UMaterialInstanceDynamic> PrevUmatInstance = UMaterialInstanceDynamic::Create(UmatBase, this);
+	BlockPrev->SetBrushFromMaterial(PrevUmatInstance);
 
 }
 
@@ -28,18 +32,27 @@ void USkillIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void USkillIcon::ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture)
 {
-	ChangeProgress = 0.0f;
-	IsStepEffect = false;
+	ChangeProgress = 1.0f;
 
-	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
+	// 이전스킬 설정 
+	IconPrev->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
+	float progress = 0.0f;
+	FHashedMaterialParameterInfo info(TEXT("Progress"));
+	Block->GetDynamicMaterial()->GetScalarParameterValue(info, progress);
+	BlockPrev->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), progress);
+	CooldownTextPrev->SetVisibility(CooldownText->GetVisibility());
+	CooldownTextPrev->SetText(CooldownText->GetText());
+
+	// 현재스킬 설정 
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
+
+	PlayAnimation(AniSwap);
 }
 
 void USkillIcon::ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture)
 {
 	ChangeProgress = 0.0f;
-	IsStepEffect = true;
 
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);

@@ -93,6 +93,7 @@ void UMainUi::SetTargetBox(FVector2D center, FVector2D size)
 
 void UMainUi::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)
 {
+	SkillIcons[index]->ChangeSkillIcon(prevTexture, texture);
 }
 
 void UMainUi::ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture)

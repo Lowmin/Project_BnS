@@ -18,12 +18,18 @@ class PROJECT_BNS_API USkillIcon : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	float ChangeProgress = 0.0f;
-	bool IsStepEffect = false;
+	float ChangeProgress = 1.0f;
 
 protected:
 	virtual void NativeConstruct() override;
 
+	UPROPERTY(EditDefaultsOnly)
+	UMaterial* UmatBase = nullptr;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* UmatInstance = nullptr;
+
+	// Current 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UImage* Icon = nullptr;
 
@@ -33,11 +39,19 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UTextBlock* CooldownText = nullptr;
 
-	UPROPERTY(EditDefaultsOnly)
-	UMaterial* UmatBase = nullptr;
+	// Prev
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* IconPrev = nullptr;
 
-	UPROPERTY()
-	UMaterialInstanceDynamic* UmatInstance = nullptr;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UImage* BlockPrev = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UTextBlock* CooldownTextPrev = nullptr;
+	
+	// 스왑 애니메이션 
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* AniSwap;
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
