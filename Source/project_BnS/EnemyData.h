@@ -28,13 +28,6 @@ struct PROJECT_BNS_API FEnemyData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int D_Level;
 
-	// 외형 관련
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class USkeletalMesh> Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UAnimInstance> AnimBP;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UAnimMontage> HitReactMontage;
 

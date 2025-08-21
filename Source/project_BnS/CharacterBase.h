@@ -25,11 +25,13 @@ protected:
 	
 public:
 	void Attack();
-	bool IsDead() const;
-	virtual void OnDamaged(int32 damage);
-	
 
-	// Stat Component
+	UFUNCTION(BlueprintPure)
+	bool IsDead() const;
+
+	virtual void OnDamaged(int32 damage);
+	virtual void Die();
+	
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	TObjectPtr<class UStatComponent> Status = nullptr;

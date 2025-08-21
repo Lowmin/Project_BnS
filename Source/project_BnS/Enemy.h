@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CharacterBase.h"
 #include "TargetAble.h"
+#include "Engine/DataTable.h"
 #include "Enemy.generated.h"
 
 
@@ -25,15 +26,13 @@ public:
 
 	virtual void OnDamaged(int32 damage) override;
 
+	virtual void Die() override;
+
+	void DestroyEnemy();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "AI Data")
-	TObjectPtr<class UDataTable> EnemyDataTable;
-
-	UPROPERTY(EditAnywhere, Category = "AI Data")
-	FName EnemyRowName;
-
-	UPROPERTY(EditAnywhere, Category = "AI Data")
-	TObjectPtr<USphereComponent> AttackRangeSphere;
+	FDataTableRowHandle EnemyDataHandle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<class UAnimMontage> HitReactMontage;

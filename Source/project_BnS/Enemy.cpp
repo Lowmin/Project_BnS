@@ -13,7 +13,7 @@
 AEnemy::AEnemy()
 {
 	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
-	capsuleComponent->SetCollisionProfileName(TEXT("AAA"));
+	capsuleComponent->SetCollisionProfileName(TEXT("Enemy"));
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
 	if (skMeshRes.Succeeded())
@@ -54,15 +54,12 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (EnemyDataTable && !EnemyRowName.IsNone())
+	if (EnemyDataHandle.DataTable)
 	{
-		const FEnemyData* Data = EnemyDataTable->FindRow<FEnemyData>(EnemyRowName, TEXT(""));
+		const FEnemyData* Data = EnemyDataHandle.DataTable->FindRow<FEnemyData>(EnemyDataHandle.RowName, TEXT(""));
 
 		if (Data)
 		{
-			GetMesh()->SetSkeletalMesh(Data->Mesh);
-			GetMesh()->SetAnimInstanceClass(Data->AnimBP);
-
 			HitReactMontage = Data->HitReactMontage;
 
 			Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(Data->D_EnemyName);
@@ -89,6 +86,31 @@ void AEnemy::OnDamaged(int32 damage)
 			AnimInstance->Montage_Play(HitReactMontage, 1.0f);
 		}
 	}
+
+
+	if (IsDead())
+	{
+		Die();
+	}
+}
+
+void AEnemy::Die()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	FTimerHandle DestroyTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		DestroyTimerHandle,
+		this,
+		&AEnemy::DestroyEnemy,
+		10.f,
+		false
+	);
+}
+
+void AEnemy::DestroyEnemy()
+{
+	Destroy();
 }
 
 bool AEnemy::IsActiveTarget_Implementation() const
