@@ -17,6 +17,10 @@ class PROJECT_BNS_API USkillIcon : public UUserWidget
 {
 	GENERATED_BODY()
 
+private:
+	float ChangeProgress = 0.0f;
+	bool IsStepEffect = false;
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -35,6 +39,8 @@ protected:
 	UPROPERTY()
 	UMaterialInstanceDynamic* UmatInstance = nullptr;
 public:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
 	void ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture);
 	void ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture);
 	void SetIcon(UTexture2D* texture);

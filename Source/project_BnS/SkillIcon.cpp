@@ -8,21 +8,48 @@
 
 void USkillIcon::NativeConstruct()
 {
+	Super::NativeConstruct();
+
 	UmatInstance = UMaterialInstanceDynamic::Create(UmatBase, this);
 	Block->SetBrushFromMaterial(UmatInstance);
+
+}
+
+void USkillIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (ChangeProgress > 1.0f)
+		return;
+
+	ChangeProgress = FMath::Clamp(ChangeProgress + (InDeltaTime * 1.0f), 0.0f, 1.0f);
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
 }
 
 void USkillIcon::ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture)
 {
+	ChangeProgress = 0.0f;
+	IsStepEffect = false;
+
+	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
+	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
 }
 
 void USkillIcon::ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture)
 {
+	ChangeProgress = 0.0f;
+	IsStepEffect = true;
+
+	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
+	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
 }
 
 void USkillIcon::SetIcon(UTexture2D* texture)
 {
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
+	ChangeProgress = 1.0f;
 }
 
 void USkillIcon::SetCooldown(float remain, float cooldown)
@@ -33,7 +60,7 @@ void USkillIcon::SetCooldown(float remain, float cooldown)
 		return;
 	}
 
-	int remainTime = FMath::CeilToInt32(remain);
+	int32 remainTime = FMath::CeilToInt32(remain);
 
 	if (remainTime == 0)
 	{
