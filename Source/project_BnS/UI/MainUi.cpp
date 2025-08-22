@@ -8,7 +8,7 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
-#include "UI/MpIcon.h"
+#include "MpIcon.h"
 #include "SkillIcon.h"
 #include "BossInfo.h"
 

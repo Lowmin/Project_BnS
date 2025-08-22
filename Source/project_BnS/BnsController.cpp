@@ -4,8 +4,8 @@
 #include "BnsController.h"
 
 #include "Blueprint/UserWidget.h"
-#include "MainUi.h"
-#include "MainUIPresenter.h"
+#include "UI/MainUi.h"
+#include "UI/MainUIPresenter.h"
 #include "MyPlayer.h"
 
 ABnsController::ABnsController()

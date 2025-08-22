@@ -4,9 +4,9 @@
 #include "MainUIPresenter.h"
 
 #include "MainUi.h"
-#include "MyPlayer.h"
-#include "StatComponent.h"
-#include "Skill/SkillSystemComponent.h"
+#include "../MyPlayer.h"
+#include "../StatComponent.h"
+#include "../Skill/SkillSystemComponent.h"
 
 void AMainUIPresenter::SetMainUI(UMainUi* ui)
 {

@@ -3,9 +3,9 @@
 
 #include "Enemy.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "WorldFloatingUiComponent.h"
-#include "Nameplate.h"
-#include "HpBar.h"
+#include "UI/WorldFloatingUiComponent.h"
+#include "UI/Nameplate.h"
+#include "UI/HpBar.h"
 #include "EnemyData.h"
 
 #include "Components/CapsuleComponent.h"
