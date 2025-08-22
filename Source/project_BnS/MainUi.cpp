@@ -7,12 +7,20 @@
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "UI/MpIcon.h"
 #include "SkillIcon.h"
 #include "BossInfo.h"
 
 void UMainUi::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	TArray<UWidget*> mpWidgets = MpSlot->GetAllChildren();
+	for (UWidget* widget : mpWidgets)
+	{
+		MpList.Add(Cast<UMpIcon>(widget));
+	}
 
 	BossInfo->SetVisibility(ESlateVisibility::Hidden);
 
@@ -47,6 +55,14 @@ void UMainUi::HpEffect(float InDeltaTime)
 		return;
 
 	HpBg->SetPercent(FMath::Lerp(bgPercent, hpPercent, InDeltaTime * 5.0f));
+}
+
+void UMainUi::SetMp(int32 current)
+{
+	for (int i = 0; i < MpList.Num(); ++i)
+	{
+		MpList[i]->SetIconVisible(i < current);
+	}
 }
 
 void UMainUi::SetStamina(float current, float max)

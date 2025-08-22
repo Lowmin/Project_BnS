@@ -28,6 +28,12 @@ protected:
 	TObjectPtr<UProgressBar> HpBar = nullptr;
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> HpText = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UHorizontalBox> MpSlot = nullptr;
+
+	TArray<TObjectPtr<class UMpIcon>> MpList;
+
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UProgressBar> StaminaBar = nullptr;
@@ -75,7 +81,7 @@ public:
 
 	void HpEffect(float InDeltaTime);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	void SetMp(int32 current);
 
 	UFUNCTION(BlueprintCallable)
