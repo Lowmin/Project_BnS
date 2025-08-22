@@ -5,7 +5,7 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
-#include "Components/CanvasPanel.h"
+#include "Components/VerticalBox.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "MpIcon.h"
@@ -30,6 +30,9 @@ void UMainUi::NativeConstruct()
 	SkillIcons.Emplace(Skill_2);
 	SkillIcons.Emplace(Skill_3);
 	SkillIcons.Emplace(Skill_4);
+
+	TargetSlot = Cast<UCanvasPanelSlot>(Target->Slot);
+
 }
 
 void UMainUi::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -96,15 +99,10 @@ void UMainUi::SetLevel(int level)
 void UMainUi::SetTargetBox(FVector2D center, FVector2D size)
 {
 	if (TargetSlot == nullptr)
-	{
-		TargetSlot = Cast<UCanvasPanelSlot>(Target->Slot);
-	}
-
-	if (TargetSlot == nullptr)
 		return;
 
 	TargetSlot->SetPosition(center);
-	TargetSlot->SetSize(size);
+	TargetSlot->SetSize(size);	
 }
 
 void UMainUi::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)

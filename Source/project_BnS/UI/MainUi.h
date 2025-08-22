@@ -48,9 +48,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> LevelText = nullptr;
-	
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UCanvasPanel> Target = nullptr;
+	TObjectPtr<class UVerticalBox> Target = nullptr;
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UCanvasPanelSlot> TargetSlot = nullptr;
 
