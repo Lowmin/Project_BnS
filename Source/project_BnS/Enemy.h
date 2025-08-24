@@ -28,6 +28,8 @@ public:
 
 	virtual void Die() override;
 
+	FDataTableRowHandle GetDataHandle() const { return EnemyDataHandle; }
+
 	void DestroyEnemy();
 
 protected:

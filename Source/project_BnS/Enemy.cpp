@@ -7,6 +7,7 @@
 #include "UI/Nameplate.h"
 #include "UI/HpBar.h"
 #include "EnemyData.h"
+#include "Enemy/EnemyAIController.h"
 
 #include "Components/CapsuleComponent.h"
 
@@ -14,6 +15,7 @@ AEnemy::AEnemy()
 {
 	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
 	capsuleComponent->SetCollisionProfileName(TEXT("Enemy"));
+	AIControllerClass = AEnemyAIController::StaticClass();
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
 	if (skMeshRes.Succeeded())
