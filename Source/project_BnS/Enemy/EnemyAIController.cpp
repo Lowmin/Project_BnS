@@ -51,6 +51,7 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 			if (EnemyData && EnemyData->BehaviorTree)
 			{
 				BlackboardComponent->InitializeBlackboard(*(EnemyData->BehaviorTree->BlackboardAsset));
+				BlackboardComponent->SetValueAsFloat(AttackRangeKey, EnemyData->D_AttackRange);
 				BehaviorTreeComponent->StartTree(*(EnemyData->BehaviorTree));
 			}
 		}

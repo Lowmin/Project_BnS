@@ -8,6 +8,7 @@
 #include "UI/HpBar.h"
 #include "EnemyData.h"
 #include "Enemy/EnemyAIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "Components/CapsuleComponent.h"
 
@@ -16,6 +17,8 @@ AEnemy::AEnemy()
 	UCapsuleComponent* capsuleComponent = GetCapsuleComponent();
 	capsuleComponent->SetCollisionProfileName(TEXT("Enemy"));
 	AIControllerClass = AEnemyAIController::StaticClass();
+
+	GetCharacterMovement()->MaxWalkSpeed = 200.f;
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skMeshRes(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"));
 	if (skMeshRes.Succeeded())
@@ -98,7 +101,14 @@ void AEnemy::OnDamaged(int32 damage)
 
 void AEnemy::Die()
 {
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController)
+	{
+		AIController->GetBrainComponent()->StopLogic(TEXT("Enemy Died"));
+	}
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetSimulatePhysics(true);
 
 	FTimerHandle DestroyTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
