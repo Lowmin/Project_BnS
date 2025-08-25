@@ -169,18 +169,18 @@ void AMyPlayer::SGlidingToggle()
 
 void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
 {
-    if (GetSkillSystemComponent())
-    {
-        GetSkillSystemComponent()->HandleBasicAttack();
-    }
+    USkillSystemComponent* SkillSys = FindComponentByClass<USkillSystemComponent>();
+    if (!SkillSys) return;
+
+    const bool ok = SkillSys->UseSkillBySlot(ESkillSlot::Slot0, GetTarget());
 }
 
 void AMyPlayer::HandleProjectileSkill(const FInputActionValue& Value)
 {
-    if (GetSkillSystemComponent())
-    {
-        GetSkillSystemComponent()->UseProjectileSkill();
-    }
+    USkillSystemComponent* SkillSys = FindComponentByClass<USkillSystemComponent>();
+    if (!SkillSys) return;
+
+    const bool ok = SkillSys->UseSkillBySlot(ESkillSlot::Slot1, GetTarget());
 }
 
 void AMyPlayer::SetCurStamina(float stamina)

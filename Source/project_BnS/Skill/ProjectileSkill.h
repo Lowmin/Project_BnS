@@ -6,7 +6,6 @@
 #include "SkillBase.h"
 #include "ProjectileSkill.generated.h"
 
-struct FProjectileData;
 class AProjectileBall;
 
 UCLASS()
@@ -16,12 +15,13 @@ class PROJECT_BNS_API AProjectileSkill : public ASkillBase
 
 public:
 	virtual void ExecuteSkill_Implementation() override;
+	virtual void OnSkillNotify_Custom(FName NotifyName) override;
 
 private:
-	bool LoadProjectileData(FProjectileData& OutData);
-	void SpawnProjectile(const FProjectileData& Data);
+	void CalcSpawnTransform(FVector& OutPos, FRotator& OutRot) const;
+	void SpawnProjectile(const struct FSkillType_Projectile& Type);
 
+private:
 	float OffsetForward = 50.f;
 	float OffsetUp = 40.f;
-
 };

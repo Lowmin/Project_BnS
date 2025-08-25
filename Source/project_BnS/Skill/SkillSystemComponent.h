@@ -1,87 +1,166 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// SkillSystemComponent.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "TimerManager.h"
+#include "SkillData.h"
 #include "SkillSystemComponent.generated.h"
 
-class USkillController;
-class UDataTable;
-class UTexture2D;
+// UI에 알려줄 간단한 신호 (아이콘/쿨다운 등)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUISetIcon, int32, Index, UTexture2D*, Icon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUISetIconStep, int32, Index, UTexture2D*, Cur, UTexture2D*, Next);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUICooldownTick, int32, Index, float, Remain, float, Total);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUIAnimatedSetIcon, int32, Index, UTexture2D*, PrevIcon, UTexture2D*, NewIcon);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSkillIconChanged, int32, SlotIndex, UTexture2D*, NewIcon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSkillCooldownTick, int32, SlotIndex, float, RemainTime, float, CooldownDuration);
+
+class UDataTable;
+class USkillSlotController;
+class ASkillBase;
+class UStatComponent;
+class UCrowdControlComponent;
+class AActor;
+
+// 슬롯에 속한 스킬 후보 캐싱
+USTRUCT()
+struct FSkillIDArray
+{
+	GENERATED_BODY()
+	UPROPERTY() TArray<int32> IDs;
+};
+
+USTRUCT()
+struct FSlotRuntimeState
+{
+	GENERATED_BODY()
+
+	float        AnimLockEndAt = 0.f;		// 애니메이션 락 풀리는 시간
+
+	int32        LastUsedSkillID = -1;		// 체인 유효 판단 (ID, 시간)
+	float        LastUsedSkillAt = 0.f;
+
+	FTimerHandle ChainTimer;				// 체인 유효 끝난 후 리셋 타이머
+
+	bool         bInputWindowOpen = false;	// 창 열렸을 때 선입력(1번)
+	bool         bQueuedInput = false;
+	TWeakObjectPtr<AActor> QueuedTarget;
+
+	float CurStartTime = 0.f;				// 이번 몽타주 시작 시각
+	bool  bConsumedThisMontage = false;		// 이번 몽타주에서 큐를 이미 한번 썼는가
+};
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROJECT_BNS_API USkillSystemComponent : public UActorComponent
+class USkillSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	USkillSystemComponent();
 
-	// 플레이어에서 호출
-	void HandleBasicAttack();
-	void UseProjectileSkill();
-
-	// UI 연결
-	UPROPERTY(BlueprintAssignable)
-	FOnSkillIconChanged OnSkillIconChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnSkillCooldownTick OnSkillCooldownTick;
-
-protected:
 	virtual void BeginPlay() override;
 
-	// 데이터
-	UPROPERTY(EditAnywhere, Category = "Skill UI")
-	TArray<TObjectPtr<UTexture2D>> BasicAttackIcons;
+	// ==== 데이터 ====
+	UPROPERTY(EditAnywhere, Category = "Skill Config")
+	TObjectPtr<UDataTable> SkillTable = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Skill UI")
-	int32 BasicAttackSlotIndex = 0;
+	// 슬롯별 1타 ID (Base); MyPlayer의 Skill Component에서 세팅
+	UPROPERTY(EditAnywhere, Category = "Skill Config")
+	TMap<ESkillSlot, int32> BaseSkillConfig;
 
-	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	FName ProjectileRowName = TEXT("Fireball_Skill");
+	// ==== 외부 API ====
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	bool UseSkillBySlot(ESkillSlot Slot, AActor* Target);
 
-	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	int32 ProjectileSlotIndex = 1;
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	bool UseSkillByIndex(int32 Index, AActor* Target);
 
-	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	TObjectPtr<UDataTable> DT_SkillCommon;
-	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	TObjectPtr<UDataTable> DT_Melee;
-	UPROPERTY(EditAnywhere, Category = "Skill Data")
-	TObjectPtr<UDataTable> DT_Projectile;
+
+	// ==== 애니 노티(몽타주에서 호출) ====
+	UFUNCTION(BlueprintCallable, Category = "Skill Notify")
+	void Notify_InputOpen(ESkillSlot Slot);
+
+	UFUNCTION(BlueprintCallable, Category = "Skill Notify")
+	void Notify_AnimUnlock(ESkillSlot Slot);
+
+	UFUNCTION(BlueprintCallable, Category = "Skill Notify")
+	void Notify_Hit(ESkillSlot Slot);
+
+	UFUNCTION(BlueprintCallable, Category = "Skill Notify")
+	void Notify_Custom(ESkillSlot Slot, FName NotifyName);
+
+	// ==== UI 방송 ====
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+	FOnUISetIcon       UI_OnSetIcon;
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+	FOnUISetIconStep  UI_OnSetIconStep;
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+	FOnUICooldownTick UI_OnCooldownTick;
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+		FOnUIAnimatedSetIcon UI_OnAnimatedSetIcon;
+
+	// 디버그
+	UFUNCTION(BlueprintPure, Category = "Skill Debug")
+	int32 GetCurrentSkillID(ESkillSlot Slot) const;
+
+	// Enemy 보조
+	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
+	bool EnemyUseBasicMelee(int32 SkillID, AActor* Target);
+
 
 private:
-	UPROPERTY()
-	TObjectPtr<USkillController> Controller;
+	// ==== 실행 파이프라인 ====
+	bool  UseSlot_Internal(ESkillSlot Slot, AActor* Target);
+	int32 ResolveSkillToUse(ESkillSlot Slot) const;                // 다음 ID 결정
+	bool  CanUseSkill(const FSkillDataRow& Row, AActor* Target) const;
+	void  CommitStateAfterUse(const FSkillDataRow& Row, FSlotRuntimeState& SlotState);
+	void  OnChainExpire(ESkillSlot Slot);                          // 체인 만료 시 상태 리셋
+	void  UpdateDisplayForSlot(ESkillSlot Slot);
+	bool  IsGlobalLock(const FSkillDataRow& Row, float Now) const;
 
-	// 콤보 상태
-	int32 ComboStep = 0;
-	int32 ComboMax = 3;
-	bool bCanInputNext = true;
-	FTimerHandle ComboTimerHandle;
-	float ComboTimeLimit = 1.0f;
+	// ==== 스폰/캐시 ====
+	ASkillBase* CreateSkill(const FSkillDataRow& Row);
+	void BuildSkillCache();
+	const FSkillDataRow* FindRowByID(int32 SkillID) const;
+	void GatherCandidatesForSlot(ESkillSlot Slot, TArray<const FSkillDataRow*>& OutRows) const;
 
-	void StartComboWindow();
-	void CloseComboWindow();
+	// ==== 유틸 ====
+	static int32      SlotToIndex(ESkillSlot Slot);
+	static ESkillSlot IndexToSlot(int32 Index);
+	FSlotRuntimeState& GetState(ESkillSlot Slot) { return SlotRuntimeStates.FindOrAdd(Slot); }
+	const FSlotRuntimeState* TryGetState(ESkillSlot Slot)const { return SlotRuntimeStates.Find(Slot); }
+	int32 GetBaseID(ESkillSlot Slot) const;
 
-	// UI 쿨다운
-	struct FCooldownInfo
-	{
-		float EndTime = 0.f;
-		float Duration = 0.f;
-	};
+	// ==== SlotController 브릿지 ====
+	UFUNCTION()
+	void HandleSlotIconChanged(ESkillSlot Slot, UTexture2D* NewIcon);
+	UFUNCTION()
+	void HandleSlotPairChanged(ESkillSlot Slot, UTexture2D* CurIcon, UTexture2D* NextIcon);
+	UFUNCTION()
+	void HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total);
 
-	TMap<int32, FCooldownInfo> CooldownInfo;
-	FTimerHandle CooldownUITimerHandle;
-	void TickCooldownUI();
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<USkillSlotController> SlotPanel = nullptr;	// UI
+	UPROPERTY(Transient)
+	TMap<ESkillSlot, FSlotRuntimeState> SlotRuntimeStates;	// 실행 상태
+	UPROPERTY(Transient)
+	TMap<int32, float> CooldownEndAt;						// SkillID, 쿨 종료 시각
+	UPROPERTY(Transient)
+	float GlobalLockEndAt = 0.f;							// GCD
+	UPROPERTY(Transient)
+	int32 GlobalLockPriority = 0;
 
-	AActor* FindCurrentTarget() const;
-	// UI 이벤트
-	void BroadcastSkillUI(const FName& SkillRowName, int32 SlotIndex);
+	// 노티파이용
+	UPROPERTY(Transient)
+	TMap<ESkillSlot, TWeakObjectPtr<ASkillBase>> ActiveSkillActors;
+
+	// 테이블 탐색 캐시
+	UPROPERTY(Transient)
+	TMap<int32, FName> RowNameByID;
+	UPROPERTY(Transient)
+	TMap<ESkillSlot, FSkillIDArray> CandidateIDsBySlot;
+
+	// 외부 시스템
+	TWeakObjectPtr<UStatComponent>         CachedStat;
+	TWeakObjectPtr<UCrowdControlComponent> CachedOwnerCC;
 };
-

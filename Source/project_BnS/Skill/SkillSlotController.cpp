@@ -1,0 +1,228 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SkillSlotController.h"
+#include "Engine/DataTable.h"
+#include "Engine/Texture2D.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+
+USkillSlotController::USkillSlotController()
+{
+}
+
+void USkillSlotController::Initialize(UDataTable* InTable, AActor* InOwner, UWorld* InWorld)
+{
+	Table = InTable;
+	Owner = InOwner;
+
+	RowNameByID.Reset();
+
+	if (!Table) return;
+
+	const TArray<FName> RowName = Table->GetRowNames();
+	RowNameByID.Reserve(RowName.Num());
+
+	// ID -> Row Name 캐시
+	for (const FName& Name : RowName)
+	{
+		const FSkillDataRow* Row = Table->FindRow<FSkillDataRow>(Name, TEXT("IDCache"));
+
+		if (!Row) continue;
+		if (Row->SkillID < 0) continue;
+		if (RowNameByID.Contains(Row->SkillID)) continue;	// 중복 ID 방지
+
+		RowNameByID.Emplace(Row->SkillID, Name);			// Key:ID, Value:RowName
+	}
+}
+
+bool USkillSlotController::EquipBaseSkill(ESkillSlot SkillSlot, int32 SkillID)
+{
+	if (!Table) return false;
+	const FSkillDataRow* Row = FindRowByID(SkillID);
+	if (!Row) return false;
+	if (Row->Slot != SkillSlot) return false;
+
+	BaseIDBySlot.FindOrAdd(SkillSlot) = SkillID;
+	CurIDBySlot.FindOrAdd(SkillSlot) = SkillID;
+
+	UTexture2D* Icon = Row->SkillIcon.LoadSynchronous();
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1, 2.f, FColor::Cyan,
+			FString::Printf(TEXT("[SlotCtrl] EquipBase %s  ID=%d  Icon=%s"),
+				*UEnum::GetValueAsString(SkillSlot),
+				SkillID,
+				*GetNameSafe(Icon))
+		);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("[SlotCtrl] EquipBase %s  ID=%d  Icon=%s"),
+		*UEnum::GetValueAsString(SkillSlot), SkillID, *GetNameSafe(Icon));
+
+	OnSlotIconChanged.Broadcast(SkillSlot, Icon);
+	return true;
+}
+
+void USkillSlotController::ResetToBase(ESkillSlot SkillSlot)
+{
+	const int32* BaseID = BaseIDBySlot.Find(SkillSlot);
+	if (!BaseID) return;
+
+	ShowSkill(SkillSlot, *BaseID);
+}
+
+bool USkillSlotController::ShowSkill(ESkillSlot SkillSlot, int32 SkillID)
+{
+	if (!Table) return false;
+	const FSkillDataRow* Row = FindRowByID(SkillID);
+	if (!Row) return false;
+
+	CurIDBySlot.FindOrAdd(SkillSlot) = SkillID;
+
+	UTexture2D* Icon = Row->SkillIcon.LoadSynchronous();
+
+	OnSlotIconChanged.Broadcast(SkillSlot, Icon);
+	return true;
+}
+
+bool USkillSlotController::ShowPairSkill(ESkillSlot SkillSlot, int32 CurSkillID, int32 NextSkillID)
+{
+	if (!Table) return false;
+	const FSkillDataRow* Cur = FindRowByID(CurSkillID);
+	const FSkillDataRow* Next = FindRowByID(NextSkillID);
+	if (!Cur || !Next) return false;
+
+	CurIDBySlot.FindOrAdd(SkillSlot) = CurSkillID;
+
+	UTexture2D* CurIcon = Cur->SkillIcon.LoadSynchronous();
+	UTexture2D* NextIcon = Next->SkillIcon.LoadSynchronous();
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1, 2.f, FColor::Cyan,
+			FString::Printf(TEXT("[SlotCtrl] ShowPair %s  Cur=%d  Next=%d  CurIcon=%s  NextIcon=%s"),
+				*UEnum::GetValueAsString(SkillSlot),
+				CurSkillID, NextSkillID,
+				*GetNameSafe(CurIcon), *GetNameSafe(NextIcon))
+		);
+	}
+
+	OnSlotPairChanged.Broadcast(SkillSlot, CurIcon, NextIcon);
+	return true;
+}
+
+int32 USkillSlotController::GetCurrentSkillID(ESkillSlot SkillSlot) const
+{
+	if (const int32* ID = CurIDBySlot.Find(SkillSlot))
+	{
+		return *ID;
+	}
+	return -1;
+}
+
+void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID, float EndAt, float TotalSec)
+{
+	ShowEndAt.FindOrAdd(SkillSlot) = EndAt;
+	ShowTotal.FindOrAdd(SkillSlot) = TotalSec;
+
+	if (UWorld* World = GetWorldSafe())
+	{
+		if (FTimerHandle* Handle = ShowTickTimer.Find(SkillSlot))
+		{
+			World->GetTimerManager().ClearTimer(*Handle);
+		}
+
+		FTimerHandle NewHandle;
+		World->GetTimerManager().SetTimer(NewHandle, FTimerDelegate::CreateUObject(this, &USkillSlotController::OnCooldownShowTick, SkillSlot), 0.05f, true);
+		ShowTickTimer.FindOrAdd(SkillSlot) = NewHandle;
+
+		OnCooldownShowTick(SkillSlot);
+	}
+}
+
+void USkillSlotController::StopCooldownShow(ESkillSlot SkillSlot)
+{
+	if (UWorld* World = GetWorldSafe())
+	{
+		if (FTimerHandle* Handle = ShowTickTimer.Find(SkillSlot))
+		{
+			World->GetTimerManager().ClearTimer(*Handle);
+		}
+	}
+}
+
+void USkillSlotController::PlayCooldownShow_All(float EndAt, float TotalSec, bool bSkipSlotCool)
+{
+	UWorld* World = GetWorldSafe();
+	if (!World) return;
+
+	const float Now = World->GetTimeSeconds();
+
+	ESkillSlot Slots[] =
+	{
+		ESkillSlot::Slot0,
+		ESkillSlot::Slot1
+		// 슬롯 늘어나면 추가
+	};
+
+	for (int i = 0; i < static_cast<int>(UE_ARRAY_COUNT(Slots)); i++)
+	{
+		ESkillSlot Slot = Slots[i];
+
+		if (bSkipSlotCool)
+		{
+			const float curEnd = ShowEndAt.FindRef(Slot);
+			if (curEnd > Now)
+			{
+				continue;
+			}
+		}
+
+		const int32 ID = GetCurrentSkillID(Slot);
+		PlayCooldownShow(Slot, ID, EndAt, TotalSec);
+	}
+}
+
+
+const FSkillDataRow* USkillSlotController::FindRowByID(int32 SkillID) const
+{
+	if (!Table) return nullptr;
+	const FName* RowName = RowNameByID.Find(SkillID);
+	if (!RowName) return nullptr;
+
+	return Table->FindRow<FSkillDataRow>(*RowName, TEXT("FindRowByID"));
+}
+
+void USkillSlotController::OnCooldownShowTick(ESkillSlot SkillSlot)
+{
+	if (UWorld* World = GetWorldSafe())
+	{
+		const float Total = ShowTotal.FindRef(SkillSlot);
+		const float End = ShowEndAt.FindRef(SkillSlot);
+		const float Now = World->GetTimeSeconds();
+		const float Remain = FMath::Max(0.f, End - Now);
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 0.1f, FColor::Yellow,
+				FString::Printf(TEXT("[SlotCtrl] CD %s  Remain=%.2f/%.2f"),
+					*UEnum::GetValueAsString(SkillSlot), Remain, Total)
+			);
+		}
+
+		OnSlotCooldownTick.Broadcast(SkillSlot, Remain, Total);
+		if (Remain <= 0.f)
+		{
+			StopCooldownShow(SkillSlot);
+		}
+	}
+}
+
+UWorld* USkillSlotController::GetWorldSafe() const
+{
+	if (Owner.IsValid()) return Owner->GetWorld();
+	return nullptr;
+}

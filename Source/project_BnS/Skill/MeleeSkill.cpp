@@ -1,128 +1,61 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "MeleeSkill.h"
-#include "MeleeData.h"
-#include "SkillCommonData.h"
-
+#include "SkillData.h"
 #include "../CharacterBase.h"
-#include "../StatComponent.h"
 
-#include "Animation/AnimInstance.h"
-#include "Animation/AnimMontage.h"
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
-#include "../Enemy.h"
+#include "Engine/World.h"
 
-void AMeleeSkill::ExecuteSkill_Implementation()
+void AMeleeSkill::OnSkillNotify_Hit()
 {
-	if (!CacheMeleeData())
-	{
-		Destroy();
-		return;
-	}
-
-	if (UAnimInstance* Anim = GetOwnerAnimInstance())
-	{
-		Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin);
-		Anim->OnPlayMontageNotifyBegin.AddUniqueDynamic(this, &AMeleeSkill::OnNotifyBegin);
-	}
-	else
-	{
-		Destroy();
-		return;
-	}
-
-	Super::ExecuteSkill_Implementation();
-
-	if (!bIsExecuting)
-	{
-		CleanUp();
-	}
+	PerformMeleeAttack();
 }
 
-void AMeleeSkill::CancelSkill_Implementation()
+void AMeleeSkill::OnSkillNotify_Custom(FName NotifyName)
 {
-	Super::CancelSkill_Implementation();
-	CleanUp();
-}
-
-void AMeleeSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	CleanUp();
-	Super::OnMontageEnded(Montage, bInterrupted);
-}
-
-void AMeleeSkill::CleanUp()
-{
-	if (UAnimInstance* Anim = GetOwnerAnimInstance())
+	if (NotifyName == TEXT("Leap"))
 	{
-		Anim->OnPlayMontageNotifyBegin.RemoveDynamic(this, &AMeleeSkill::OnNotifyBegin);
-	}
-}
-
-bool AMeleeSkill::CacheMeleeData()
-{
-	if (!TypeHandle.DataTable) return false;
-
-	MeleeData = TypeHandle.GetRow<FMeleeData>(TEXT("CacheMeleeData"));
-
-	return MeleeData != nullptr;
-}
-
-
-void AMeleeSkill::OnNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
-{
-	if (NotifyName == TEXT("Hit"))
-	{
-		PerformMeleeAttack();
+		if (ACharacter* Player = GetOwnerCharacter())
+		{
+			const FVector V = Player->GetActorForwardVector() * 600.f + FVector(0, 0, 420.f);
+			Player->LaunchCharacter(V, true, true);
+		}
 	}
 }
 
 void AMeleeSkill::PerformMeleeAttack()
 {
-	ACharacterBase* Caster = Cast<ACharacterBase>(GetOwnerCharacter());
-	if (!Caster || !MeleeData) return;
+	const FSkillType_Melee* Data = GetTypeData_Melee();
+	ACharacter* Player = GetOwnerCharacter();
+	if (!Data || !Player || !GetWorld()) return;
 
-	const FVector Start = Caster->GetActorLocation();
-	const FVector Dir = Caster->GetActorForwardVector();
-	const FVector End = Start + Dir * MeleeData->AttackRange;
+	const FVector Start = Player->GetActorLocation();
+	const FVector Dir = Player->GetActorForwardVector();
+	const FVector End = Start + Dir * Data->AttackLength;
 
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(MeleeData->AttackRadius);
-	TArray<FHitResult> Hits;
-	FCollisionQueryParams QP(SCENE_QUERY_STAT(MeleeTrace), false, Caster);
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(Data->AttackRadius);
+	FCollisionQueryParams QP(SCENE_QUERY_STAT(MeleeTrace), false, Player);
 
-	FCollisionObjectQueryParams ObjectParam;
-	ObjectParam.AddObjectTypesToQuery(ECC_Pawn);
-	ObjectParam.AddObjectTypesToQuery(ECC_GameTraceChannel6);
+	FCollisionObjectQueryParams Obj;
+	Obj.AddObjectTypesToQuery(ECC_Pawn);
+	Obj.AddObjectTypesToQuery(ECC_GameTraceChannel6);
 
-	bool bHitSomething = GetWorld()->SweepMultiByObjectType(Hits, Start, End, FQuat::Identity, ObjectParam, Sphere, QP);
+	TArray<FHitResult> HitObject;
+	const bool bAny = GetWorld()->SweepMultiByObjectType(HitObject, Start, End, FQuat::Identity, Obj, Sphere, QP);
 
-	DrawDebugSphere(GetWorld(), Start, MeleeData->AttackRadius, 16, bHitSomething ? FColor::Green : FColor::Red, false, 1.5f, 0, 1.5f);
+	// 디버그 구체
+	DrawDebugSphere(GetWorld(), Start, Data->AttackRadius, 16, bAny ? FColor::Green : FColor::Red, false, 1.0f, 0, 1.5f);
 
-	TSet<AActor*> DamagedActors;
-	bool bHitActiveEnemy = false;
-	for (const FHitResult& Hit : Hits)
+	TSet<AActor*> HitEnemy;
+	for (const FHitResult& Hit : HitObject)
 	{
-		AActor* HitActor = Hit.GetActor();
-		if (!HitActor || HitActor == Caster || DamagedActors.Contains(HitActor))
-		{
-			continue;
-		}
+		AActor* Other = Hit.GetActor();
+		if (!Other || Other == Player || HitEnemy.Contains(Other)) continue;
 
-		if (AEnemy* HitEnemy = Cast<AEnemy>(HitActor))
-		{
-			if (!HitEnemy->IsDead())
-			{
-				bHitActiveEnemy = true;
-			}
+		ApplyDamageToCharacter(Cast<ACharacter>(Other));
+		HitEnemy.Add(Other);
 
-		}
-
-		ApplyDamageToCharacter(Cast<ACharacter>(HitActor));
-		DamagedActors.Add(HitActor);
-
-		if (!MeleeData->bCanHitMultiTarget) break;
+		if (!Data->bCanHitMultiTarget) break;
 	}
-
 }

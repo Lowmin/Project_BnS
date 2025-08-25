@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SkillBase.h"
-#include "SkillCommonData.h"
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 #include "Animation/AnimInstance.h"
@@ -14,99 +13,125 @@ ASkillBase::ASkillBase()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void ASkillBase::InitializeSkill(const FDataTableRowHandle& InCommonHandle, const FDataTableRowHandle& InTypeHandle, UAnimMontage* PreloadedMontage)
+void ASkillBase::InitFromRow(const FSkillDataRow& InRow)
 {
-	CommonHandle = InCommonHandle;
-	TypeHandle = InTypeHandle;
-	SkillMontage = PreloadedMontage;
+	MySkillID = InRow.SkillID;
+	MySlot = InRow.Slot;
+	MyBaseDamage = InRow.Damage;
+	SavedTypeData = InRow.SkillTypeData;
+
+	MyMontage = InRow.AnimMontage.IsNull() ? nullptr : InRow.AnimMontage.LoadSynchronous();
+	if (!IsValid(MyMontage)) MyMontage = nullptr;
 }
 
+void ASkillBase::SetSkillTarget(AActor* InTarget)
+{
+	MyTarget = InTarget;
+}
+
+AActor* ASkillBase::GetSkillTarget() const
+{
+	return MyTarget.Get();
+}
+
+// 스킬 실행
 void ASkillBase::ExecuteSkill_Implementation()
 {
-	if (bIsExecuting || !SkillMontage) return;
+	if (bIsExecuting) return;
 
-	if (UAnimInstance* AnimInstance = GetOwnerAnimInstance())
+	if (MyMontage)
 	{
+		if (UAnimInstance* Anim = GetOwnerAnimInstance())
+		{
+			if (!Anim->Montage_IsPlaying(MyMontage))
+			{
+				Anim->Montage_Play(MyMontage, 1.0f);
+			}
+		}
+
 		bIsExecuting = true;
-		FOnMontageEnded OnEndDelegate;
-		OnEndDelegate.BindUObject(this, &ASkillBase::OnMontageEnded);
-		AnimInstance->Montage_Play(SkillMontage);
-		AnimInstance->Montage_SetEndDelegate(OnEndDelegate, SkillMontage);
 	}
 }
 
 void ASkillBase::CancelSkill_Implementation()
 {
-	if (bIsExecuting && SkillMontage)
+	// 몽타주가 있으면 부드럽게 멈춤 (End 콜백이 들어올 것)
+	bool bGetEnd = false;
+	if (MyMontage)
 	{
-		if (UAnimInstance* AnimInstance = GetOwnerAnimInstance())
+		if (UAnimInstance* Anim = GetOwnerAnimInstance())
 		{
-			AnimInstance->Montage_Stop(0.1f, SkillMontage);
+			Anim->Montage_Stop(0.15f, MyMontage);
+			bGetEnd = true;
 		}
 	}
-	bIsExecuting = false;
+
+	if (!bGetEnd)
+	{
+		OnMontageEnded(nullptr, true);
+	}
 }
 
+// 노티 처리
+void ASkillBase::OnAnimNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
+{
+	if (!MyMontage || Payload.SequenceAsset != MyMontage) return;
+
+	if (NotifyName == TEXT("Hit"))
+	{
+		OnSkillNotify_Hit();	// 공격 판정 타이밍은 파생에서
+		return;
+	}
+
+	OnSkillNotify_Custom(NotifyName);
+}
+
+// 몽타주 종료
 void ASkillBase::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	bIsExecuting = false;
+
+	OnSkillMontageEnded(bInterrupted);
+	OnEnded.Broadcast(MySlot, bInterrupted);
+
 	Destroy();
 }
 
-const FSkillCommonData* ASkillBase::GetCommonData() const
+ACharacter* ASkillBase::GetOwnerCharacter() const
 {
-	return CommonHandle.GetRow<FSkillCommonData>(TEXT("ASkillBase::GetCommonData"));
+	return Cast<ACharacter>(GetOwner());
+}
+
+UAnimInstance* ASkillBase::GetOwnerAnimInstance() const
+{
+	if (ACharacter* Character = GetOwnerCharacter())
+	{
+		if (USkeletalMeshComponent* SkMeshComp = Character->GetMesh())
+		{
+			return SkMeshComp->GetAnimInstance();
+		}
+	}
+	return nullptr;
 }
 
 int32 ASkillBase::CalculateDamage() const
 {
-	const FSkillCommonData* Data = GetCommonData();
-	if (!Data) return 1; // 최소 대미지
+	const ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwner());
+	const UStatComponent* Stat = OwnerCharacter ? OwnerCharacter->GetStatusComponent() : nullptr;
+	const float Atk = Stat ? Stat->GetAtk() : 1.f;
 
-	const ACharacterBase* OwnerChar = Cast<ACharacterBase>(GetOwner());
-	const UStatComponent* StatComp = OwnerChar ? OwnerChar->GetStatusComponent() : nullptr;
-	if (!StatComp) return 1; // 최소 대미지
-
-	const float Atk = StatComp->GetAtk();
-
-	const float RawDamage = Data->DamageFlat + (Data->DamageRatio * Atk);
-	return FMath::Max(1, FMath::RoundToInt(RawDamage));
+	const float Raw = MyBaseDamage * Atk;
+	return FMath::Max(1, FMath::RoundToInt(Raw));
 }
 
 void ASkillBase::ApplyDamageToCharacter(ACharacter* DamagedCharacter) const
 {
 	if (!DamagedCharacter || DamagedCharacter == GetOwner()) return;
 
-	if (ACharacterBase* HitCharacter = Cast<ACharacterBase>(DamagedCharacter))
+	if (ACharacterBase* Target = Cast<ACharacterBase>(DamagedCharacter))
 	{
-		const int32 FinalDamage = CalculateDamage();
-		HitCharacter->OnDamaged(FinalDamage);
+		const int32 Dmg = CalculateDamage();
+		Target->OnDamaged(Dmg);
 	}
 }
 
-ACharacter* ASkillBase::GetOwnerCharacter() const
-{
-	return GetOwner<ACharacter>();
-}
-
-UAnimInstance* ASkillBase::GetOwnerAnimInstance() const
-{
-	if (ACharacter* OwnerChar = GetOwnerCharacter())
-	{
-		if (USkeletalMeshComponent* Mesh = OwnerChar->GetMesh())
-		{
-			return Mesh->GetAnimInstance();
-		}
-	}
-	return nullptr;
-}
-
-void ASkillBase::SetSkillTarget(AActor* InTarget)
-{
-	TargetActor = InTarget;
-}
-
-AActor* ASkillBase::GetSkillTarget() const
-{
-	return TargetActor.Get();
-}

@@ -22,8 +22,10 @@ void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 
 	if (USkillSystemComponent* Skill = MyPlayer->GetSkillSystemComponent())
 	{
-		Skill->OnSkillIconChanged.AddDynamic(this, &AMainUIPresenter::SetSkillIcon);
-		Skill->OnSkillCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
+		Skill->UI_OnSetIcon.AddDynamic(this, &AMainUIPresenter::SetSkillIcon);
+		Skill->UI_OnSetIconStep.AddDynamic(this, &AMainUIPresenter::ChangeSkillIconStep);
+		Skill->UI_OnCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
+		Skill->UI_OnAnimatedSetIcon.AddDynamic(this, &AMainUIPresenter::ChangeSkillIcon);
 	}
 }
 

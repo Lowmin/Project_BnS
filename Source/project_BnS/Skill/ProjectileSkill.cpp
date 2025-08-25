@@ -4,58 +4,86 @@
 #include "ProjectileSkill.h"
 #include "ProjectileBall.h"
 #include "ProjectileData.h"
+
 #include "GameFramework/Character.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 
 void AProjectileSkill::ExecuteSkill_Implementation()
 {
-	FProjectileData Data;
-	if (!LoadProjectileData(Data)) return;
+	const FSkillType_Projectile* Type = GetTypeData_Projectile();
+	if (!Type) return;
+	if (!MyMontage) return;
 
 	Super::ExecuteSkill_Implementation();
-
-	SpawnProjectile(Data);
+	SpawnProjectile(*Type);		// 몽타주 없이 단발 처리: 발사체 스폰만 하고 즉시 종료
+	Destroy();
 }
 
-bool AProjectileSkill::LoadProjectileData(FProjectileData& OutData)
+void AProjectileSkill::OnSkillNotify_Custom(FName NotifyName)
 {
-	if (!TypeHandle.DataTable) return false;
-	if (const FProjectileData* Row = TypeHandle.GetRow<FProjectileData>(TEXT("Projectile_Skill")))
+	if (NotifyName == TEXT("Shoot"))
 	{
-		OutData = *Row;
-		return true;
+		if (const FSkillType_Projectile* Type = GetTypeData_Projectile())
+		{
+			SpawnProjectile(*Type);
+		}
 	}
-
-	return false;
 }
 
-void AProjectileSkill::SpawnProjectile(const FProjectileData& Data)
+void AProjectileSkill::CalcSpawnTransform(FVector& OutPos, FRotator& OutRot) const
 {
+	OutPos = FVector::ZeroVector;
+	OutRot = FRotator::ZeroRotator;
+
 	ACharacter* Player = GetOwnerCharacter();
 	if (!Player) return;
 
-	const FVector StartPos =
-		Player->GetActorLocation() + Player->GetActorForwardVector() * OffsetForward + FVector(0, 0, OffsetUp);
+	FVector Start = Player->GetActorLocation();
 
-	AActor* Target = GetSkillTarget();
-	const FRotator Rot =
-		Target ? (Target->GetActorLocation() - StartPos).Rotation() : Player->GetActorRotation();
+	// 캐릭터와 조금 떨어진 위치 
+	Start += Player->GetActorForwardVector() * OffsetForward;
+	Start += FVector(0, 0, OffsetUp);
 
-	FActorSpawnParameters Spawn;
-	Spawn.Owner = Player;
-	Spawn.Instigator = Player;
-	Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	TSubclassOf<AActor> ProjClass = Data.ProjectileClass.LoadSynchronous();
-	if (!ProjClass) return;
-
-	AActor* NewProjectile = GetWorld()->SpawnActor<AActor>(ProjClass, StartPos, Rot, Spawn);
-	if (!NewProjectile) return;
-
-	if (AProjectileBall* Ball = Cast<AProjectileBall>(NewProjectile))
-	{
-		Ball->SetupProjectileData(Data, Player, CalculateDamage());
-	}
-
+	const AActor* Target = GetSkillTarget();
+	OutRot = Target ? (Target->GetActorLocation() - Start).Rotation() : Player->GetActorRotation();
+	OutPos = Start;
 }
+
+void AProjectileSkill::SpawnProjectile(const FSkillType_Projectile& Type)
+{
+	if (!Type.ProjectileClass) return;
+
+	ACharacter* Player = GetOwnerCharacter();
+	UWorld* World = GetWorld();
+	if (!Player || !World) return;
+
+	FVector Pos;
+	FRotator Rot;
+	CalcSpawnTransform(Pos, Rot);
+
+	FActorSpawnParameters SP;
+	SP.Owner = Player;
+	SP.Instigator = Player;
+	SP.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// 액터 스폰
+	AActor* Spawned = World->SpawnActor<AActor>(Type.ProjectileClass, Pos, Rot, SP);
+	if (!Spawned) return;
+
+	// 발사체 데이터 세팅 (값만 전달)
+	if (AProjectileBall* Ball = Cast<AProjectileBall>(Spawned))
+	{
+		FProjectileData Data;
+		Data.ProjectileSpeed = Type.Speed;                      // 속도
+		Data.ProjectileLifeTime = Type.LifeSec;                    // 수명
+		Data.GravityAffects = (Type.Gravity > 0.f);            // 중력 적용 여부
+		Data.ExplosionOnImpact = (Type.ExplosionRadius > 0.f);    // 충돌 시 폭발
+		Data.ExplosionRadius = Type.ExplosionRadius;            // 폭발 반경
+
+		const int32 Damage = CalculateDamage();
+		Ball->SetupProjectileData(Data, Player, Damage);
+	}
+}
+
 

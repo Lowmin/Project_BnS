@@ -6,29 +6,17 @@
 #include "SkillBase.h"
 #include "MeleeSkill.generated.h"
 
-struct FMeleeData;
-
 UCLASS()
 class PROJECT_BNS_API AMeleeSkill : public ASkillBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual void ExecuteSkill_Implementation() override;
-	virtual void CancelSkill_Implementation() override;
+	virtual void OnSkillNotify_Hit() override;
 
 protected:
-	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual void OnSkillNotify_Custom(FName NotifyName) override;
 
 private:
-	bool CacheMeleeData();
-
 	void PerformMeleeAttack();
-
-	UFUNCTION()
-	void OnNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& Payload);
-
-	void CleanUp();
-
-	const FMeleeData* MeleeData = nullptr;
 };
