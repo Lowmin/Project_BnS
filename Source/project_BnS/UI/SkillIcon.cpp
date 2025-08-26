@@ -35,7 +35,7 @@ void USkillIcon::ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture)
 	ChangeProgress = 1.0f;
 
 	// 이전스킬 설정 
-	IconPrev->GetDynamicMaterial()->SetTextureParameterValue(TEXT("PrevTexture"), prevTexture);
+	IconPrev->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), prevTexture);
 	float progress = 0.0f;
 	FHashedMaterialParameterInfo info(TEXT("Progress"));
 	Block->GetDynamicMaterial()->GetScalarParameterValue(info, progress);
@@ -63,6 +63,9 @@ void USkillIcon::SetIcon(UTexture2D* texture)
 {
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
 	ChangeProgress = 1.0f;
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("set icon"));
 }
 
 void USkillIcon::SetCooldown(float remain, float cooldown)
