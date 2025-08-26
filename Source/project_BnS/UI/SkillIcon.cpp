@@ -64,8 +64,6 @@ void USkillIcon::SetIcon(UTexture2D* texture)
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), texture);
 	ChangeProgress = 1.0f;
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
-
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("set icon"));
 }
 
 void USkillIcon::SetCooldown(float remain, float cooldown)
