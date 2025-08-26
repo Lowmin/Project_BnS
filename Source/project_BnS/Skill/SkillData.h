@@ -4,11 +4,12 @@
 #include "Engine/DataTable.h"
 #include "StructUtils/InstancedStruct.h"
 #include "../CrowdControlComponent.h"
-#include "SkillData.generated.h"
 
 class ASkillBase;
 class AActor;
 class UTexture2D;
+
+#include "SkillData.generated.h"
 
 // 스킬 슬롯 (입력)
 UENUM(BlueprintType)

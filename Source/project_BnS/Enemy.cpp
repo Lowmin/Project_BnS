@@ -107,9 +107,6 @@ void AEnemy::Die()
 		AIController->GetBrainComponent()->StopLogic(TEXT("Enemy Died"));
 	}
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetSimulatePhysics(true);
-
 	FTimerHandle DestroyTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		DestroyTimerHandle,
