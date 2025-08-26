@@ -10,13 +10,13 @@ class ASkillBase;
 class AActor;
 class UTexture2D;
 
-// ½ºÅ³ ½½·Ô (ÀÔ·Â)
+// ìŠ¤í‚¬ ìŠ¬ë¡¯ (ì…ë ¥)
 UENUM(BlueprintType)
 enum class ESkillSlot : uint8
 {
 	None	  UMETA(DisplayName = "None"),		// Enemy
-	Slot0	  UMETA(DisplayName = "LMB"),		// ±âº» °ø°İ
-	Slot1     UMETA(DisplayName = "1"),			// ¹ß»çÃ¼
+	Slot0	  UMETA(DisplayName = "LMB"),		// ê¸°ë³¸ ê³µê²©
+	Slot1     UMETA(DisplayName = "1"),			// ë°œì‚¬ì²´
 	Slot2     UMETA(DisplayName = "2"),
 	Slot3     UMETA(DisplayName = "3"),
 	Slot4     UMETA(DisplayName = "4"),
@@ -24,18 +24,23 @@ enum class ESkillSlot : uint8
 	SlotE     UMETA(DisplayName = "E")
 };
 
-// °¢ ½½·Ô ³» Á¸ÀçÇÏ´Â ½ºÅ³ ºĞ·ù Layer
+// ê° ìŠ¬ë¡¯ ë‚´ ì¡´ì¬í•˜ëŠ” ìŠ¤í‚¬ ë¶„ë¥˜ Layer
 UENUM(BlueprintType)
 enum class ESkillLayer : uint8
 {
-	Base		= 0,	// ¹ßµ¿ Á¶°Ç ¾ø´Â ±âº» °ø°İ
-	Chain		= 1,	// ¿¬°è ½ºÅ³
-	Proc		= 2,	// ¸·±â/È¸ÇÇ½Ã È°¼ºÈ­
-	Finisher	= 3,	// Æ¯Á¤ Á¶°Ç ÀÌÈÄ È°¼ºÈ­µÇ´Â ½ºÅ³ (3ÄŞº¸ ÈÄ °­ÇÑ °ø°İ)
-	BossCC		= 4		// ÇÕ°İ±â Å¸ÀÌ¹Ö¿¡ È°¼ºÈ­µÇ´Â ½ºÅ³
+	// ë°œë™ ì¡°ê±´ ì—†ëŠ” ê¸°ë³¸ ê³µê²©
+	Base		= 0,
+	// ì—°ê³„ ìŠ¤í‚¬
+	Chain		= 1,
+	// ë§‰ê¸°/íšŒí”¼ì‹œ í™œì„±í™”
+	Proc		= 2,
+	// íŠ¹ì • ì¡°ê±´ ì´í›„ í™œì„±í™”ë˜ëŠ” ìŠ¤í‚¬ (3ì½¤ë³´ í›„ ê°•í•œ ê³µê²©)
+	Finisher	= 3,
+	// í•©ê²©ê¸° íƒ€ì´ë°ì— í™œì„±í™”ë˜ëŠ” ìŠ¤í‚¬
+	BossCC		= 4	
 };
 
-// ½ºÅ³ Å¸ÀÔ ¼¼ÆÃ	(Melee, Projectile, Heal/Buff, Area of Field, Dash Attack...)
+// ìŠ¤í‚¬ íƒ€ì… ì„¸íŒ…	(Melee, Projectile, Heal/Buff, Area of Field, Dash Attack...)
 USTRUCT(BlueprintType)
 struct FSkillTypeBase
 {
@@ -99,7 +104,7 @@ struct FSkillType_Area : public FSkillTypeBase
 	float Duration = 3.f;
 };
 
-// ½ºÅ³ °øÅë Å×ÀÌºí
+// ìŠ¤í‚¬ ê³µí†µ í…Œì´ë¸”
 USTRUCT(BlueprintType)
 struct FSkillDataRow : public FTableRowBase
 {
@@ -114,14 +119,17 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Identity")
 	FName SkillName;
 
+	// ì…ë ¥ ìŠ¬ë¡¯ (None:Enemy, 0:LMB, 1~E:Keyboard 1,2,3,4,Q,E)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	ESkillSlot Slot = ESkillSlot::None;		// ÀÔ·Â ½½·Ô (None:Enemy, 0:LMB, 1~E:Keyboard 1,2,3,4,Q,E)
+	ESkillSlot Slot = ESkillSlot::None;
 
+	// ìŠ¤í‚¬ ê³„ì¸µ (Layer0:ì¡°ê±´X, Layer1:ì½¤ë³´ì²´ì¸, Layer2:ë§‰ê¸°/íšŒí”¼ í™œì„±í™”, Layer3:ì¼ì • ìŠ¤íƒ/ë§ˆë¬´ë¦¬, Layer4:ë³´ìŠ¤ í•©ê²©ê¸°)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	ESkillLayer Layer = ESkillLayer::Base;	// ½ºÅ³ °èÃş (Layer0:Á¶°ÇX, Layer1:ÄŞº¸Ã¼ÀÎ, Layer2:¸·±â/È¸ÇÇ È°¼ºÈ­, Layer3:ÀÏÁ¤ ½ºÅÃ/¸¶¹«¸®, Layer4:º¸½º ÇÕ°İ±â)
+	ESkillLayer Layer = ESkillLayer::Base;
 
+	// ê°™ì€ Layer ë‚´ ìš°ì„  ìˆœìœ„ ìˆ˜ì¹˜ 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	int32 Priority = 0;						// °°Àº Layer ³» ¿ì¼± ¼øÀ§ ¼öÄ¡ 
+	int32 Priority = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	int32 MpCost = 0;
@@ -132,20 +140,21 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	float CooldownSec = 0.f;
 
+	// ìŠ¤í‚¬ ì‚¬ìš© ì§í›„ ë‹¤ë¥¸ ìŠ¤í‚¬ ì‚¬ìš© ë¶ˆê°€ ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	float AnimLockSec = 0.3f;		// ½ºÅ³ »ç¿ë Á÷ÈÄ ´Ù¸¥ ½ºÅ³ »ç¿ë ºÒ°¡ ½Ã°£
+	float AnimLockSec = 0.3f;
 
+	// Combo (ì—†ìœ¼ë©´ -1)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	float QueueWindowSec = 0.2f;	// AnimLock ÀÌÈÄ 
+	int32 ChainNextID = -1;
 
+	// Combo ì—°ê³„ ê°€ëŠ¥ ì‹œê°„
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	int32 ChainNextID = -1;			// Combo (¾øÀ¸¸é -1)
+	float ChainWindowSec = 0.f;
 
+	// íšŒí”¼/ë§‰ê¸° ì‹œ Lock ë¬´ì‹œ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	float ChainWindowSec = 0.f;		// Combo ¿¬°è °¡´É ½Ã°£
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	bool bOffLock = false;			// È¸ÇÇ/¸·±â ½Ã Lock ¹«½Ã
+	bool bOffLock = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	TSoftObjectPtr<UAnimMontage> AnimMontage;
@@ -153,8 +162,9 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	TSoftObjectPtr<UTexture2D> SkillIcon = nullptr;
 
+	// ì„¸íŒ…í•œ ë¦¬ìŠ¤íŠ¸ ìƒíƒœ(down, stun)ê°€ ëª¨ë‘ íƒ€ê²Ÿì— ìˆì–´ì•¼ ì‚¬ìš© ê°€ëŠ¥
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	TArray<ECrowdControlType> NeedTargetCC;		// ¼¼ÆÃÇÑ ¸®½ºÆ® »óÅÂ(down, stun)°¡ ¸ğµÎ Å¸°Ù¿¡ ÀÖ¾î¾ß »ç¿ë °¡´É
+	TArray<ECrowdControlType> NeedTargetCC;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	TSubclassOf<ASkillBase> SkillActorClass = nullptr;

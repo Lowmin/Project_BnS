@@ -48,7 +48,7 @@ protected:
 	// 노티
 	virtual void OnSkillMontageEnded(bool bInterrupted) {}		// 몽타주 종료 후 정리
 
-	//
+	
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	ACharacter* GetOwnerCharacter() const;
 

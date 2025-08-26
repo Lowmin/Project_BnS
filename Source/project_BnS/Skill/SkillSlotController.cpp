@@ -47,18 +47,6 @@ bool USkillSlotController::EquipBaseSkill(ESkillSlot SkillSlot, int32 SkillID)
 	CurIDBySlot.FindOrAdd(SkillSlot) = SkillID;
 
 	UTexture2D* Icon = Row->SkillIcon.LoadSynchronous();
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 2.f, FColor::Cyan,
-			FString::Printf(TEXT("[SlotCtrl] EquipBase %s  ID=%d  Icon=%s"),
-				*UEnum::GetValueAsString(SkillSlot),
-				SkillID,
-				*GetNameSafe(Icon))
-		);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("[SlotCtrl] EquipBase %s  ID=%d  Icon=%s"),
-		*UEnum::GetValueAsString(SkillSlot), SkillID, *GetNameSafe(Icon));
 
 	OnSlotIconChanged.Broadcast(SkillSlot, Icon);
 	return true;
@@ -97,17 +85,6 @@ bool USkillSlotController::ShowPairSkill(ESkillSlot SkillSlot, int32 CurSkillID,
 
 	UTexture2D* CurIcon = Cur->SkillIcon.LoadSynchronous();
 	UTexture2D* NextIcon = Next->SkillIcon.LoadSynchronous();
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, 2.f, FColor::Cyan,
-			FString::Printf(TEXT("[SlotCtrl] ShowPair %s  Cur=%d  Next=%d  CurIcon=%s  NextIcon=%s"),
-				*UEnum::GetValueAsString(SkillSlot),
-				CurSkillID, NextSkillID,
-				*GetNameSafe(CurIcon), *GetNameSafe(NextIcon))
-		);
-	}
 
 	OnSlotPairChanged.Broadcast(SkillSlot, CurIcon, NextIcon);
 	return true;
@@ -203,15 +180,6 @@ void USkillSlotController::OnCooldownShowTick(ESkillSlot SkillSlot)
 		const float End = ShowEndAt.FindRef(SkillSlot);
 		const float Now = World->GetTimeSeconds();
 		const float Remain = FMath::Max(0.f, End - Now);
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, 0.1f, FColor::Yellow,
-				FString::Printf(TEXT("[SlotCtrl] CD %s  Remain=%.2f/%.2f"),
-					*UEnum::GetValueAsString(SkillSlot), Remain, Total)
-			);
-		}
 
 		OnSlotCooldownTick.Broadcast(SkillSlot, Remain, Total);
 		if (Remain <= 0.f)
