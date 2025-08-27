@@ -6,6 +6,13 @@
 #include "../CrowdControlComponent.h"
 #include "SkillData.generated.h"
 
+UENUM(BlueprintType)
+enum class ECooldownUIType : uint8
+{
+	Skill,   // 개별 스킬 쿨타임
+	Global   // GCD
+};
+
 class ASkillBase;
 class AActor;
 class UTexture2D;
@@ -37,8 +44,9 @@ enum class ESkillLayer : uint8
 	// 특정 조건 이후 활성화되는 스킬 (3콤보 후 강한 공격)
 	Finisher	= 3,
 	// 합격기 타이밍에 활성화되는 스킬
-	BossCC		= 4	
+	BossCC		= 4 
 };
+
 
 // 스킬 타입 세팅	(Melee, Projectile, Heal/Buff, Area of Field, Dash Attack...)
 USTRUCT(BlueprintType)
