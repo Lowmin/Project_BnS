@@ -22,5 +22,5 @@ class PROJECT_BNS_API IBuffTick
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	void BuffTick(float deltaTime);
+	virtual void BuffTick(float deltaTime);
 };

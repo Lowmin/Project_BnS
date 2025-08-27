@@ -5,7 +5,18 @@
 
 #include "../CharacterBase.h"
 
-FBuffData UBuff::GetBuffData()
+void UBuff::SetBuffData(const FBuffData* data)
 {
-	return Data;
+	Data = data;
+	RemainTime = data->Duration;
+}
+
+void UBuff::SetTarget(ACharacterBase* target)
+{
+	Target = target;
+}
+
+const FBuffData& UBuff::GetBuffData()const
+{
+	return *Data;
 }

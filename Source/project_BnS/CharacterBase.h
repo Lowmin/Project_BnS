@@ -32,13 +32,19 @@ public:
 	virtual void OnDamaged(int32 damage);
 	virtual void Die();
 	
+	// Status Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	TObjectPtr<class UStatComponent> Status = nullptr;
+
 public:
 	UStatComponent* GetStatusComponent() const;
+	float GetCurHp() const;
+	float GetMaxHp() const;
+	int GetCurMp() const;
+	int GetCharacterLevel() const;
 
-	// CrowdControl
+	// CrowdControl Component
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UCrowdControlComponent> CrowdControl = nullptr;
@@ -54,12 +60,19 @@ private:
 	USkillSystemComponent* SkillSystem = nullptr;
 
 public:
-	float GetCurHp() const;
-	float GetMaxHp() const;
-	int GetCurMp() const;
-	int GetCharacterLevel() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Skills")
 	USkillSystemComponent* GetSkillSystemComponent() const { return SkillSystem; }
 
+	// Buff Component
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Buff")
+	TObjectPtr<class UBuffComponent> BuffComponent = nullptr;
+
+public:
+	/// <summary>
+	/// 버프 관리 컴포넌트 
+	/// </summary>
+	/// <returns> 버프 관리 컴포넌트  </returns>
+	UBuffComponent* GetBuffComponent() const;
 };

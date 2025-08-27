@@ -4,19 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "BuffType.h"
+#include "BuffData.h"
 #include "Buff.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, struct FBuffData);
+DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, FBuffData);
 
-struct FBuffData
-{
-	int32 Idx;
-	EBuffType Type;
-	float Value;
-	float TickTime;
-	float Duration;
-};
 
 /**
  * 
@@ -26,13 +18,15 @@ class PROJECT_BNS_API UBuff : public UObject
 {
 	GENERATED_BODY()
 	
-private:
-	FBuffData Data;
-	float RemainTime;
-	class ACharacterBase* Target;
+protected:
+	const FBuffData* Data;
+	float RemainTime = 0.0f;
+	TWeakObjectPtr<class ACharacterBase> Target;
 
 public:
-	FBuffData GetBuffData();
+	void SetBuffData(const FBuffData* data);
+	void SetTarget(ACharacterBase* target);
+	const FBuffData& GetBuffData() const;
 
 	FBuffSetupDele OnBuffStart;
 	FBuffSetupDele OnBuffFinish;

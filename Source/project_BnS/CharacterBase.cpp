@@ -10,6 +10,8 @@
 
 #include "Skill/SkillSystemComponent.h"
 
+#include "Buff/BuffComponent.h"
+
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
@@ -30,6 +32,8 @@ ACharacterBase::ACharacterBase()
 	CrowdControl = CreateDefaultSubobject<UCrowdControlComponent>(TEXT("CrowdControl"));
 	// skillComponent 생성
 	SkillSystem = CreateDefaultSubobject<USkillSystemComponent>(TEXT("SkillSystem"));
+	// BuffComponent 생성
+	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +68,26 @@ UStatComponent* ACharacterBase::GetStatusComponent() const
 	return Status;
 }
 
+inline float ACharacterBase::GetCurHp() const
+{
+	return Status->GetCurHp();
+}
+
+inline float ACharacterBase::GetMaxHp() const
+{
+	return Status->GetMaxHp();
+}
+
+inline int ACharacterBase::GetCurMp() const
+{
+	return Status->GetCurMp();
+}
+
+inline int ACharacterBase::GetCharacterLevel() const
+{
+	return Status->GetLevel();
+}
+
 UCrowdControlComponent* ACharacterBase::GetCrowdControlComponent()
 {
 	return CrowdControl;
@@ -79,22 +103,7 @@ ECrowdControlType ACharacterBase::GetCrowdControlType()
 	return CrowdControl->GetCrowdControlType();
 }
 
-float ACharacterBase::GetCurHp() const
+UBuffComponent* ACharacterBase::GetBuffComponent() const
 {
-	return Status->GetCurHp();
-}
-
-float ACharacterBase::GetMaxHp() const
-{
-	return Status->GetMaxHp();
-}
-
-int ACharacterBase::GetCurMp() const
-{
-	return Status->GetCurMp();
-}
-
-int ACharacterBase::GetCharacterLevel() const
-{
-	return Status->GetLevel();
+	return BuffComponent;
 }
