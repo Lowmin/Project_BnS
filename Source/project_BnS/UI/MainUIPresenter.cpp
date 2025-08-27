@@ -127,10 +127,10 @@ void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)
 	MainUI->SetSkillIcon(index, texture);
 }
 
-void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown)
+void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum)
 {
 	if (MainUI == nullptr)
 		return;
 
-	MainUI->SetSkillCooldown(index, remain, cooldown);
+	MainUI->SetSkillCooldown(index, remain, cooldown, isVisibleNum);
 }

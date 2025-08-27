@@ -120,7 +120,7 @@ void UMainUi::SetSkillIcon(int index, UTexture2D* texture)
 	SkillIcons[index]->SetIcon(texture);
 }
 
-void UMainUi::SetSkillCooldown(int index, float remain, float cooldown)
+void UMainUi::SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum)
 {
-	SkillIcons[index]->SetCooldown(remain, cooldown);
+	SkillIcons[index]->SetCooldown(remain, cooldown, isVisibleNum);
 }

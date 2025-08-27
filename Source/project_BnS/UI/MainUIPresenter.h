@@ -68,6 +68,7 @@ public:
 	/// </param>
 	/// <param name="remain"> 남은 시간 </param>
 	/// <param name="cooldown"> 총 쿨타임 시간 </param>
+	/// <param name="isVisibleNum"> 쿨타임 숫자 노출 여부 </param>
 	UFUNCTION()
-	void OnCooldownChange(int index, float remain, float cooldown);
+	void OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum);
 };

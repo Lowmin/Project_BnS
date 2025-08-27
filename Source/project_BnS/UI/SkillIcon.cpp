@@ -66,7 +66,7 @@ void USkillIcon::SetIcon(UTexture2D* texture)
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
 }
 
-void USkillIcon::SetCooldown(float remain, float cooldown)
+void USkillIcon::SetCooldown(float remain, float cooldown, bool isVisibleNum)
 {
 	if (UmatInstance == nullptr)
 	{
