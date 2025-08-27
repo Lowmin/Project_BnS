@@ -14,14 +14,7 @@ void AMeleeSkill::OnSkillNotify_Hit()
 
 void AMeleeSkill::OnSkillNotify_Custom(FName NotifyName)
 {
-	if (NotifyName == TEXT("Leap"))
-	{
-		if (ACharacter* Player = GetOwnerCharacter())
-		{
-			const FVector V = Player->GetActorForwardVector() * 600.f + FVector(0, 0, 420.f);
-			Player->LaunchCharacter(V, true, true);
-		}
-	}
+
 }
 
 void AMeleeSkill::PerformMeleeAttack()

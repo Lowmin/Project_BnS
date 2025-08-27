@@ -12,9 +12,10 @@ class UTexture2D;
 class AActor;
 class UWorld;
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSlotIconChanged, ESkillSlot, SkillSlot, UTexture2D*, NewIcon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSlotPairChanged, ESkillSlot, SkillSlot, UTexture2D*, CurIcon, UTexture2D*, NextIcon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSlotCooldownTick, ESkillSlot, SkillSlot, float, Remain, float, Total);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSlotCooldownTick, ESkillSlot, SkillSlot, float, Remain, float, Total, ECooldownUIType, Type);
 
 UCLASS()
 class PROJECT_BNS_API USkillSlotController : public UObject
@@ -79,5 +80,7 @@ private:
 	TMap<ESkillSlot, float> ShowEndAt;
 	UPROPERTY(Transient)
 	TMap<ESkillSlot, float> ShowTotal;
+	UPROPERTY(Transient)
+	TMap<ESkillSlot, ECooldownUIType> ShowType;
 
 };

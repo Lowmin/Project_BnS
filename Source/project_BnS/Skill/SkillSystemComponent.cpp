@@ -2,24 +2,13 @@
 #include "SkillSystemComponent.h"
 #include "SkillSlotController.h"
 #include "SkillBase.h"
-
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 #include "../CrowdControlComponent.h"
-
 #include "Engine/DataTable.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
-#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
-
-// 디버깅
-#define SKILLDBG 1
-#if SKILLDBG
-#define SKLOG(fmt, ...) UE_LOG(LogTemp, Warning, TEXT(fmt), ##__VA_ARGS__)
-#else
-#define SKLOG(...)
-#endif
 
 USkillSystemComponent::USkillSystemComponent()
 {
@@ -29,16 +18,13 @@ USkillSystemComponent::USkillSystemComponent()
 void USkillSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	if (ACharacterBase* Character = Cast<ACharacterBase>(GetOwner()))
 	{
 		CachedStat = Character->GetStatusComponent();
 		CachedOwnerCC = Character->GetCrowdControlComponent();
 	}
-	// 테이블 캐시
 	BuildSkillCache();
 
-	// 슬롯 패널 생성
 	SlotPanel = NewObject<USkillSlotController>(this);
 	if (SlotPanel)
 	{
@@ -56,84 +42,65 @@ void USkillSystemComponent::BeginPlay()
 }
 
 // ========== 외부 API ==========
-bool USkillSystemComponent::UseSkillByIndex(int32 Index, AActor* Target)
+bool USkillSystemComponent::UseSkillByIndex(int32 Index, AActor* Target) { return UseSlot_Internal(IndexToSlot(Index), Target); }
+bool USkillSystemComponent::UseSkillBySlot(ESkillSlot Slot, AActor* Target) { return UseSlot_Internal(Slot, Target); }
+
+void USkillSystemComponent::UpdateAllSkillDisplays(AActor* CurrentTarget)
 {
-	return UseSlot_Internal(IndexToSlot(Index), Target);
+	if (!SlotPanel) return;
+	for (const auto& Pair : BaseSkillConfig)
+	{
+		UpdateDisplayForSlot(Pair.Key, CurrentTarget);
+	}
 }
 
-bool USkillSystemComponent::UseSkillBySlot(ESkillSlot Slot, AActor* Target)
-{
-	return UseSlot_Internal(Slot, Target);
-}
-
-// ========== 애니 노티 ==========
+// ========== 애니 노티파이 ==========
 void USkillSystemComponent::Notify_InputOpen(ESkillSlot Slot)
 {
 	FSlotRuntimeState& SlotState = GetState(Slot);
 	SlotState.bInputWindowOpen = true;
 	SlotState.bQueuedInput = false;
-	SKLOG("[Slot%02d] INPUT-OPEN t=%.3f (queued=%d)", (int)Slot, GetWorld()->GetTimeSeconds(), GetState(Slot).bQueuedInput);
 }
 
 void USkillSystemComponent::Notify_AnimUnlock(ESkillSlot Slot)
 {
-	// 락 해제. 큐가 있으면 단 한 번만 소비
 	FSlotRuntimeState& SlotState = GetState(Slot);
-	SlotState.AnimLockEndAt = 0.f;
 	SlotState.bInputWindowOpen = false;
-
-	const float Now = GetWorld()->GetTimeSeconds();
-	const float Elapsed = Now - SlotState.CurStartTime;
-	const bool HadQueue = SlotState.bQueuedInput;
-
-	SlotState.AnimLockEndAt = 0.f;
-	SlotState.bInputWindowOpen = false;
-
-	SKLOG("[Slot%02d] UNLOCK t=%.3f elapsed=%.3f queued=%d", (int)Slot, Now, Elapsed, HadQueue);
-
-	if (HadQueue && !SlotState.bConsumedThisMontage)
+	if (SlotState.bQueuedInput && !SlotState.bConsumedThisMontage)
 	{
+		AActor* QueuedTarget = SlotState.QueuedTarget.Get();
 		SlotState.bQueuedInput = false;
-		SlotState.bConsumedThisMontage = true;
-		AActor* Queued = SlotState.QueuedTarget.Get();
 		SlotState.QueuedTarget = nullptr;
-		UseSlot_Internal(Slot, Queued);
+		SlotState.bConsumedThisMontage = true;
+		UseSlot_Internal(Slot, QueuedTarget);
 	}
 }
 
 void USkillSystemComponent::Notify_Hit(ESkillSlot Slot)
 {
-	if (ActiveSkillActors.Contains(Slot) && ActiveSkillActors[Slot].IsValid())
+	if (TWeakObjectPtr<ASkillBase>* FoundActor = ActiveSkillActors.Find(Slot))
 	{
-		ASkillBase* CurrentSkillActor = ActiveSkillActors[Slot].Get();
-		if (CurrentSkillActor)
-		{
-			CurrentSkillActor->OnSkillNotify_Hit();
-		}
+		if (FoundActor->IsValid()) FoundActor->Get()->OnSkillNotify_Hit();
 	}
 }
 
 void USkillSystemComponent::Notify_Custom(ESkillSlot Slot, FName NotifyName)
 {
-	if (ActiveSkillActors.Contains(Slot) && ActiveSkillActors[Slot].IsValid())
+	if (TWeakObjectPtr<ASkillBase>* FoundActor = ActiveSkillActors.Find(Slot))
 	{
-		ASkillBase* CurrentSkillActor = ActiveSkillActors[Slot].Get();
-		if (CurrentSkillActor)
-		{
-			CurrentSkillActor->OnSkillNotify_Custom(NotifyName);
-		}
+		if (FoundActor->IsValid()) FoundActor->Get()->OnSkillNotify_Custom(NotifyName);
 	}
 }
 
 // ========== 실행 파이프라인 ==========
 bool USkillSystemComponent::UseSlot_Internal(ESkillSlot Slot, AActor* Target)
 {
-	if (!GetWorld() || !SkillTable || !SlotPanel) return false;
+	// 1. 사전 검사
+	if (!GetWorld() || !SkillTable) return false;
 
 	FSlotRuntimeState& SlotState = GetState(Slot);
 	const float Now = GetWorld()->GetTimeSeconds();
 
-	// 1) 슬롯 락: 막혀 있으면 선입력 1회만 큐하고 종료
 	if (Now < SlotState.AnimLockEndAt)
 	{
 		if (SlotState.bInputWindowOpen && !SlotState.bQueuedInput)
@@ -144,16 +111,16 @@ bool USkillSystemComponent::UseSlot_Internal(ESkillSlot Slot, AActor* Target)
 		return false;
 	}
 
-	// 아이콘 교체
-	const int32 UseID = ResolveSkillToUse(Slot);
+	const int32 UseID = ResolveSkillToExecute(Slot, Target);
 	if (UseID <= 0) return false;
 	const FSkillDataRow* Row = FindRowByID(UseID);
 	if (!Row) return false;
 
-	// 2) 글로벌 락 검사(우선순위/락무시 반영)
+	check(Row->Slot == Slot);
+
+	// 글로벌 락 검사(우선순위 / 락무시 반영)
 	if (IsGlobalLock(*Row, Now))
 	{
-		// 입력창 열려 있으면 1회만 큐
 		if (SlotState.bInputWindowOpen && !SlotState.bQueuedInput)
 		{
 			SlotState.bQueuedInput = true;
@@ -164,144 +131,168 @@ bool USkillSystemComponent::UseSlot_Internal(ESkillSlot Slot, AActor* Target)
 
 	if (!CanUseSkill(*Row, Target)) return false;
 
-	// 3) MP
-	if (Row->MpCost > 0 && CachedStat.IsValid())
+	// 2. 실행
+
+	// 롤백용 원본 MP
+	int32 OriginalMp = 0;
+	if (CachedStat.IsValid()) OriginalMp = CachedStat->GetCurMp();
+
+	if (Row->MpCost != 0 && CachedStat.IsValid())
 	{
-		const int32 Mp = CachedStat->GetCurMp();
-		if (Mp < Row->MpCost) return false;
-		CachedStat->SetCurMp(FMath::Max(0, Mp - Row->MpCost));
+		const int32 FinalMp = FMath::Clamp(OriginalMp - Row->MpCost, 0, CachedStat->GetMaxMp());
+		CachedStat->SetCurMp(FinalMp);
 	}
 
-	// 4) 스킬 액터 생성 + 실행
+	if (TWeakObjectPtr<ASkillBase>* FoundActor = ActiveSkillActors.Find(Slot))
+	{
+		if (FoundActor->IsValid()) FoundActor->Get()->CancelSkill_Implementation();
+	}
+
 	ASkillBase* skill = CreateSkill(*Row);
 	if (!skill)
 	{
 		// 스폰 실패시 소모된 MP 복구
-		if (Row->MpCost > 0 && CachedStat.IsValid())
-		{
-			CachedStat->SetCurMp(CachedStat->GetCurMp() + Row->MpCost);
-		}
-		UpdateDisplayForSlot(Slot);
+		if (Row->MpCost != 0 && CachedStat.IsValid()) CachedStat->SetCurMp(OriginalMp);
+		UE_LOG(LogTemp, Error, TEXT("SkillSystem: Failed to spawn SkillActor. MP refunded."), Row->SkillID);
 		return false;
 	}
-	ActiveSkillActors.Add(Slot, skill);
 
+	// 3. 상태 커밋
+	ActiveSkillActors.Add(Slot, skill);
 	SlotState.CurStartTime = Now;
 	SlotState.bConsumedThisMontage = false;
-
 	skill->InitFromRow(*Row);
 	skill->SetSkillTarget(Target);
-
 	ISkillInterface::Execute_ExecuteSkill(skill);
 
-	// 5) 상태 커밋, UI
 	CommitStateAfterUse(*Row, SlotState);
-	UpdateDisplayForSlot(Slot);
+	UpdateDisplayForSlot(Slot, Target);
 	return true;
 }
 
-int32 USkillSystemComponent::ResolveSkillToUse(ESkillSlot Slot) const
+// ========== 스킬 결정 ==========
+int32 USkillSystemComponent::ResolveSkillToExecute(ESkillSlot Slot, AActor* Target) const
+{
+	const FSkillDataRow* PrioritySkill = FindHighestPrioritySkillForSlot(Slot, Target);
+	if (PrioritySkill) return PrioritySkill->SkillID;
+	return ResolveChainSkill(Slot);
+}
+
+int32 USkillSystemComponent::ResolveChainSkill(ESkillSlot Slot) const
 {
 	const float Now = GetWorld()->GetTimeSeconds();
-
 	const int32 BaseID = GetBaseID(Slot);
 	if (BaseID <= 0) return -1;
-
 	const FSlotRuntimeState* SlotState = TryGetState(Slot);
 	if (!SlotState || SlotState->LastUsedSkillID <= 0) return BaseID;
-
-	// 마지막 사용 스킬
 	const FSkillDataRow* Last = FindRowByID(SlotState->LastUsedSkillID);
 	if (!Last) return BaseID;
-
-	// 체인 유효시간이 지났으면 1타로 리셋
-	if ((Now - SlotState->LastUsedSkillAt) > Last->ChainWindowSec)
-		return BaseID;
-
+	if ((Now - SlotState->LastUsedSkillAt) > Last->ChainWindowSec) return BaseID;
 	return (Last->ChainNextID > 0) ? Last->ChainNextID : BaseID;
+}
+
+const FSkillDataRow* USkillSystemComponent::FindHighestPrioritySkillForSlot(ESkillSlot Slot, AActor* Target) const
+{
+	const FSkillIDArray* CandidateIDs = CandidateIDsBySlot.Find(Slot);
+	if (!CandidateIDs) return nullptr;
+
+	const FSkillDataRow* BestSkillRow = nullptr;
+	int32 MaxPriority = TNumericLimits<int32>::Min();
+	for (const int32 SkillID : CandidateIDs->IDs)
+	{
+		const FSkillDataRow* CurrentRow = FindRowByID(SkillID);
+		if (!CurrentRow) continue;
+		if (CurrentRow->Layer == ESkillLayer::Chain || CurrentRow->Layer == ESkillLayer::Base) continue;
+		if (CheckActivationConditions(*CurrentRow, Target) && CurrentRow->Priority > MaxPriority)
+		{
+			BestSkillRow = CurrentRow;
+			MaxPriority = CurrentRow->Priority;
+		}
+	}
+	return BestSkillRow;
+}
+
+bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, AActor* Target) const
+{
+	switch (Row.Layer)
+	{
+	case ESkillLayer::Proc: return false;
+	case ESkillLayer::Finisher:
+	case ESkillLayer::BossCC:
+	{
+		if (Row.NeedTargetCC.Num() == 0) return true;
+		if (!Target) return false;
+		if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
+		{
+			// CC 처리 필요
+			return true;
+		}
+	}
+	}
+	return false;
 }
 
 bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target) const
 {
 	const float Now = GetWorld()->GetTimeSeconds();
-
-	// 1) 쿨다운
 	if (const float* EndAt = CooldownEndAt.Find(Row.SkillID))
 	{
 		if (*EndAt > Now) return false;
 	}
-
-	// 2) MP(코스트가 있으면 스탯 필요)
-	if (Row.MpCost > 0)
+	if (Row.MpCost != 0)
 	{
 		if (!CachedStat.IsValid()) return false;
-		if (CachedStat->GetCurMp() < Row.MpCost) return false;
+		if (Row.MpCost > 0)
+		{
+			if (CachedStat->GetCurMp() < Row.MpCost) return false;
+		}
+		else
+		{
+			if (CachedStat->GetCurMp() >= CachedStat->GetMaxMp()) return false;
+		}
 	}
-
-	// 3) 체인 스텝이면 연결 유효성 보장(안전망)
 	if (Row.Layer == ESkillLayer::Chain)
 	{
 		const FSlotRuntimeState* SlotState = TryGetState(Row.Slot);
 		if (!SlotState || SlotState->LastUsedSkillID < 0) return false;
 		const FSkillDataRow* Last = FindRowByID(SlotState->LastUsedSkillID);
 		if (!Last) return false;
-
-		const bool Ok = (Last->ChainNextID == Row.SkillID) && ((Now - SlotState->LastUsedSkillAt) <= Last->ChainWindowSec);
-		if (!Ok) return false;
+		const bool bOk = (Last->ChainNextID == Row.SkillID) && ((Now - SlotState->LastUsedSkillAt) <= Last->ChainWindowSec);
+		if (!bOk) return false;
 	}
-
-	// 4) 타겟 CC 요구(있는 스킬만)
 	if (Row.NeedTargetCC.Num() > 0)
 	{
 		if (!Target) return false;
-		const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>();
-		if (!TargetCC) return false;
+		if (!Target->FindComponentByClass<UCrowdControlComponent>()) return false;
 	}
-
 	return true;
 }
 
 void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotRuntimeState& SlotState)
 {
 	const float Now = GetWorld()->GetTimeSeconds();
-
-	// 1) 슬롯 락
 	if (Row.AnimLockSec > 0.f)
 	{
 		SlotState.AnimLockEndAt = Now + Row.AnimLockSec;
-	}
-
-	// 글로벌 락
-	if (Row.AnimLockSec > 0.f)
-	{
-		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, Now + Row.AnimLockSec);
+		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, SlotState.AnimLockEndAt);
 		GlobalLockPriority = Row.Priority;
 		if (SlotPanel)
 		{
 			SlotPanel->PlayCooldownShow_All(GlobalLockEndAt, Row.AnimLockSec, true);
 		}
 	}
-
-	// 2) 연계
 	SlotState.LastUsedSkillID = Row.SkillID;
 	SlotState.LastUsedSkillAt = Now;
-
 	if (Row.ChainNextID > 0 && Row.ChainWindowSec > 0.f)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(SlotState.ChainTimer);
-		GetWorld()->GetTimerManager().SetTimer(
-			SlotState.ChainTimer,
-			FTimerDelegate::CreateUObject(this, &USkillSystemComponent::OnChainExpire, Row.Slot),
-			Row.ChainWindowSec, false);
+		GetWorld()->GetTimerManager().SetTimer(SlotState.ChainTimer, FTimerDelegate::CreateUObject(this, &USkillSystemComponent::OnChainExpire, Row.Slot), Row.ChainWindowSec, false);
 	}
 	else
 	{
 		SlotState.LastUsedSkillID = -1;
-		SlotState.LastUsedSkillAt = 0.f;
 		GetWorld()->GetTimerManager().ClearTimer(SlotState.ChainTimer);
 	}
-
-	// 3) 쿨타임
 	if (Row.Layer == ESkillLayer::Base && Row.CooldownSec > 0.f)
 	{
 		float& End = CooldownEndAt.FindOrAdd(Row.SkillID);
@@ -318,65 +309,45 @@ void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotR
 
 void USkillSystemComponent::OnChainExpire(ESkillSlot Slot)
 {
-	FSlotRuntimeState& SlotState = GetState(Slot);
-	SlotState.LastUsedSkillID = -1;
-	SlotState.LastUsedSkillAt = 0.f;
-	SlotState.bQueuedInput = false;
-	SlotState.bInputWindowOpen = false;
-
-	if (SlotPanel) SlotPanel->ResetToBase(Slot);
+	GetState(Slot).LastUsedSkillID = -1;
+	GetState(Slot).bQueuedInput = false;
+	UpdateDisplayForSlot(Slot, nullptr);
 }
 
-void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot)
+void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target)
 {
 	if (!SlotPanel) return;
-
 	const int32 PrevID = SlotPanel->GetCurrentSkillID(Slot);
-	const int32 NextID = ResolveSkillToUse(Slot);
-
+	const int32 NextID = ResolveSkillToExecute(Slot, Target);
+	if (PrevID == NextID) return;
 	if (NextID <= 0)
 	{
 		SlotPanel->ResetToBase(Slot);
 		return;
 	}
-
-	if (PrevID != NextID)
+	UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
+	UTexture2D* NextIcon = IconCache.FindRef(NextID);
+	if (PrevIcon && NextIcon)
 	{
-		const FSkillDataRow* PrevRow = FindRowByID(PrevID);
-		const FSkillDataRow* NextRow = FindRowByID(NextID);
-		if (PrevRow && NextRow)
-		{
-			UTexture2D* PrevIcon = PrevRow->SkillIcon.LoadSynchronous();
-			UTexture2D* NextIcon = NextRow->SkillIcon.LoadSynchronous();
-			UI_OnAnimatedSetIcon.Broadcast(SlotToIndex(Slot), PrevIcon, NextIcon);
-		}
+		UI_OnAnimatedSetIcon.Broadcast(SlotToIndex(Slot), PrevIcon, NextIcon);
 	}
-
 	SlotPanel->ShowSkill(Slot, NextID);
 }
 
 bool USkillSystemComponent::IsGlobalLock(const FSkillDataRow& Row, float Now) const
 {
-	// bOffLock 이 true면(회피/막기같은) 락 무시 가능
 	if (Row.bOffLock) return false;
-
-	// 시간이 락 안이면 막힘. 단, 더 높은 우선순위 스킬은 허용
-	if (Now < GlobalLockEndAt && Row.Priority <= GlobalLockPriority)
-	{
-		return true; // 막힘
-	}
+	if (Now < GlobalLockEndAt && Row.Priority <= GlobalLockPriority) return true;
 	return false;
 }
 
-// ========== 스폰/캐시 ==========
+// ========== 스폰/캐시/유틸 ==========
 ASkillBase* USkillSystemComponent::CreateSkill(const FSkillDataRow& Row)
 {
 	if (!GetWorld() || !Row.SkillActorClass) return nullptr;
-
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
 	return GetWorld()->SpawnActor<ASkillBase>(Row.SkillActorClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams);
 }
 
@@ -384,24 +355,28 @@ void USkillSystemComponent::BuildSkillCache()
 {
 	RowNameByID.Reset();
 	CandidateIDsBySlot.Reset();
+	IconCache.Reset();
 	if (!SkillTable) return;
-
-	//
-	ensureAlwaysMsgf(SkillTable->GetRowStruct() == FSkillDataRow::StaticStruct(),
-		TEXT("SkillTable row type mismatch. Expected FSkillDataRow."));
+	if (SkillTable->GetRowStruct() != FSkillDataRow::StaticStruct()) return;
 
 	const TArray<FName> Names = SkillTable->GetRowNames();
 	RowNameByID.Reserve(Names.Num());
-
 	for (const FName& Nm : Names)
 	{
 		const FSkillDataRow* Row = SkillTable->FindRow<FSkillDataRow>(Nm, TEXT("BuildSkillCache"));
 		if (!Row || Row->SkillID < 0) continue;
-
 		RowNameByID.FindOrAdd(Row->SkillID) = Nm;
-
 		if (Row->Slot != ESkillSlot::None)
+		{
 			CandidateIDsBySlot.FindOrAdd(Row->Slot).IDs.Add(Row->SkillID);
+		}
+		if (!Row->SkillIcon.IsNull())
+		{
+			if (UTexture2D* Icon = Row->SkillIcon.LoadSynchronous())
+			{
+				IconCache.Add(Row->SkillID, Icon);
+			}
+		}
 	}
 }
 
@@ -413,21 +388,6 @@ const FSkillDataRow* USkillSystemComponent::FindRowByID(int32 SkillID) const
 	return nullptr;
 }
 
-void USkillSystemComponent::GatherCandidatesForSlot(ESkillSlot Slot, TArray<const FSkillDataRow*>& OutRows) const
-{
-	OutRows.Reset();
-	if (!SkillTable) return;
-
-	if (const FSkillIDArray* Arr = CandidateIDsBySlot.Find(Slot))
-	{
-		OutRows.Reserve(Arr->IDs.Num());
-		for (int32 ID : Arr->IDs)
-			if (const FSkillDataRow* Row = FindRowByID(ID))
-				OutRows.Add(Row);
-	}
-}
-
-// ========== 유틸 ==========
 int32 USkillSystemComponent::GetBaseID(ESkillSlot Slot) const
 {
 	if (const int32* ID = BaseSkillConfig.Find(Slot)) return *ID;
@@ -469,18 +429,22 @@ ESkillSlot USkillSystemComponent::IndexToSlot(int32 Index)
 	}
 }
 
-// UI 브릿지
+// ========== UI 브릿지 ==========
 void USkillSystemComponent::HandleSlotIconChanged(ESkillSlot Slot, UTexture2D* NewIcon)
 {
 	UI_OnSetIcon.Broadcast(SlotToIndex(Slot), NewIcon);
 }
+
 void USkillSystemComponent::HandleSlotPairChanged(ESkillSlot Slot, UTexture2D* CurIcon, UTexture2D* NextIcon)
 {
 	UI_OnSetIconStep.Broadcast(SlotToIndex(Slot), CurIcon, NextIcon);
 }
-void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total)
+
+void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total, ECooldownUIType Type)
 {
-	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total);
+	const bool isVisibleNum = (Type == ECooldownUIType::Global);
+
+	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total, isVisibleNum);
 }
 
 // Enemy: 단발 실행

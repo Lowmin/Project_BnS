@@ -103,6 +103,7 @@ void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID,
 {
 	ShowEndAt.FindOrAdd(SkillSlot) = EndAt;
 	ShowTotal.FindOrAdd(SkillSlot) = TotalSec;
+	ShowType.FindOrAdd(SkillSlot) = ECooldownUIType::Skill;
 
 	if (UWorld* World = GetWorldSafe())
 	{
@@ -157,8 +158,15 @@ void USkillSlotController::PlayCooldownShow_All(float EndAt, float TotalSec, boo
 			}
 		}
 
-		const int32 ID = GetCurrentSkillID(Slot);
-		PlayCooldownShow(Slot, ID, EndAt, TotalSec);
+		ShowEndAt.FindOrAdd(Slot) = EndAt;
+		ShowTotal.FindOrAdd(Slot) = TotalSec;
+		ShowType.FindOrAdd(Slot) = ECooldownUIType::Global;
+
+		FTimerHandle NewHandle;
+		World->GetTimerManager().SetTimer(NewHandle, FTimerDelegate::CreateUObject(this, &USkillSlotController::OnCooldownShowTick, Slot), 0.05f, true);
+		ShowTickTimer.FindOrAdd(Slot) = NewHandle;
+
+		OnCooldownShowTick(Slot);
 	}
 }
 
@@ -180,8 +188,9 @@ void USkillSlotController::OnCooldownShowTick(ESkillSlot SkillSlot)
 		const float End = ShowEndAt.FindRef(SkillSlot);
 		const float Now = World->GetTimeSeconds();
 		const float Remain = FMath::Max(0.f, End - Now);
+		const ECooldownUIType Type = ShowType.FindRef(SkillSlot);
 
-		OnSlotCooldownTick.Broadcast(SkillSlot, Remain, Total);
+		OnSlotCooldownTick.Broadcast(SkillSlot, Remain, Total, Type);
 		if (Remain <= 0.f)
 		{
 			StopCooldownShow(SkillSlot);
