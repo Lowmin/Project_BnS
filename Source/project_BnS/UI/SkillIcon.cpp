@@ -76,17 +76,24 @@ void USkillIcon::SetCooldown(float remain, float cooldown, bool isVisibleNum)
 
 	int32 remainTime = FMath::CeilToInt32(remain);
 
+	if (isVisibleNum && remainTime > 0)
+	{
+		CooldownText->SetVisibility(ESlateVisibility::Visible);
+		CooldownText->SetText(FText::AsNumber(remainTime));
+	}
+	else
+	{
+		CooldownText->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	if (remainTime == 0)
 	{
 		Block->SetVisibility(ESlateVisibility::Hidden);
-		CooldownText->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
 		Block->SetVisibility(ESlateVisibility::Visible);
-		CooldownText->SetVisibility(ESlateVisibility::Visible);
 
 		UmatInstance->SetScalarParameterValue(TEXT("Progress"), remain / cooldown);
-		CooldownText->SetText(FText::AsNumber(remainTime));
 	}
 }
