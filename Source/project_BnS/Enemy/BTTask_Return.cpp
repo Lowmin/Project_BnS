@@ -3,7 +3,6 @@
 
 #include "BTTask_Return.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "AIController.h"
 
 UBTTask_Return::UBTTask_Return()
 {
@@ -15,13 +14,12 @@ EBTNodeResult::Type UBTTask_Return::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
-
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!AIController || !BlackboardComp) return EBTNodeResult::Failed;
 
-	FVector HomeLocation = BlackboardComp->GetValueAsVector(ReturnPositionKey.SelectedKeyName);
+	if (!AIController)
+	{
+		return EBTNodeResult::Failed;
+	}
 
-	AIController->MoveToLocation(HomeLocation, 100.0f);
-
-	return EBTNodeResult::Succeeded;
+	return EBTNodeResult::Type();
 }
