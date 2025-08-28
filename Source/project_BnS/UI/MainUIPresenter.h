@@ -43,7 +43,9 @@ public:
  	UFUNCTION()
 	void OnExpChange(float current, float max) const;
 
-	void OnTargetChange(FVector2D center, FVector2D size) const;
+	void OnTargetChange(const FVector2D& center, const FVector2D& size) const;
+
+	// Skill 
 
  	UFUNCTION()
  	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
@@ -71,4 +73,7 @@ public:
 	/// <param name="isVisibleNum"> 쿨타임 숫자 노출 여부 </param>
 	UFUNCTION()
 	void OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum);
+
+	// BossInfo
+	void OnBossHpChange(float current, float max);
 };

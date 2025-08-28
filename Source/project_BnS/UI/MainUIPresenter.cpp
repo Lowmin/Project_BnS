@@ -31,6 +31,9 @@ void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 
 void AMainUIPresenter::Bind(UStatComponent* stat)
 {
+	MyPlayer->OnTargetBoxChange.BindUObject(this, &AMainUIPresenter::OnTargetChange);
+	// MyPlayer->OnBossHpChange.BindUObject(this, &AMainUIPresenter::OnBossHpChange);
+
 	MyPlayer->OnStaminaChange.BindUObject(this, &AMainUIPresenter::OnStaminaChange);
 	MyPlayer->OnExpChange.BindUObject(this, &AMainUIPresenter::OnExpChange);
 	
@@ -95,7 +98,7 @@ void AMainUIPresenter::OnExpChange(float current, float max) const
 	MainUI->SetExp(current, max);
 }
 
-void AMainUIPresenter::OnTargetChange(FVector2D center, FVector2D size) const
+void AMainUIPresenter::OnTargetChange(const FVector2D& center, const FVector2D& size) const
 {
 	if(MainUI == nullptr)
 		return;
@@ -133,4 +136,12 @@ void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown,
 		return;
 
 	MainUI->SetSkillCooldown(index, remain, cooldown, isVisibleNum);
+}
+
+void AMainUIPresenter::OnBossHpChange(float current, float max)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetBossHp(current, max);
 }

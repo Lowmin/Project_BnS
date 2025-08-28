@@ -11,6 +11,7 @@
 #include "MpIcon.h"
 #include "SkillIcon.h"
 #include "BossInfo.h"
+#include "../StatComponent.h"
 
 void UMainUi::NativeConstruct()
 {
@@ -123,4 +124,23 @@ void UMainUi::SetSkillIcon(int index, UTexture2D* texture)
 void UMainUi::SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum)
 {
 	SkillIcons[index]->SetCooldown(remain, cooldown, isVisibleNum);
+}
+
+void UMainUi::SetBossInfo(const UStatComponent* status, float distance)
+{
+	BossInfo->SetInfo(status->GetCurHp(), status->GetMaxHp(), status->GetLevel(), status->GetCharacterName(), distance);
+}
+
+void UMainUi::SetBossHp(float current, float max)
+{
+	BossInfo->OnChangeHp(current, max);
+}
+
+void UMainUi::SetBossCrowdControlCount(int current, int max)
+{
+}
+
+void UMainUi::SetBossDistance(float distance)
+{
+	BossInfo->SetDistance(distance);
 }

@@ -4,7 +4,6 @@
 #include "TargetingSystem.h"
 
 #include "BnsController.h"
-#include "UI/MainUIPresenter.h"
 #include "TargetAble.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
@@ -13,12 +12,10 @@
 // Sets default values for this component's properties
 ATargetingSystem::ATargetingSystem()
 {
-	// ...
-	//Primar Tick.bCanEverTick = true;
 	PrimaryActorTick.bCanEverTick = true;
 
 	TargetSensor = CreateDefaultSubobject<USphereComponent>(TEXT("TargetSensors"));
-	TargetSensor->SetSphereRadius(1000);
+	TargetSensor->SetSphereRadius(1000.0f);
 	TargetSensor->SetHiddenInGame(false);
 	TargetSensor->SetupAttachment(RootComponent);
 	TargetSensor->SetCollisionProfileName(TEXT("TargetingSensor"));
@@ -52,45 +49,49 @@ void ATargetingSystem::Tick(float DeltaTime)
 	{
 		SetCurTarget();
 	}
-	
-	if(Target == nullptr)
-	{
-		BnsController->UIPresenter->OnTargetChange(FVector2D::ZeroVector, FVector2D(100, 100));
-	}
-	else
-	{
-		// 좌표 계산 
-		FVector pos = ITargetAble::Execute_GetWorldLocation(Target);
-		FVector2D screen;
-		UGameplayStatics::ProjectWorldToScreen(BnsController, pos, screen);
 
-		// viewport 기준 계산 
-		float x = ((screen.X/ViewportSize.X) - 0.5f);
-		float y = ((screen.Y/ViewportSize.Y) - 0.5f);
+	// 타겟박스 계산 
+	SetTargetBox();
+}
 
-		// 실제 좌표 적용 
-		x *= UiViewportSize.X;
-		y *= UiViewportSize.Y;
+void ATargetingSystem::SetTargetBox()
+{
+	if (Target == nullptr)
+		return;
 
-		// 크기 계산 
-		FVector camPos = CameraManager->GetCameraLocation();
-		float distance = FVector::Distance(pos, camPos);
-		float fov = CameraManager->GetFOVAngle() * 0.5f;
-		float targetBoxRatio = (UiViewportSize.Y) / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
+	// 좌표 계산 
+	FVector pos = ITargetAble::Execute_GetWorldLocation(Target);
+	FVector2D screen;
+	UGameplayStatics::ProjectWorldToScreen(BnsController, pos, screen);
 
-		FVector2D targetCenter = ITargetAble::Execute_GetTargetCenter(Target);
-		FVector2D targetBoxSize = ITargetAble::Execute_GetTargetBoxSize(Target);
+	// viewport 기준 계산 
+	float x = ((screen.X / ViewportSize.X) - 0.5f);
+	float y = ((screen.Y / ViewportSize.Y) - 0.5f);
 
-		targetBoxSize *= targetBoxRatio;
+	// 실제 좌표 적용 
+	x *= UiViewportSize.X;
+	y *= UiViewportSize.Y;
 
-		BnsController->UIPresenter->OnTargetChange(targetCenter + FVector2D(x, y), targetBoxSize);
-	}
+	// 크기 계산 
+	FVector camPos = CameraManager->GetCameraLocation();
+	float distance = FVector::Distance(pos, camPos);
+	float fov = CameraManager->GetFOVAngle() * 0.5f;
+	float targetBoxRatio = (UiViewportSize.Y) / (distance * FMath::Tan(FMath::DegreesToRadians(fov)));
+
+	FVector2D targetCenter = ITargetAble::Execute_GetTargetCenter(Target);
+	FVector2D targetBoxSize = ITargetAble::Execute_GetTargetBoxSize(Target);
+
+	targetBoxSize *= targetBoxRatio;
+
+	OnTargetBoxChange.Execute(targetCenter + FVector2D(x, y), targetBoxSize);
 }
 
 void ATargetingSystem::RemoveCurrentTarget()
 {
 	ITargetAble::Execute_OnTargeted(Target, false);
-	Target = nullptr;
+	Target = nullptr; 
+	
+	OnTargetBoxChange.Execute(FVector2D::ZeroVector, FVector2D(100.0f, 100.0f));
 }
 
 void ATargetingSystem::SetCurTarget()
@@ -187,8 +188,6 @@ ACharacterBase* ATargetingSystem::GetTarget() const
 
 void ATargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ITargetAble* targetAble = Cast<ITargetAble>(OtherActor);
-	
 	if(OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
 	{
 		TargetAbles.Add(OtherActor);
@@ -206,4 +205,3 @@ void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor*
 		}
 	}
 }
-
