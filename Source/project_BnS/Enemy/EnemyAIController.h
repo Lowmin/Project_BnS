@@ -36,4 +36,5 @@ protected:
 private:
 	FName TargetNameKey = TEXT("TargetActor");
 	FName AttackRangeKey = TEXT("AttackRange");
+	FName ReturnPositionKey = TEXT("ReturnPosition");
 };
