@@ -442,7 +442,16 @@ void USkillSystemComponent::HandleSlotPairChanged(ESkillSlot Slot, UTexture2D* C
 
 void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total, ECooldownUIType Type)
 {
-	const bool isVisibleNum = (Type == ECooldownUIType::Global);
+	bool isVisibleNum = false;
+
+	if (Type == ECooldownUIType::Skill)
+	{
+		isVisibleNum = (Remain > 0.f);
+	}
+	else if (Type == ECooldownUIType::Global)
+	{
+		isVisibleNum = (Remain > 1.0f);
+	}
 
 	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total, isVisibleNum);
 }
