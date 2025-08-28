@@ -39,6 +39,7 @@ protected:
 
 public:
 	UStatComponent* GetStatusComponent() const;
+	const FString& GetCharacterName() const;
 	float GetCurHp() const;
 	float GetMaxHp() const;
 	int GetCurMp() const;

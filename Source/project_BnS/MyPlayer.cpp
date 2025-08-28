@@ -27,6 +27,8 @@ AMyPlayer::AMyPlayer()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
+
+    Status->SetCharacterName("BNS_User");
 }
 
 void AMyPlayer::BeginPlay()

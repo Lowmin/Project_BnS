@@ -28,6 +28,8 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
+	FString CharacterName = "";
+	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float CurHp = 100.0f;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float MaxHp = 100.0f;
@@ -69,5 +71,8 @@ public:
 	// def
 	float GetDef() const;
 	void SetDef(float def);
-
+	
+	// Name
+	const FString& GetCharacterName() const;
+	void SetCharacterName(const FString name);
 };

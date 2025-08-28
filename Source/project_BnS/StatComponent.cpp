@@ -114,3 +114,13 @@ void UStatComponent::SetDef(float def)
 {
 	Def = def;
 }
+
+const FString& UStatComponent::GetCharacterName() const
+{
+	return CharacterName;
+}
+
+void UStatComponent::SetCharacterName(const FString name)
+{
+	CharacterName = name;
+}

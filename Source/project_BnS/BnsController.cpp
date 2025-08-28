@@ -39,7 +39,7 @@ void ABnsController::BeginPlay()
 	UIPresenter->OnStaminaChange(player->GetCurStamina(), player->GetMaxStamina());
 	UIPresenter->OnLevelChange(player->GetCharacterLevel());
 	UIPresenter->OnExpChange(player->GetCurExp(), player->GetMaxExp());
-	UIPresenter->OnNicknameChange(TEXT("BNSUser"));
+	UIPresenter->OnNicknameChange(player->GetCharacterName());
 	UIPresenter->OnBattleChange(false);
 
 }

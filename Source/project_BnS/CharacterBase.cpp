@@ -68,6 +68,11 @@ UStatComponent* ACharacterBase::GetStatusComponent() const
 	return Status;
 }
 
+const FString& ACharacterBase::GetCharacterName() const
+{
+	return Status->GetCharacterName();
+}
+
 inline float ACharacterBase::GetCurHp() const
 {
 	return Status->GetCurHp();
