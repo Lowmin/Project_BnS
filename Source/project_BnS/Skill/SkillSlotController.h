@@ -44,7 +44,7 @@ public:
 	int32 GetCurrentSkillID(ESkillSlot SkillSlot) const;
 
 	// UI ÄðÅ¸ÀÓ
-	void PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID, float EndAt, float TotalSec);
+	void PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID, float EndAt, float TotalSec, ECooldownUIType Type);
 	void StopCooldownShow(ESkillSlot SkillSlot);
 	void PlayCooldownShow_All(float EndAt, float TotalSec, bool bSkipSlotCool = true);	// GCD
 

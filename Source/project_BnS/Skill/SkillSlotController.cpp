@@ -99,11 +99,12 @@ int32 USkillSlotController::GetCurrentSkillID(ESkillSlot SkillSlot) const
 	return -1;
 }
 
-void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID, float EndAt, float TotalSec)
+void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID, float EndAt, float TotalSec, ECooldownUIType Type)
 {
 	ShowEndAt.FindOrAdd(SkillSlot) = EndAt;
 	ShowTotal.FindOrAdd(SkillSlot) = TotalSec;
-	ShowType.FindOrAdd(SkillSlot) = ECooldownUIType::Skill;
+	//ShowType.FindOrAdd(SkillSlot) = ECooldownUIType::Skill;
+	ShowType.FindOrAdd(SkillSlot) = Type;
 
 	if (UWorld* World = GetWorldSafe())
 	{
@@ -138,16 +139,10 @@ void USkillSlotController::PlayCooldownShow_All(float EndAt, float TotalSec, boo
 
 	const float Now = World->GetTimeSeconds();
 
-	ESkillSlot Slots[] =
+	for (const auto& Pair : BaseIDBySlot)
 	{
-		ESkillSlot::Slot0,
-		ESkillSlot::Slot1
-		// ½½·Ô ´Ã¾î³ª¸é Ãß°¡
-	};
-
-	for (int i = 0; i < static_cast<int>(UE_ARRAY_COUNT(Slots)); i++)
-	{
-		ESkillSlot Slot = Slots[i];
+		ESkillSlot Slot = Pair.Key;
+		if (Slot == ESkillSlot::None) continue;
 
 		if (bSkipSlotCool)
 		{

@@ -115,6 +115,8 @@ private:
 	const FSkillDataRow* FindHighestPrioritySkillForSlot(ESkillSlot Slot, AActor* Target) const;
 	bool CheckActivationConditions(const FSkillDataRow& Row, AActor* Target) const;
 
+	void RefreshCooldownViewForSlot(ESkillSlot Slot, int32 SkillID);	// SkillID = Current Skill ID
+
 	// ==== 스폰 / 캐시 / 유틸 ====
 	ASkillBase* CreateSkill(const FSkillDataRow& Row);
 	void  BuildSkillCache();

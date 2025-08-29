@@ -145,6 +145,10 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	float Damage = 1.f;
 
+	// 스킬 발동 가능 최대 사거리 (ex. 발사체 800(8m))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
+	float MaxRange = 0.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	float CooldownSec = 0.f;
 

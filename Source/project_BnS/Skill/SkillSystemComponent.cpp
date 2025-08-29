@@ -232,6 +232,56 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 	return false;
 }
 
+void USkillSystemComponent::RefreshCooldownViewForSlot(ESkillSlot Slot, int32 SkillID)
+{
+	if (!SlotPanel) return;
+
+	const float Now = GetWorld()->GetTimeSeconds();
+
+	// 1. 해당 슬롯의 개별 스킬 쿨타임
+	float SkillRemainTime = 0.f;
+	const float* SkillEndAt = CooldownEndAt.Find(SkillID);
+	if (SkillEndAt && *SkillEndAt > Now)
+	{
+		SkillRemainTime = *SkillEndAt - Now;
+	}
+
+	// 2. GCD
+	float GcdRemainTime = 0.f;
+	if (GlobalLockEndAt > Now)
+	{
+		GcdRemainTime = GlobalLockEndAt - Now;
+	}
+
+	// 3. 더 긴 쪽이 대표 쿨타임
+	const float DisplayCooldown = FMath::Max(SkillRemainTime, GcdRemainTime);
+
+	// 4. 대표 쿨타임을 기준으로 UI를 표시하거나 끔
+	if (DisplayCooldown > 0.f)
+	{
+		if (SkillRemainTime > GcdRemainTime)
+		{
+			if (SkillEndAt)
+			{
+				const FSkillDataRow* Row = FindRowByID(SkillID);
+				if (Row)
+				{
+					SlotPanel->PlayCooldownShow(Slot, SkillID, *SkillEndAt, Row->CooldownSec, ECooldownUIType::Skill);
+				}
+			}
+		}
+		else
+		{
+			SlotPanel->PlayCooldownShow(Slot, -1, GlobalLockEndAt, GcdRemainTime, ECooldownUIType::Global);
+		}
+	}
+	else
+	{
+		SlotPanel->StopCooldownShow(Slot);
+	}
+
+}
+
 bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target) const
 {
 	const float Now = GetWorld()->GetTimeSeconds();
@@ -245,10 +295,6 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 		if (Row.MpCost > 0)
 		{
 			if (CachedStat->GetCurMp() < Row.MpCost) return false;
-		}
-		else
-		{
-			if (CachedStat->GetCurMp() >= CachedStat->GetMaxMp()) return false;
 		}
 	}
 	if (Row.Layer == ESkillLayer::Chain)
@@ -265,22 +311,56 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 		if (!Target) return false;
 		if (!Target->FindComponentByClass<UCrowdControlComponent>()) return false;
 	}
+
+	// 스킬 사용 유효 사거리
+	if (Row.MaxRange > 0.f && Target)
+	{
+		const float Distance = GetOwner()->GetDistanceTo(Target);
+		if (Distance > Row.MaxRange)
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[Failed] %s: Distance Over (%.0f / %.0f cm)"), *Row.SkillName.ToString(), Distance, Row.MaxRange));
+			}
+			return false;
+		}
+		else
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("[Success] %s: Distance Ok (%.0f / %.0f cm)"), *Row.SkillName.ToString(), Distance, Row.MaxRange));
+			}
+		}
+	}
 	return true;
 }
 
 void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotRuntimeState& SlotState)
 {
 	const float Now = GetWorld()->GetTimeSeconds();
+	// 쿨타임 데이터
+	if (Row.CooldownSec > 0.f)
+	{
+		float& End = CooldownEndAt.FindOrAdd(Row.SkillID);
+		if (End <= Now)
+		{
+			End = Now + Row.CooldownSec;
+			UE_LOG(LogTemp, Log, TEXT("[CommitStateAfterUse] 'RealCoolTime' Log: SkillID=%d, %.2f sec"), Row.SkillID, Row.CooldownSec);
+		}
+	}
+	// GCD 데이터
 	if (Row.AnimLockSec > 0.f)
 	{
 		SlotState.AnimLockEndAt = Now + Row.AnimLockSec;
 		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, SlotState.AnimLockEndAt);
 		GlobalLockPriority = Row.Priority;
+		UE_LOG(LogTemp, Log, TEXT("[CommitStateAfterUse] '(GCD)' Log: %.2f Sec"), Row.AnimLockSec);
 		if (SlotPanel)
 		{
 			SlotPanel->PlayCooldownShow_All(GlobalLockEndAt, Row.AnimLockSec, true);
 		}
 	}
+	// 연계 상태 데이터
 	SlotState.LastUsedSkillID = Row.SkillID;
 	SlotState.LastUsedSkillAt = Now;
 	if (Row.ChainNextID > 0 && Row.ChainWindowSec > 0.f)
@@ -292,18 +372,6 @@ void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotR
 	{
 		SlotState.LastUsedSkillID = -1;
 		GetWorld()->GetTimerManager().ClearTimer(SlotState.ChainTimer);
-	}
-	if (Row.Layer == ESkillLayer::Base && Row.CooldownSec > 0.f)
-	{
-		float& End = CooldownEndAt.FindOrAdd(Row.SkillID);
-		if (End <= Now)
-		{
-			End = Now + Row.CooldownSec;
-			if (SlotPanel)
-			{
-				SlotPanel->PlayCooldownShow(Row.Slot, Row.SkillID, End, Row.CooldownSec);
-			}
-		}
 	}
 }
 
@@ -319,19 +387,32 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 	if (!SlotPanel) return;
 	const int32 PrevID = SlotPanel->GetCurrentSkillID(Slot);
 	const int32 NextID = ResolveSkillToExecute(Slot, Target);
-	if (PrevID == NextID) return;
-	if (NextID <= 0)
+
+	if (PrevID != NextID)
 	{
-		SlotPanel->ResetToBase(Slot);
-		return;
+		UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
+		UTexture2D* NextIcon = IconCache.FindRef(NextID);
+
+		const int32 BaseID = GetBaseID(Slot);
+		if (!PrevIcon) PrevIcon = IconCache.FindRef(BaseID);
+		if (!NextIcon) NextIcon = IconCache.FindRef(BaseID);
+
+		if (NextID <= 0)
+		{
+			SlotPanel->ResetToBase(Slot);
+		}
+		else
+		{
+			SlotPanel->ShowSkill(Slot, NextID);
+		}
+
+		if (PrevIcon && NextIcon)
+		{
+			UI_OnAnimatedSetIcon.Broadcast(SlotToIndex(Slot), PrevIcon, NextIcon);
+		}
 	}
-	UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
-	UTexture2D* NextIcon = IconCache.FindRef(NextID);
-	if (PrevIcon && NextIcon)
-	{
-		UI_OnAnimatedSetIcon.Broadcast(SlotToIndex(Slot), PrevIcon, NextIcon);
-	}
-	SlotPanel->ShowSkill(Slot, NextID);
+
+	RefreshCooldownViewForSlot(Slot, NextID > 0 ? NextID : GetBaseID(Slot));
 }
 
 bool USkillSystemComponent::IsGlobalLock(const FSkillDataRow& Row, float Now) const
