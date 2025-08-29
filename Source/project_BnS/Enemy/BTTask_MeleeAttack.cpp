@@ -34,7 +34,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
     AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
     if (!TargetActor) return EBTNodeResult::Failed;
 
-    const bool bSuccess = SkillSystem->EnemyUseBasicMelee(AttackSkillID, TargetActor);
+    SkillSystem->EnemyUseBasicMelee(AttackSkillID, TargetActor);
 
-    return bSuccess ? EBTNodeResult::Succeeded : EBTNodeResult::Failed;
+    return EBTNodeResult::Succeeded;
 }

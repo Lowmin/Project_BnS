@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
+#include "BehaviorTree/Services/BTService_BlackboardBase.h"
 #include "BTService_CalculateReturnPos.generated.h"
 
 UCLASS()
-class PROJECT_BNS_API UBTService_CalculateReturnPos : public UBTService
+class PROJECT_BNS_API UBTService_CalculateReturnPos : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 
@@ -17,15 +17,6 @@ public:
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
-	float MaxDistance = 500.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	FBlackboardKeySelector HomePositionKey;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
-	float ReturnCompleteDistance = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
-	FBlackboardKeySelector ShouldReturnKey;
 };
