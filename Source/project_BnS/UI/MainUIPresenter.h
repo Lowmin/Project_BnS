@@ -19,7 +19,7 @@ public:
  	void SetMyPlayer(class AMyPlayer* player);
 
  private:
- 	void Bind(class UStatComponent* stat);
+ 	void BindUI();
  	
 	// variable
 	UPROPERTY()
@@ -74,6 +74,9 @@ public:
 	UFUNCTION()
 	void OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum);
 
+
 	// BossInfo
+	void OnBossInfoChange(class UStatComponent* status, float distance);
 	void OnBossHpChange(float current, float max);
+	void OnBossDistanceChange(float distance);
 };

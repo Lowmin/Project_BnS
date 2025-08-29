@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Skill/SkillSystemComponent.h"
 #include "StatComponent.h"
+#include "BossSensorComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -29,6 +30,9 @@ AMyPlayer::AMyPlayer()
     FollowCamera->bUsePawnControlRotation = false;
 
     Status->SetCharacterName("BNS_User");
+
+    BossSensor = CreateDefaultSubobject<UBossSensorComponent>(TEXT("BossInfo"));
+    BossSensor->SetupAttachment(RootComponent);
 }
 
 void AMyPlayer::BeginPlay()
@@ -183,6 +187,11 @@ void AMyPlayer::HandleProjectileSkill(const FInputActionValue& Value)
     if (!SkillSys) return;
 
     const bool ok = SkillSys->UseSkillBySlot(ESkillSlot::Slot1, GetTarget());
+}
+
+UBossSensorComponent* AMyPlayer::GetBossSensorComponent()
+{
+    return BossSensor;
 }
 
 void AMyPlayer::SetCurStamina(float stamina)

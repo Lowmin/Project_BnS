@@ -128,6 +128,13 @@ void UMainUi::SetSkillCooldown(int index, float remain, float cooldown, bool isV
 
 void UMainUi::SetBossInfo(const UStatComponent* status, float distance)
 {
+	if (status == nullptr)
+	{
+		BossInfo->SetVisibility(ESlateVisibility::Hidden);
+		return;
+	}
+
+	BossInfo->SetVisibility(ESlateVisibility::Visible);
 	BossInfo->SetInfo(status->GetCurHp(), status->GetMaxHp(), status->GetLevel(), status->GetCharacterName(), distance);
 }
 
