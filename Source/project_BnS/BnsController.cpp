@@ -22,6 +22,11 @@ ABnsController::ABnsController()
 void ABnsController::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ABnsController::OnPossess(APawn* pawn)
+{
+	Super::OnPossess(pawn);
 
 	// UI 생성 
 	if (MainUiClass != nullptr)
@@ -29,7 +34,7 @@ void ABnsController::BeginPlay()
 		MainUi = CreateWidget<UMainUi>(this, MainUiClass);
 		MainUi->AddToViewport();
 	}
-	
+
 	AMyPlayer* player = GetPawn<AMyPlayer>();
 	UIPresenter = GetWorld()->SpawnActor<AMainUIPresenter>(AMainUIPresenter::StaticClass());
 	UIPresenter->SetMainUI(MainUi);
@@ -41,10 +46,4 @@ void ABnsController::BeginPlay()
 	UIPresenter->OnExpChange(player->GetCurExp(), player->GetMaxExp());
 	UIPresenter->OnNicknameChange(player->GetCharacterName());
 	UIPresenter->OnBattleChange(false);
-
-}
-
-void ABnsController::OnPossess(APawn* pawn)
-{
-	Super::OnPossess(pawn);
 }
