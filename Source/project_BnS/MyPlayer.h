@@ -24,7 +24,6 @@ public:
     class UPostProcessComponent* PostProcessComponent;
 
     UPROPERTY(EditAnywhere, Category = "Effects")
-
     class UMaterialInterface* FastGlideEffectMaterial;
     UPROPERTY(EditAnywhere, Category = Input)
     class UInputMappingContext* IC_Player;
@@ -82,6 +81,14 @@ private:
 
     float CurrentBlurStrength;
     float TargetBlurStrength;
+
+    // Boss Sensor
+private:
+    UPROPERTY(VisibleAnywhere)
+    class UBossSensorComponent* BossSensor;
+
+public:
+    class UBossSensorComponent* GetBossSensorComponent();
 
     // Status
 private:

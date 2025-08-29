@@ -7,6 +7,8 @@
 #include "CharacterBase.h"
 #include "TargetingSystem.generated.h"
 
+DECLARE_DELEGATE_TwoParams(FDele_Single_TargetBox, const FVector2D&, const FVector2D&);
+
 
 UCLASS()
 class PROJECT_BNS_API ATargetingSystem : public ACharacterBase
@@ -33,13 +35,14 @@ private:
 	TObjectPtr<class ABnsController> BnsController;
 	
 	TArray<TObjectPtr<AActor>> TargetAbles{};
-	
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class USphereComponent> TargetSensor = nullptr;
 
 	// UPROPERTY(VisibleAnywhere)
 	TObjectPtr<AActor> Target = nullptr;
+
+	void SetTargetBox();
 
 	// 타겟 해제
 	void RemoveCurrentTarget();
@@ -54,6 +57,8 @@ private:
 	bool IsTargetBlocked(FVector targetPos);
 
 public:
+	FDele_Single_TargetBox OnTargetBoxChange;
+
 	/// <summary>
 	/// 현재 조준한 타겟 존재 여부 
 	/// </summary>

@@ -7,6 +7,7 @@
 #include "../MyPlayer.h"
 #include "../StatComponent.h"
 #include "../Skill/SkillSystemComponent.h"
+#include "../BossSensorComponent.h"
 
 void AMainUIPresenter::SetMainUI(UMainUi* ui)
 {
@@ -18,8 +19,15 @@ void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 {
 	MyPlayer = player;
 	
-	Bind(MyPlayer->GetStatusComponent());
+	BindUI();
+}
 
+void AMainUIPresenter::BindUI()
+{
+	if (MyPlayer == nullptr)
+		return;
+
+	// 스킬 바인드 
 	if (USkillSystemComponent* Skill = MyPlayer->GetSkillSystemComponent())
 	{
 		Skill->UI_OnSetIcon.AddDynamic(this, &AMainUIPresenter::SetSkillIcon);
@@ -27,16 +35,27 @@ void AMainUIPresenter::SetMyPlayer(AMyPlayer* player)
 		Skill->UI_OnCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
 		Skill->UI_OnAnimatedSetIcon.AddDynamic(this, &AMainUIPresenter::ChangeSkillIcon);
 	}
-}
 
-void AMainUIPresenter::Bind(UStatComponent* stat)
-{
+	// 보스 UI 바인드 
+	if (UBossSensorComponent* BossSensor = MyPlayer->GetBossSensorComponent())
+	{
+		BossSensor->OnBossInfoChange.BindUObject(this, &AMainUIPresenter::OnBossInfoChange);
+		BossSensor->OnBossHpChange.BindUObject(this, &AMainUIPresenter::OnBossHpChange);
+		BossSensor->OnBossDistanceChange.BindUObject(this, &AMainUIPresenter::OnBossDistanceChange);
+	}
+
+	// 타겟 박스 바인드 
+	MyPlayer->OnTargetBoxChange.BindUObject(this, &AMainUIPresenter::OnTargetChange);
+
+	// 스테이터스 바인드 
+	if (UStatComponent* stat = MyPlayer->GetStatusComponent())
+	{
+		stat->OnHpChange.AddUObject(this, &AMainUIPresenter::OnHpChange);
+		stat->OnMpChange.AddUObject(this, &AMainUIPresenter::OnMpChange);
+		stat->OnLevelChange.AddUObject(this, &AMainUIPresenter::OnLevelChange);
+	}
 	MyPlayer->OnStaminaChange.BindUObject(this, &AMainUIPresenter::OnStaminaChange);
 	MyPlayer->OnExpChange.BindUObject(this, &AMainUIPresenter::OnExpChange);
-	
-	stat->OnHpChange.AddUObject(this, &AMainUIPresenter::OnHpChange);
-	stat->OnMpChange.AddUObject(this, &AMainUIPresenter::OnMpChange);
-	stat->OnLevelChange.AddUObject(this, &AMainUIPresenter::OnLevelChange);
 }
 
 void AMainUIPresenter::OnHpChange(float current, float max) const
@@ -95,7 +114,7 @@ void AMainUIPresenter::OnExpChange(float current, float max) const
 	MainUI->SetExp(current, max);
 }
 
-void AMainUIPresenter::OnTargetChange(FVector2D center, FVector2D size) const
+void AMainUIPresenter::OnTargetChange(const FVector2D& center, const FVector2D& size) const
 {
 	if(MainUI == nullptr)
 		return;
@@ -133,4 +152,28 @@ void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown,
 		return;
 
 	MainUI->SetSkillCooldown(index, remain, cooldown, isVisibleNum);
+}
+
+void AMainUIPresenter::OnBossInfoChange(UStatComponent* status, float distance)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetBossInfo(status, distance);
+}
+
+void AMainUIPresenter::OnBossHpChange(float current, float max)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetBossHp(current, max);
+}
+
+void AMainUIPresenter::OnBossDistanceChange(float distance)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetBossDistance(distance);
 }

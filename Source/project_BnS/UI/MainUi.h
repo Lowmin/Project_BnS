@@ -122,4 +122,10 @@ public:
 	/// <param name="isVisibleNum"> 쿨타임 숫자 노출 여부  </param>
 	UFUNCTION()
 	void SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum);
+
+	// Boss Info
+	void SetBossInfo(const class UStatComponent* status, float distance);
+	void SetBossHp(float current, float max);
+	void SetBossCrowdControlCount(int current, int max);
+	void SetBossDistance(float distance);
 };
