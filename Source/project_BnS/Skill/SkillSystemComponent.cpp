@@ -548,6 +548,15 @@ bool USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
 	ASkillBase* skill = CreateSkill(*Row);
 	if (!skill) return false;
 
+	if (TWeakObjectPtr<ASkillBase>* FoundActor = ActiveSkillActors.Find(Row->Slot))
+	{
+		if (FoundActor->IsValid())
+		{
+			FoundActor->Get()->CancelSkill_Implementation();
+		}
+	}
+	ActiveSkillActors.Add(Row->Slot, skill);
+
 	skill->InitFromRow(*Row);
 	skill->SetSkillTarget(Target);
 	ISkillInterface::Execute_ExecuteSkill(skill);
