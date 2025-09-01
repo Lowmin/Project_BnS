@@ -41,7 +41,7 @@ protected:
 	TObjectPtr<UTextBlock> StaminaText = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UProgressBar> ExpBar = nullptr;
+	TObjectPtr<class UHoverProgressBar> ExpBar = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> NicknameText = nullptr;

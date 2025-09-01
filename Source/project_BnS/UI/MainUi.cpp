@@ -12,6 +12,7 @@
 #include "SkillIcon.h"
 #include "BossInfo.h"
 #include "../StatComponent.h"
+#include "HoverProgressBar.h"
 
 void UMainUi::NativeConstruct()
 {
@@ -33,7 +34,6 @@ void UMainUi::NativeConstruct()
 	SkillIcons.Emplace(Skill_4);
 
 	TargetSlot = Cast<UCanvasPanelSlot>(Target->Slot);
-
 }
 
 void UMainUi::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -84,7 +84,11 @@ void UMainUi::SetStaminaEnable(bool enable)
 
 void UMainUi::SetExp(float current, float max)
 {
+	int32 curExp = FMath::FloorToInt32(current);
+	int32 maxExp = FMath::FloorToInt32(max);
+
 	ExpBar->SetPercent(current / max);
+	ExpBar->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), curExp, maxExp)));
 }
 
 void UMainUi::SetNickname(const FString& nickname)
