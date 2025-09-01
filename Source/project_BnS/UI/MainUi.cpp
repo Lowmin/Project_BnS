@@ -115,9 +115,9 @@ void UMainUi::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* te
 	SkillIcons[index]->ChangeSkillIcon(prevTexture, texture);
 }
 
-void UMainUi::ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void UMainUi::ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture)
 {
-	SkillIcons[index]->ChangeSkillIconStep(prevTexture, texture);
+	SkillIcons[index]->ChangeSkillIconChain(prevTexture, texture);
 }
 
 void UMainUi::SetSkillIcon(int index, UTexture2D* texture)

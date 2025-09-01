@@ -50,7 +50,7 @@ void USkillIcon::ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture)
 	PlayAnimation(AniSwap);
 }
 
-void USkillIcon::ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture)
+void USkillIcon::ChangeSkillIconChain(UTexture2D* prevTexture, UTexture2D* texture)
 {
 	ChangeProgress = 0.0f;
 

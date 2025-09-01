@@ -50,7 +50,7 @@ public:
  	UFUNCTION()
  	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
 	UFUNCTION()
- 	void ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture);
+ 	void ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture);
  	
 	/// <summary>
 	/// 스킬 아이콘 변경 

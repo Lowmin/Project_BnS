@@ -31,7 +31,7 @@ void AMainUIPresenter::BindUI()
 	if (USkillSystemComponent* Skill = MyPlayer->GetSkillSystemComponent())
 	{
 		Skill->UI_OnSetIcon.AddDynamic(this, &AMainUIPresenter::SetSkillIcon);
-		Skill->UI_OnSetIconStep.AddDynamic(this, &AMainUIPresenter::ChangeSkillIconStep);
+		Skill->UI_OnSetIconStep.AddDynamic(this, &AMainUIPresenter::ChangeSkillIconChain);
 		Skill->UI_OnCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
 		Skill->UI_OnAnimatedSetIcon.AddDynamic(this, &AMainUIPresenter::ChangeSkillIcon);
 	}
@@ -130,12 +130,12 @@ void AMainUIPresenter::ChangeSkillIcon(int index, UTexture2D* prevTexture, UText
 	MainUI->ChangeSkillIcon(index, prevTexture, texture);
 }
 
-void AMainUIPresenter::ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void AMainUIPresenter::ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture)
 {
 	if(MainUI == nullptr)
 		return;
 
-	MainUI->ChangeSkillIconStep(index, prevTexture, texture);
+	MainUI->ChangeSkillIconChain(index, prevTexture, texture);
 }
 
 void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)

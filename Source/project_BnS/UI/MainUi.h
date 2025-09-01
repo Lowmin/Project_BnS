@@ -106,7 +106,7 @@ public:
 	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
 	
     UFUNCTION()
-    void ChangeSkillIconStep(int index, UTexture2D* prevTexture, UTexture2D* texture);
+    void ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture);
 
 	UFUNCTION()
 	void SetSkillIcon(int index, UTexture2D* texture);

@@ -56,7 +56,7 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void ChangeSkillIcon(UTexture2D* prevTexture, UTexture2D* texture);
-	void ChangeSkillIconStep(UTexture2D* prevTexture, UTexture2D* texture);
+	void ChangeSkillIconChain(UTexture2D* prevTexture, UTexture2D* texture);
 	void SetIcon(UTexture2D* texture);
 	void SetCooldown(float remain, float cooldown, bool isVisibleNum);
 };
