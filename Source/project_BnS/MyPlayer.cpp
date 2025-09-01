@@ -98,7 +98,6 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPlayer::Move(const FInputActionValue& Value)
 {
-
     if (MovementSystem && MovementSystem->GetMoveState() == EMoveState::WallRunning)
     {
         return;

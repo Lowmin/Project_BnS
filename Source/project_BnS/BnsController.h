@@ -28,10 +28,21 @@ private:
 	TSubclassOf<class UMainUi> MainUiClass = nullptr;
 	UPROPERTY()
 	TObjectPtr<class UMainUi> MainUi = nullptr;
+
+
 public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class AMainUIPresenter> UIPresenter = nullptr;
 
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;
+
+	virtual void SetupInputComponent() override;
+
+	// Input
+private:
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_Inventory = nullptr;
+
+	void ShowInventory();
 };

@@ -7,16 +7,23 @@
 #include "UI/MainUi.h"
 #include "UI/MainUIPresenter.h"
 #include "MyPlayer.h"
+#include "InputAction.h"
+#include "EnhancedInputComponent.h"
 
 ABnsController::ABnsController()
 {
-	ConstructorHelpers::FClassFinder<UMainUi> res(TEXT("/Game/UI/WBP_Ingame.WBP_Ingame_C"));
+	static ConstructorHelpers::FClassFinder<UMainUi> res(TEXT("/Game/UI/WBP_Ingame.WBP_Ingame_C"));
 	if (res.Succeeded())
 	{
 		MainUiClass = res.Class;
 	}
 	//UIPresenter = CreateDefaultSubobject<AMainUIPresenter>(TEXT("UiPresenter"));
-	
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> iaInventory(TEXT("/Game/Input/IA_Inventory.IA_Inventory"));
+	if (iaInventory.Succeeded())
+	{
+		IA_Inventory = iaInventory.Object;
+	}
 }
 
 void ABnsController::BeginPlay()
@@ -46,4 +53,36 @@ void ABnsController::OnPossess(APawn* pawn)
 	UIPresenter->OnExpChange(player->GetCurExp(), player->GetMaxExp());
 	UIPresenter->OnNicknameChange(player->GetCharacterName());
 	UIPresenter->OnBattleChange(false);
+
+
+	if (IA_Inventory)
+	{
+	}
+}
+
+void ABnsController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	UEnhancedInputComponent* EnhancedPlayerInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	if (EnhancedPlayerInputComponent != nullptr)
+	{
+		EnhancedPlayerInputComponent->BindAction(IA_Inventory, ETriggerEvent::Completed, this, &ABnsController::ShowInventory);
+	}
+}
+
+void ABnsController::ShowInventory()
+{
+	// 마우스 커서 제어 
+	SetShowMouseCursor(!ShouldShowMouseCursor());
+
+	// 인풋 모드 설정 
+	if (ShouldShowMouseCursor())
+	{
+		SetInputMode(FInputModeGameAndUI());	
+	}
+	else
+	{
+		SetInputMode(FInputModeGameOnly());
+	}
 }
