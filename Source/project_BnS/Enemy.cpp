@@ -95,6 +95,7 @@ void AEnemy::OnDamaged(int32 damage)
 
 	if (IsDead())
 	{
+		//GetMesh()->SetCollisionProfileName(TEXT("EnemyDie"));
 		Die();
 	}
 }
@@ -106,6 +107,9 @@ void AEnemy::Die()
 	{
 		AIController->GetBrainComponent()->StopLogic(TEXT("Enemy Died"));
 	}
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 
 	FTimerHandle DestroyTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(

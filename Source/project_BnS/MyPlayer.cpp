@@ -104,6 +104,11 @@ void AMyPlayer::Move(const FInputActionValue& Value)
         return;
     }
 
+    if (MovementSystem->GetMoveState() == EMoveState::Gliding || MovementSystem->GetMoveState() == EMoveState::FastGliding)
+    {
+        return;
+    }
+
     const FVector2D MovementVector = Value.Get<FVector2D>();
 
     if (Controller != nullptr)

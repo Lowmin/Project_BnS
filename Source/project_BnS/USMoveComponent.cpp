@@ -224,7 +224,7 @@ void USMoveComponent::StartGlide()
 void USMoveComponent::StopGlide()
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
-	SetMoveState(EMoveState::Running);
+	SetMoveState(EMoveState::Idle);
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	MyPlayer->GetCharacterMovement()->GravityScale = 1.0f;
 }
@@ -252,6 +252,9 @@ void USMoveComponent::Glide(float DeltaTime)
 		StopGlide();
 		return;
 	}
+	const FVector ForwardDirection = MyPlayer->GetActorForwardVector();
+	MyPlayer->AddMovementInput(ForwardDirection, 1.0f);
+
 	MyPlayer->GetCharacterMovement()->Velocity.Z = -GlideDescentSpeed;
 }
 
