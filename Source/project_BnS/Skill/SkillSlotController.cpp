@@ -81,7 +81,7 @@ bool USkillSlotController::ShowPairSkill(ESkillSlot SkillSlot, int32 CurSkillID,
 	const FSkillDataRow* Next = FindRowByID(NextSkillID);
 	if (!Cur || !Next) return false;
 
-	CurIDBySlot.FindOrAdd(SkillSlot) = CurSkillID;
+	CurIDBySlot.FindOrAdd(SkillSlot) = NextSkillID;
 
 	UTexture2D* CurIcon = Cur->SkillIcon.LoadSynchronous();
 	UTexture2D* NextIcon = Next->SkillIcon.LoadSynchronous();

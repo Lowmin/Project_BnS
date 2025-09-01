@@ -385,10 +385,33 @@ void USkillSystemComponent::OnChainExpire(ESkillSlot Slot)
 void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target)
 {
 	if (!SlotPanel) return;
+
 	const int32 PrevID = SlotPanel->GetCurrentSkillID(Slot);
 	const int32 NextID = ResolveSkillToExecute(Slot, Target);
 
-	if (PrevID != NextID)
+	if (PrevID == NextID)
+	{
+		RefreshCooldownViewForSlot(Slot, NextID > 0 ? NextID : GetBaseID(Slot));
+		return;
+	}
+
+	if (Slot == ESkillSlot::Slot0)
+	{
+		const int32 BaseID = GetBaseID(Slot);
+
+		int32 FinalPrevID = (PrevID > 0) ? PrevID : BaseID;
+		int32 FinalNextID = (NextID > 0) ? NextID : BaseID;
+
+		if (FinalNextID > 0)
+		{
+			SlotPanel->ShowPairSkill(Slot, FinalPrevID, FinalNextID);
+		}
+		else
+		{
+			SlotPanel->ResetToBase(Slot);
+		}
+	}
+	else
 	{
 		UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
 		UTexture2D* NextIcon = IconCache.FindRef(NextID);
