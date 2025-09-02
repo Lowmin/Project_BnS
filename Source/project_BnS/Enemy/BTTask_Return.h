@@ -25,5 +25,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector ReturnPositionKey;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector ReturnRotationKey;
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	float AcceptanceRadius = 50.0f;
 };

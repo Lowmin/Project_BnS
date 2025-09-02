@@ -11,6 +11,21 @@ UBTService_CalculateReturnPos::UBTService_CalculateReturnPos()
 	bNotifyBecomeRelevant = true;
 }
 
+void UBTService_CalculateReturnPos::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
+
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (!AIController || !BlackboardComp) return;
+
+	APawn* ControlledPawn = AIController->GetPawn();
+	if (!ControlledPawn) return;
+
+	const FRotator CurrentRotation = ControlledPawn->GetActorRotation();
+	BlackboardComp->SetValueAsRotator(DefaultRotationKey.SelectedKeyName, CurrentRotation);
+}
+
 void UBTService_CalculateReturnPos::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);

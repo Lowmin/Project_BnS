@@ -39,6 +39,8 @@ EBTNodeResult::Type UBTTask_Return::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 void UBTTask_Return::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	AAIController* AIController = OwnerComp.GetAIOwner();
+	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
+
 	if (!AIController || !AIController->GetPathFollowingComponent())
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
@@ -50,6 +52,13 @@ void UBTTask_Return::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 
 	if (Status == EPathFollowingStatus::Idle)
 	{
+		APawn* ControlledPawn = AIController->GetPawn();
+		if (ControlledPawn)
+		{
+			FRotator ReturnRotation = BlackboardComp->GetValueAsRotator(ReturnRotationKey.SelectedKeyName);
+			ControlledPawn->SetActorRotation(ReturnRotation);
+		}
+
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 	else if (Status != EPathFollowingStatus::Moving)
