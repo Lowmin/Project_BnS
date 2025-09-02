@@ -42,6 +42,8 @@ private:
 	// UPROPERTY(VisibleAnywhere)
 	TObjectPtr<AActor> Target = nullptr;
 
+	void OnViewportResized(FViewport* viewport, uint32 params);
+
 	void SetTargetBox();
 
 	// 타겟 해제

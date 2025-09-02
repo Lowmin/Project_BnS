@@ -28,18 +28,21 @@ void ATargetingSystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GEngine->GameViewport->GetViewportSize(ViewportSize);
-	float uiDpScale = UWidgetLayoutLibrary::GetViewportScale(GEngine->GameViewport->GetWorld());
-	UiViewportSize = ViewportSize * (1 / uiDpScale);
-	CameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
-
 	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 	BnsController = Cast<ABnsController>(playerController);
+	CameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+
+	FViewport::ViewportResizedEvent.AddUObject(this, &ATargetingSystem::OnViewportResized);
+
+	OnViewportResized(GEngine->GameViewport->Viewport, 0);
 }
 
 void ATargetingSystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+	BnsController = Cast<ABnsController>(playerController);
 
 	// 타겟 유효성 검사 
 	ValidateTarget();
@@ -52,6 +55,16 @@ void ATargetingSystem::Tick(float DeltaTime)
 
 	// 타겟박스 계산 
 	SetTargetBox();
+}
+void ATargetingSystem::OnViewportResized(FViewport* viewport, uint32 params)
+{
+	FIntPoint size = viewport->GetSizeXY();
+	ViewportSize.X = size.X;
+	ViewportSize.Y = size.Y;
+
+	//GEngine->GameViewport->GetViewportSize(ViewportSize);
+	float uiDpScale = UWidgetLayoutLibrary::GetViewportScale(GEngine->GameViewport->GetWorld());
+	UiViewportSize = ViewportSize * (1 / uiDpScale);
 }
 
 void ATargetingSystem::SetTargetBox()
