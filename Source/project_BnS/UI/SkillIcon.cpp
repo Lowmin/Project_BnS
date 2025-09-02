@@ -26,7 +26,7 @@ void USkillIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	if (ChangeProgress > 1.0f)
 		return;
 
-	ChangeProgress = FMath::Clamp(ChangeProgress + (InDeltaTime * 1.0f), 0.0f, 1.0f);
+	ChangeProgress = FMath::Clamp(ChangeProgress + (InDeltaTime * 4.0f), 0.0f, 1.0f);
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(TEXT("Progress"), ChangeProgress);
 }
 
