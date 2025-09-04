@@ -85,14 +85,14 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         EnhancedPlayerInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AMyPlayer::StopJumping);
         EnhancedPlayerInputComponent->BindAction(IA_Run, ETriggerEvent::Started, this, &AMyPlayer::SMoveToggle);
 
-        if (IA_BasicAttack)
-        {
-            EnhancedPlayerInputComponent->BindAction(IA_BasicAttack, ETriggerEvent::Started, this, &AMyPlayer::HandleBasicAttack);
-        }
-        if (IA_ProjectileSkill)
-        {
-            EnhancedPlayerInputComponent->BindAction(IA_ProjectileSkill, ETriggerEvent::Started, this, &AMyPlayer::HandleProjectileSkill);
-        }
+        // Skill Slot
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_Zero, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 0);	// LMB -> Slot0
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_One, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 1);	// 1 -> Slot1
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_Two, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 2);	// 2 -> Slot2
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_Three, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 3);	// 3 -> Slot3
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_Four, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 4);	// 4 -> Slot4
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_Q, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 5);	// Q -> Slot5
+        EnhancedPlayerInputComponent->BindAction(IA_Slot_E, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 6);	// E -> Slot6
     }
 }
 
@@ -177,20 +177,12 @@ void AMyPlayer::SGlidingToggle()
     }
 }
 
-void AMyPlayer::HandleBasicAttack(const FInputActionValue& Value)
+void AMyPlayer::HandleSkillInput(int32 SkillIndex)
 {
-    USkillSystemComponent* SkillSys = FindComponentByClass<USkillSystemComponent>();
+    USkillSystemComponent* SkillSys = GetSkillSystemComponent();
     if (!SkillSys) return;
 
-    const bool ok = SkillSys->UseSkillBySlot(ESkillSlot::Slot0, GetTarget());
-}
-
-void AMyPlayer::HandleProjectileSkill(const FInputActionValue& Value)
-{
-    USkillSystemComponent* SkillSys = FindComponentByClass<USkillSystemComponent>();
-    if (!SkillSys) return;
-
-    const bool ok = SkillSys->UseSkillBySlot(ESkillSlot::Slot1, GetTarget());
+    SkillSys->UseSkillByIndex(SkillIndex, GetTarget());
 }
 
 UBossSensorComponent* AMyPlayer::GetBossSensorComponent()
