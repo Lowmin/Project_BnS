@@ -20,3 +20,19 @@ const FBuffData& UBuff::GetBuffData()const
 {
 	return *Data;
 }
+
+ACharacterBase* UBuff::GetTarget() const
+{
+	return Target.Get();
+}
+
+float UBuff::GetRemainTime() const
+{
+	return RemainTime;
+}
+
+bool UBuff::CheckTickDuration(float deltaTime)
+{
+	RemainTime -= deltaTime;
+	return RemainTime <= 0.f;
+}

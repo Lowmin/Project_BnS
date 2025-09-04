@@ -17,4 +17,7 @@ class PROJECT_BNS_API UBuffPoison : public UBuff, public IBuffTick
 	
 public:
 	virtual void BuffTick(float deltaTime) override;
+
+private:
+	float LastTickTime = 0.0f;
 };

@@ -77,6 +77,41 @@ void UBuffComponent::BuffTick(float deltaTime)
 	auto a = GetBuffList();
 }
 
+void UBuffComponent::UpdateBuffDuration(float deltaTime)
+{
+	for (int32 i = BuffList.Num() - 1; i >= 0; --i)
+	{
+		UBuff* buff = BuffList[i];
+		if (buff == nullptr) continue;
+
+		ACharacterBase* target = buff->GetTarget();
+		bool bRemove = false;
+
+		if (!target || target->IsDead())
+		{
+			bRemove = true;
+		}
+		else if (buff->CheckTickDuration(deltaTime))
+		{
+			bRemove = true;
+		}
+
+		if (bRemove)
+		{
+			// 버프 종료 델리게이트
+			buff->OnBuffFinish.Broadcast(buff->GetBuffData());
+
+			// 틱 리스트에 있는 버프 제거
+			IBuffTick* buffTick = Cast<IBuffTick>(buff);
+			if (buffTick)
+			{
+				BuffTickList.erase(std::remove(BuffTickList.begin(), BuffTickList.end(), buffTick), BuffTickList.end());
+			}
+			BuffList.RemoveAt(i);
+		}
+	}
+}
+
 const TArray<class UBuff*> UBuffComponent::GetBuffList() const
 {
 	return BuffList;

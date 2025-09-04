@@ -27,6 +27,12 @@ public:
 	void SetBuffData(const FBuffData* data);
 	void SetTarget(ACharacterBase* target);
 	const FBuffData& GetBuffData() const;
+	ACharacterBase* GetTarget() const;
+
+	// 남은 시간 확인 (끝나면 true)
+	bool CheckTickDuration(float deltaTime);
+	// UI 표시; 남은 시간
+	float GetRemainTime() const;
 
 	FBuffSetupDele OnBuffStart;
 	FBuffSetupDele OnBuffFinish;

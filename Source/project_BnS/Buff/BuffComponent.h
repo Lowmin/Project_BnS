@@ -48,6 +48,9 @@ private:
 	/// <param name="deltaTime"> 델타타임 </param>
 	void BuffTick(float deltaTime);
 
+	// (추가) 지속 시간 갱신 및 만료된 버프 제거
+	void UpdateBuffDuration(float deltaTime);
+
 public:
 	const TArray<class UBuff*> GetBuffList() const;
 
