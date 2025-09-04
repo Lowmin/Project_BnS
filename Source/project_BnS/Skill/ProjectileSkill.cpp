@@ -13,11 +13,13 @@ void AProjectileSkill::ExecuteSkill_Implementation()
 {
 	const FSkillType_Projectile* Type = GetTypeData_Projectile();
 	if (!Type) return;
-	if (!MyMontage) return;
-
+	if (!MyMontage)
+	{
+		SpawnProjectile(*Type);
+		Destroy();
+		return;
+	}
 	Super::ExecuteSkill_Implementation();
-	SpawnProjectile(*Type);		// 몽타주 없이 단발 처리: 발사체 스폰만 하고 즉시 종료
-	Destroy();
 }
 
 void AProjectileSkill::OnSkillNotify_Custom(FName NotifyName)

@@ -58,6 +58,11 @@ void ATargetingSystem::Tick(float DeltaTime)
 }
 void ATargetingSystem::OnViewportResized(FViewport* viewport, uint32 params)
 {
+	if (GEngine == nullptr)
+		return;
+	if (GEngine->GameViewport == nullptr)
+		return;
+
 	FIntPoint size = viewport->GetSizeXY();
 	ViewportSize.X = size.X;
 	ViewportSize.Y = size.Y;

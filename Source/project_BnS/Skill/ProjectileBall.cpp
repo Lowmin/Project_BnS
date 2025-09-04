@@ -14,18 +14,14 @@ AProjectileBall::AProjectileBall()
 	// 충돌 구
 	HitSphere = CreateDefaultSubobject<USphereComponent>(TEXT("HitSphere"));
 	HitSphere->InitSphereRadius(30.f);
-	// 콜리전 채널 세팅 필요
-	HitSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HitSphere->SetCollisionObjectType(ECC_WorldDynamic);
-	HitSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-	HitSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	HitSphere->SetCollisionResponseToChannel(ECC_GameTraceChannel6, ECR_Overlap);
-	HitSphere->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
-	HitSphere->SetGenerateOverlapEvents(true);
 	RootComponent = HitSphere;
 
+	// 콜리전 채널 세팅 필요
+	HitSphere->SetCollisionObjectType(ECC_GameTraceChannel7);
+	HitSphere->SetCollisionProfileName(TEXT("Projectile"));
+	HitSphere->SetNotifyRigidBodyCollision(true);
+
 	HitSphere->OnComponentHit.AddDynamic(this, &AProjectileBall::OnHit);
-	HitSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectileBall::OnOverlap);
 
 	MoveSphere = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Move"));
 	MoveSphere->bRotationFollowsVelocity = true;
@@ -57,6 +53,7 @@ void AProjectileBall::DoExplore(const FVector& HitPos)
 
 void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *GetNameSafe(Other));
 	if (!Other || Other == GetOwner())
 	{
 		Destroy();
@@ -66,19 +63,6 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 	const FVector Impact = FVector(Hit.ImpactPoint);
 	const FVector Self = GetActorLocation();
 	const FVector Position = Hit.bBlockingHit ? Impact : Self;
-	DoExplore(Position);
-	Destroy();
-}
-
-void AProjectileBall::OnOverlap(UPrimitiveComponent* OverComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHit)
-{
-	if (IsDamage) { Destroy(); return; }
-	if (!Other || Other == GetOwner()) { Destroy(); return; }
-
-	ProjectileDamage(Other);
-	IsDamage = true;
-
-	const FVector Position = bFromSweep ? FVector(SweepHit.ImpactPoint) : GetActorLocation();
 	DoExplore(Position);
 	Destroy();
 }

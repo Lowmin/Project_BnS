@@ -51,10 +51,25 @@ public:
 
     // Skill
     UPROPERTY(EditAnywhere, Category = Input)
-    class UInputAction* IA_BasicAttack;
+    class UInputAction* IA_Slot_Zero;           // LMB
 
     UPROPERTY(EditAnywhere, Category = Input)
-    class UInputAction* IA_ProjectileSkill;
+    class UInputAction* IA_Slot_One;            // 1
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Slot_Two;            // 2
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Slot_Three;          // 3
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Slot_Four;           // 4
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Slot_Q;               // Q
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Slot_E;              // E
 
 protected:
     virtual void BeginPlay() override;
@@ -69,8 +84,7 @@ protected:
     void SGlidingToggle();
 
     // Skill
-    void HandleBasicAttack(const FInputActionValue& Value);
-    void HandleProjectileSkill(const FInputActionValue& Value);
+    void HandleSkillInput(int32 SkillIndex);
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
