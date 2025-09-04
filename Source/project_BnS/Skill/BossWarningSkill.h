@@ -17,18 +17,18 @@ class PROJECT_BNS_API ABossWarningSkill : public AMeleeSkill
 
 public:
 	virtual void ExecuteSkill_Implementation() override;
-	virtual void OnSkillNotify_Hit() override;
+	ABossWarningSkill();
 
 protected:
 	void PerformDelayedAttack();
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Effect", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AActor> WarningIndicatorClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	TSubclassOf<AWarningIndicator> WarningIndicatorClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Effect", meta = (AllowPrivateAccess = "true"))
-	float WarningDuration = 1.5f;
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	float WarningDuration = 3.0f;
 
 	UPROPERTY()
-	TObjectPtr<AActor> SpawnedIndicator;
+	TObjectPtr<AWarningIndicator> SpawnedIndicator;
 };

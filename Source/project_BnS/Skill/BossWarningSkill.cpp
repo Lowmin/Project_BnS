@@ -6,6 +6,7 @@
 #include "../CharacterBase.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "DrawDebugHelpers.h"
 
 void ABossWarningSkill::ExecuteSkill_Implementation()
 {
@@ -16,18 +17,21 @@ void ABossWarningSkill::ExecuteSkill_Implementation()
 		return;
 	}
 
-	// 준비 동작
-	//PlayAnimMontage(MyMontage);
-
-	const FSkillType_Melee* Data = GetTypeData_Melee();
-	if (Data)
+	if (MyMontage)
 	{
-		const FVector Start = OwnerCharacter->GetActorLocation();
-		const FVector Dir = OwnerCharacter->GetActorForwardVector();
-
-		const FVector SpawnLocation = Start + Dir * Data->AttackLength;
-		SpawnedIndicator = GetWorld()->SpawnActor<AActor>(WarningIndicatorClass, SpawnLocation, FRotator::ZeroRotator);
+		if (UAnimInstance* AnimInstance = GetOwnerAnimInstance())
+		{
+			AnimInstance->Montage_Play(MyMontage);
+		}
 	}
+	const FSkillType_Area* AreaData = GetTypeData_Area();
+	if (!AreaData)
+	{
+		Destroy();
+		return;
+	}
+
+	SpawnedIndicator = GetWorld()->SpawnActor<AWarningIndicator>(WarningIndicatorClass, OwnerCharacter->GetActorLocation(), FRotator::ZeroRotator);
 
 	FTimerHandle AttackTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -38,6 +42,16 @@ void ABossWarningSkill::ExecuteSkill_Implementation()
 		false);
 }
 
+ABossWarningSkill::ABossWarningSkill()
+{
+	static ConstructorHelpers::FClassFinder<AWarningIndicator> Indicator(TEXT("/Game/Enemy/Boss/BP_WarningIndicator.BP_WarningIndicator_C"));
+
+	if (Indicator.Succeeded())
+	{
+		WarningIndicatorClass = Indicator.Class;
+	}
+}
+
 void ABossWarningSkill::PerformDelayedAttack()
 {
 	if (SpawnedIndicator)
@@ -45,12 +59,43 @@ void ABossWarningSkill::PerformDelayedAttack()
 		SpawnedIndicator->Destroy();
 	}
 
-	//PerformMeleeAttack();
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	const FSkillType_Area* AreaData = GetTypeData_Area();
+	if (!OwnerCharacter || !AreaData)
+	{
+		Destroy();
+		return;
+	}
+
+	const FVector Center = OwnerCharacter->GetActorLocation();
+	const float AttackRadius = AreaData->Radius;
+
+	FCollisionQueryParams QP;
+	QP.AddIgnoredActor(OwnerCharacter);
+
+	TArray<FHitResult> HitResults;
+	GetWorld()->SweepMultiByChannel(
+		HitResults,
+		Center,
+		Center,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(AttackRadius),
+		QP
+	);
+
+	DrawDebugSphere(GetWorld(), Center, AttackRadius, 32, FColor::Red, false, 2.0f);
+
+	TSet<AActor*> DamagedActors;
+	for (const FHitResult& Hit : HitResults)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && !DamagedActors.Contains(HitActor))
+		{
+			ApplyDamageToCharacter(Cast<ACharacter>(HitActor));
+			DamagedActors.Add(HitActor);
+		}
+	}
 
 	Destroy();
-}
-
-void ABossWarningSkill::OnSkillNotify_Hit()
-{
-
 }

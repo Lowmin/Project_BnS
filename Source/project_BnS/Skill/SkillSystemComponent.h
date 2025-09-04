@@ -99,6 +99,8 @@ public:
 	// Enemy 보조
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
 	bool EnemyUseBasicMelee(int32 SkillID, AActor* Target);
+	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
+	bool IsReady(int32 SkillID) const;
 
 private:
 	// ==== 실행 파이프라인 ====

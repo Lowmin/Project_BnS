@@ -588,3 +588,12 @@ bool USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
 	CommitStateAfterUse(*Row, Dummy);
 	return true;
 }
+
+bool USkillSystemComponent::IsReady(int32 SkillID) const
+{
+	if (const float* EndAt = CooldownEndAt.Find(SkillID))
+	{
+		return *EndAt <= GetWorld()->GetTimeSeconds();
+	}
+	return true;
+}
