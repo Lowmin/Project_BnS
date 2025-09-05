@@ -34,6 +34,11 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
     AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetActorKey.SelectedKeyName));
     if (!TargetActor) return EBTNodeResult::Failed;
 
+    FVector LookDirection = TargetActor->GetActorLocation() - Enemy->GetActorLocation();
+    LookDirection.Z = 0;
+    FRotator TargetRotation = LookDirection.Rotation();
+    Enemy->SetActorRotation(TargetRotation);
+
     SkillSystem->EnemyUseBasicMelee(AttackSkillID, TargetActor);
 
     return EBTNodeResult::Succeeded;

@@ -40,7 +40,6 @@ void AWarningIndicator::SetDecalSize(float Radius)
 	{
 		const float DecalDepth = 200.0f;
 		DecalComponent->DecalSize = FVector(DecalDepth, Radius, Radius);
-
 		DecalComponent->MarkRenderStateDirty();
 
 		UE_LOG(LogTemp, Warning, TEXT("[WarningIndicator] DecalComponent Size SET TO: %s"), *DecalComponent->DecalSize.ToString());

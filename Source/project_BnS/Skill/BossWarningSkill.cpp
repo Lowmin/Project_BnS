@@ -33,6 +33,9 @@ void ABossWarningSkill::ExecuteSkill_Implementation()
 
 	SpawnedIndicator = GetWorld()->SpawnActor<AWarningIndicator>(WarningIndicatorClass, OwnerCharacter->GetActorLocation(), FRotator::ZeroRotator);
 
+	if(SpawnedIndicator)
+		SpawnedIndicator->SetDecalSize(AreaData->Radius);
+
 	FTimerHandle AttackTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		AttackTimerHandle,
@@ -69,6 +72,8 @@ void ABossWarningSkill::PerformDelayedAttack()
 
 	const FVector Center = OwnerCharacter->GetActorLocation();
 	const float AttackRadius = AreaData->Radius;
+	UE_LOG(LogTemp, Error, TEXT("Attack Radius from Data Table: %f"), AttackRadius);
+
 
 	FCollisionQueryParams QP;
 	QP.AddIgnoredActor(OwnerCharacter);
@@ -93,6 +98,7 @@ void ABossWarningSkill::PerformDelayedAttack()
 		if (HitActor && !DamagedActors.Contains(HitActor))
 		{
 			ApplyDamageToCharacter(Cast<ACharacter>(HitActor));
+
 			DamagedActors.Add(HitActor);
 		}
 	}

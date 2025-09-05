@@ -48,7 +48,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 	ValidateTarget();
 
 	// 타겟 선정 
-	if(Target == nullptr && TargetAbles.Num() > 0)
+	if (Target == nullptr && TargetAbles.Num() > 0)
 	{
 		SetCurTarget();
 	}
@@ -107,8 +107,8 @@ void ATargetingSystem::SetTargetBox()
 void ATargetingSystem::RemoveCurrentTarget()
 {
 	ITargetAble::Execute_OnTargeted(Target, false);
-	Target = nullptr; 
-	
+	Target = nullptr;
+
 	OnTargetBoxChange.Execute(FVector2D::ZeroVector, FVector2D(100.0f, 100.0f));
 }
 
@@ -116,7 +116,7 @@ void ATargetingSystem::SetCurTarget()
 {
 	FVector pos = GetActorLocation();
 	FVector forward = GetActorForwardVector();
-	
+
 	float distance = std::numeric_limits<float>::max();
 
 	for (AActor* targetAble : TargetAbles)
@@ -132,14 +132,14 @@ void ATargetingSystem::SetCurTarget()
 		float distSqrt = FVector::DistSquared(pos, targetPos);
 
 		// 45도 이내, 가장 짧은 거리 타겟 설정 
-		if(dot > 0.5f && distSqrt < distance)
+		if (dot > 0.5f && distSqrt < distance)
 		{
 			// 대상이 가려져있지 않은경우 등록 
-			if(!IsTargetBlocked(targetPos))
+			if (!IsTargetBlocked(targetPos))
 			{
 				distance = distSqrt;
-				const ACharacterBase*  characterBase = Cast<ACharacterBase>(targetAble);
-				if(characterBase != nullptr)
+				const ACharacterBase* characterBase = Cast<ACharacterBase>(targetAble);
+				if (characterBase != nullptr)
 				{
 					Target = targetAble;
 					ITargetAble::Execute_OnTargeted(Target, true);
@@ -151,7 +151,7 @@ void ATargetingSystem::SetCurTarget()
 
 void ATargetingSystem::ValidateTarget()
 {
-	if(Target == nullptr)
+	if (Target == nullptr)
 		return;
 	UObject* obj = Cast<UObject>(Target);
 	if (obj == nullptr)
@@ -162,22 +162,22 @@ void ATargetingSystem::ValidateTarget()
 	{
 		RemoveCurrentTarget();
 	}
-	
+
 	FVector pos = GetActorLocation();
 	FVector targetPos = ITargetAble::Execute_GetWorldLocation(obj);
-	
+
 	FVector forward = GetActorForwardVector();
 	FVector dir = (targetPos - pos).GetSafeNormal();
 	float dot = FVector::DotProduct(forward, dir);
 
 	// 45도 이상 벗어나면 타겟 해제 
-	if(dot < 0.5f)
+	if (dot < 0.5f)
 	{
 		RemoveCurrentTarget();
 	}
 
 	// 대상이 가려져있는경우 타게팅 해제 
-	if(IsTargetBlocked(targetPos))
+	if (IsTargetBlocked(targetPos))
 	{
 		RemoveCurrentTarget();
 	}
@@ -187,7 +187,7 @@ bool ATargetingSystem::IsTargetBlocked(FVector targetPos)
 {
 	FVector pos = CameraManager->GetCameraLocation();
 	FHitResult result;
-	if(GetWorld()->LineTraceSingleByChannel(result, pos, targetPos, ECC_GameTraceChannel4))
+	if (GetWorld()->LineTraceSingleByChannel(result, pos, targetPos, ECC_GameTraceChannel4))
 	{
 		return true;
 	}
@@ -206,18 +206,18 @@ ACharacterBase* ATargetingSystem::GetTarget() const
 
 void ATargetingSystem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if(OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
+	if (OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
 	{
 		TargetAbles.Add(OtherActor);
 	}
 }
 
-void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ATargetingSystem::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
 	{
 		TargetAbles.Remove(OtherActor);
-		if(OtherActor == Target)
+		if (OtherActor == Target)
 		{
 			RemoveCurrentTarget();
 		}

@@ -47,6 +47,7 @@ void UBTTask_Return::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 		return;
 	}
 
+
 	UPathFollowingComponent* PathFollowingComp = AIController->GetPathFollowingComponent();
 	const EPathFollowingStatus::Type Status = PathFollowingComp->GetStatus();
 
