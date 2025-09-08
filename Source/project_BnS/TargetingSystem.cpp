@@ -121,14 +121,14 @@ void ATargetingSystem::SetCurTarget()
 
 	for (AActor* targetAble : TargetAbles)
 	{
+		// 비활성 대상 검사하지 않음 
 		if (!ITargetAble::Execute_IsActiveTarget(targetAble))
 			continue;
 
 		FVector targetPos = ITargetAble::Execute_GetWorldLocation(targetAble);
-
 		FVector dir = (targetPos - pos).GetSafeNormal();
-		float dot = FVector::DotProduct(forward, dir);
 
+		float dot = FVector::DotProduct(forward, dir);
 		float distSqrt = FVector::DistSquared(pos, targetPos);
 
 		// 45도 이내, 가장 짧은 거리 타겟 설정 
