@@ -7,6 +7,9 @@
 #include "DrawDebugHelpers.h"
 #include "../CharacterBase.h"
 
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+
 AProjectileBall::AProjectileBall()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -16,7 +19,6 @@ AProjectileBall::AProjectileBall()
 	HitSphere->InitSphereRadius(30.f);
 	RootComponent = HitSphere;
 
-	// 콜리전 채널 세팅 필요
 	HitSphere->SetCollisionObjectType(ECC_GameTraceChannel7);
 	HitSphere->SetCollisionProfileName(TEXT("Projectile"));
 	HitSphere->SetNotifyRigidBodyCollision(true);
@@ -30,6 +32,13 @@ AProjectileBall::AProjectileBall()
 	MoveSphere->MaxSpeed = 1200.f;
 
 	MoveSphere->UpdatedComponent = HitSphere;
+
+	// 이펙트
+	TrailVFXComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("TrailVFX"));
+	TrailVFXComponent->SetupAttachment(RootComponent);
+
+	MovingSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("TravelSound"));
+	MovingSoundComponent->SetupAttachment(RootComponent);
 
 	// 유도 기능
 
@@ -60,6 +69,16 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 		return;
 	}
 	ProjectileDamage(Other);
+
+	if (HitVFX)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitVFX, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+	}
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, Hit.ImpactPoint);
+	}
+
 	const FVector Impact = FVector(Hit.ImpactPoint);
 	const FVector Self = GetActorLocation();
 	const FVector Position = Hit.bBlockingHit ? Impact : Self;
@@ -78,7 +97,7 @@ void AProjectileBall::ProjectileDamage(AActor* Enemy)
 }
 
 
-void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage)
+void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage, UParticleSystem* InHitVFX, USoundBase* InHitSound, UParticleSystem* InTrailVFX, USoundBase* InMovingSound)
 {
 	CurrentData = InData;
 	SetOwner(InOwner);
@@ -98,4 +117,20 @@ void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor*
 
 	DamageValue = (InDamage == INDEX_NONE) ? 0 : FMath::Max(1, InDamage);
 	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+
+	// 이펙트
+	HitVFX = InHitVFX;
+	HitSound = InHitSound;
+
+	if (TrailVFXComponent && InTrailVFX)
+	{
+		TrailVFXComponent->SetTemplate(InTrailVFX);
+		TrailVFXComponent->Activate();
+	}
+	if (MovingSoundComponent && InMovingSound)
+	{
+		MovingSoundComponent->SetSound(InMovingSound);
+		MovingSoundComponent->Play();
+	}
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMeleeSkill::OnSkillNotify_Hit()
 {
@@ -47,6 +48,17 @@ void AMeleeSkill::PerformMeleeAttack()
 		if (!Other || Other == Player || HitEnemy.Contains(Other)) continue;
 
 		ApplyDamageToCharacter(Cast<ACharacter>(Other));
+
+		if (MyHitVFX)
+		{
+			// 맞은 위치(ImpactPoint)에 이펙트 생성
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyHitVFX, Hit.ImpactPoint, Dir.Rotation());
+		}
+		if (MyHitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, MyHitSound, Hit.ImpactPoint);
+		}
+
 		HitEnemy.Add(Other);
 
 		if (!Data->bCanHitMultiTarget) break;

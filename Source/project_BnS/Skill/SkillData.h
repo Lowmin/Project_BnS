@@ -4,6 +4,7 @@
 #include "Engine/DataTable.h"
 #include "StructUtils/InstancedStruct.h"
 #include "../CrowdControlComponent.h"
+#include "Sound/SoundBase.h"
 #include "SkillData.generated.h"
 
 UENUM(BlueprintType)
@@ -16,6 +17,7 @@ enum class ECooldownUIType : uint8
 class ASkillBase;
 class AActor;
 class UTexture2D;
+class UParticleSystem;
 
 // 스킬 슬롯 (입력)
 UENUM(BlueprintType)
@@ -92,6 +94,12 @@ struct FSkillType_Projectile : public FSkillTypeBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ExplosionRadius = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<UParticleSystem> TrailVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<USoundBase> MovingSound;
 };
 
 USTRUCT(BlueprintType)
@@ -173,6 +181,22 @@ struct FSkillDataRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	TSoftObjectPtr<UTexture2D> SkillIcon = nullptr;
+
+	// 캐스팅 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<UParticleSystem> CastVFX;
+
+	// 캐스팅 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<USoundBase> CastSound;
+
+	// 타격 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<UParticleSystem> HitVFX;
+
+	// 타격 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<USoundBase> HitSound;
 
 	// 세팅한 리스트 상태(down, stun)가 모두 타겟에 있어야 사용 가능
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
