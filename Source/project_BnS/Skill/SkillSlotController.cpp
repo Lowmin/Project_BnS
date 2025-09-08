@@ -103,7 +103,6 @@ void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID,
 {
 	ShowEndAt.FindOrAdd(SkillSlot) = EndAt;
 	ShowTotal.FindOrAdd(SkillSlot) = TotalSec;
-	//ShowType.FindOrAdd(SkillSlot) = ECooldownUIType::Skill;
 	ShowType.FindOrAdd(SkillSlot) = Type;
 
 	if (UWorld* World = GetWorldSafe())

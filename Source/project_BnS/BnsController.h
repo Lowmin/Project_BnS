@@ -29,6 +29,11 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UMainUi> MainUi = nullptr;
 
+	UPROPERTY()
+	TSubclassOf<class UUserWidget> InventoryClass = nullptr;
+	UPROPERTY()
+	TObjectPtr<class UInventory> Inventory = nullptr;
+
 
 public:
 	UPROPERTY(VisibleAnywhere)

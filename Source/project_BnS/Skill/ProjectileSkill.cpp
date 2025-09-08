@@ -84,7 +84,7 @@ void AProjectileSkill::SpawnProjectile(const FSkillType_Projectile& Type)
 		Data.ExplosionRadius = Type.ExplosionRadius;            // Æø¹ß ¹Ý°æ
 
 		const int32 Damage = CalculateDamage();
-		Ball->SetupProjectileData(Data, Player, Damage);
+		Ball->SetupProjectileData(Data, Player, Damage, MyHitVFX, MyHitSound, Type.TrailVFX, Type.MovingSound);
 	}
 }
 

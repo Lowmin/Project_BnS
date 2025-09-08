@@ -7,8 +7,10 @@
 #include "UI/MainUi.h"
 #include "UI/MainUIPresenter.h"
 #include "MyPlayer.h"
+#include "UI/Inventory/Inventory.h"
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
+
 
 ABnsController::ABnsController()
 {
@@ -17,12 +19,17 @@ ABnsController::ABnsController()
 	{
 		MainUiClass = res.Class;
 	}
-	//UIPresenter = CreateDefaultSubobject<AMainUIPresenter>(TEXT("UiPresenter"));
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> iaInventory(TEXT("/Game/Input/IA_Inventory.IA_Inventory"));
 	if (iaInventory.Succeeded())
 	{
 		IA_Inventory = iaInventory.Object;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> inventory(TEXT("/Game/UI/Inventory/WBP_Inventory.WBP_Inventory_C"));
+	if (inventory.Succeeded())
+	{
+		InventoryClass = inventory.Class;
 	}
 }
 
@@ -55,8 +62,11 @@ void ABnsController::OnPossess(APawn* pawn)
 	UIPresenter->OnBattleChange(false);
 
 
-	if (IA_Inventory)
-	{
+	if (InventoryClass && IA_Inventory)
+	{ 
+		Inventory = CreateWidget<UInventory>(this, InventoryClass);
+		Inventory->AddToViewport();
+		Inventory->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -73,16 +83,8 @@ void ABnsController::SetupInputComponent()
 
 void ABnsController::ShowInventory()
 {
-	// 마우스 커서 제어 
-	SetShowMouseCursor(!ShouldShowMouseCursor());
+	Inventory->SetVisiblePopup(!Inventory->IsVisible());
 
-	// 인풋 모드 설정 
-	if (ShouldShowMouseCursor())
-	{
-		SetInputMode(FInputModeGameAndUI());	
-	}
-	else
-	{
-		SetInputMode(FInputModeGameOnly());
-	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "popup cnt : " + FString::FromInt(UPopup::PopupCount));
 }

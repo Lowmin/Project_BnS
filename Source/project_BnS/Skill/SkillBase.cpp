@@ -7,6 +7,8 @@
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 
 ASkillBase::ASkillBase()
 {
@@ -19,6 +21,12 @@ void ASkillBase::InitFromRow(const FSkillDataRow& InRow)
 	MySlot = InRow.Slot;
 	MyBaseDamage = InRow.Damage;
 	SavedTypeData = InRow.SkillTypeData;
+
+	// 스킬 이펙트
+	MyCastVFX = InRow.CastVFX;
+	MyCastSound = InRow.CastSound;
+	MyHitVFX = InRow.HitVFX;
+	MyHitSound = InRow.HitSound;
 
 	MyMontage = InRow.AnimMontage.IsNull() ? nullptr : InRow.AnimMontage.LoadSynchronous();
 	if (!IsValid(MyMontage)) MyMontage = nullptr;
@@ -38,6 +46,20 @@ AActor* ASkillBase::GetSkillTarget() const
 void ASkillBase::ExecuteSkill_Implementation()
 {
 	if (bIsExecuting) return;
+
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	if (OwnerCharacter)
+	{
+		if (MyCastVFX)
+		{
+			// 소켓 생성 시 위치 수정
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyCastVFX, OwnerCharacter->GetActorLocation());
+		}
+		if (MyCastSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, MyCastSound, OwnerCharacter->GetActorLocation());
+		}
+	}
 
 	if (MyMontage)
 	{

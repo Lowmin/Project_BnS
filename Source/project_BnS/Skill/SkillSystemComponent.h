@@ -18,6 +18,7 @@ class USkillSlotController;
 class ASkillBase;
 class UStatComponent;
 class UCrowdControlComponent;
+class USMoveComponent;
 class AActor;
 
 // 슬롯에 속한 스킬들 캐싱
@@ -167,4 +168,5 @@ private:
 	// ==== 외부 시스템 ====
 	TWeakObjectPtr<UStatComponent>         CachedStat;
 	TWeakObjectPtr<UCrowdControlComponent> CachedOwnerCC;
+	TWeakObjectPtr<USMoveComponent>        CachedSMoveComponent;
 };

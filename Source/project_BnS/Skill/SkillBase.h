@@ -88,6 +88,16 @@ protected:
 	UPROPERTY()
 	FInstancedStruct SavedTypeData;		// 스킬 타입 저장
 
+	// 스킬 이펙트
+	UPROPERTY()
+	TObjectPtr<UParticleSystem> MyCastVFX;
+	UPROPERTY()
+	TObjectPtr<USoundBase> MyCastSound;
+	UPROPERTY()
+	TObjectPtr<UParticleSystem> MyHitVFX;
+	UPROPERTY()
+	TObjectPtr<USoundBase> MyHitSound;
+
 private:
 	// 베이스에서 바인딩/라우팅/종료
 	UFUNCTION()

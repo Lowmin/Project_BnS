@@ -5,6 +5,7 @@
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 #include "../CrowdControlComponent.h"
+#include "../USMoveComponent.h"
 #include "Engine/DataTable.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -22,6 +23,10 @@ void USkillSystemComponent::BeginPlay()
 	{
 		CachedStat = Character->GetStatusComponent();
 		CachedOwnerCC = Character->GetCrowdControlComponent();
+	}
+	if (AActor* Owner = GetOwner())
+	{
+		CachedSMoveComponent = Owner->FindComponentByClass<USMoveComponent>();
 	}
 	BuildSkillCache();
 
@@ -153,7 +158,6 @@ bool USkillSystemComponent::UseSlot_Internal(ESkillSlot Slot, AActor* Target)
 	{
 		// 스폰 실패시 소모된 MP 복구
 		if (Row->MpCost != 0 && CachedStat.IsValid()) CachedStat->SetCurMp(OriginalMp);
-		UE_LOG(LogTemp, Error, TEXT("SkillSystem: Failed to spawn SkillActor. MP refunded."), Row->SkillID);
 		return false;
 	}
 
@@ -284,6 +288,21 @@ void USkillSystemComponent::RefreshCooldownViewForSlot(ESkillSlot Slot, int32 Sk
 
 bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target) const
 {
+	if (CachedSMoveComponent.IsValid())
+	{
+		switch (CachedSMoveComponent->GetMoveState())
+		{
+		case EMoveState::Gliding:
+		case EMoveState::FastGliding:
+		case EMoveState::WallRunning:
+		case EMoveState::WaterRunning:
+		case EMoveState::ClimbingLedge:
+		case EMoveState::Swim:
+			return false;
+		default:
+			break;
+		}
+	}
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (const float* EndAt = CooldownEndAt.Find(Row.SkillID))
 	{
