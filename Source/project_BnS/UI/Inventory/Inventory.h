@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "../Popup.h"
 #include "Inventory.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API UInventory : public UUserWidget
+class PROJECT_BNS_API UInventory : public UPopup
 {
 	GENERATED_BODY()
 	

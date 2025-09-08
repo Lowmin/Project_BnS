@@ -83,18 +83,8 @@ void ABnsController::SetupInputComponent()
 
 void ABnsController::ShowInventory()
 {
-	// 마우스 커서 제어 
-	SetShowMouseCursor(!ShouldShowMouseCursor());
+	Inventory->SetVisiblePopup(!Inventory->IsVisible());
 
-	// 인풋 모드 설정 
-	if (ShouldShowMouseCursor())
-	{
-		SetInputMode(FInputModeGameAndUI());	
-		Inventory->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		SetInputMode(FInputModeGameOnly());
-		Inventory->SetVisibility(ESlateVisibility::Hidden);
-	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "popup cnt : " + FString::FromInt(UPopup::PopupCount));
 }
