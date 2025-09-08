@@ -18,16 +18,19 @@ class PROJECT_BNS_API AGruxBoss_Rush : public ASkillBase
 public:
 	AGruxBoss_Rush();
 	virtual void ExecuteSkill_Implementation() override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	void PerformDash();
 	void EndDash();
 
-	//UFUNCTION()
-	//void OnDashHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FResult& Hit);
-
+	UFUNCTION()
+	void OnDashOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	TObjectPtr<UAnimMontage> RushMontage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	TSubclassOf<AWarningIndicator> WarningIndicatorClass;
 
@@ -39,4 +42,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AWarningIndicator> SpawndIndicator;
+
+	FVector DashDirection;
+
+	UPROPERTY()
+	TSet<AActor*> HitActors;
 };
