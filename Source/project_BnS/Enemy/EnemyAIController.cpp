@@ -61,6 +61,17 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 
 void AEnemyAIController::TargetPercception(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (!Actor)
+	{
+		BlackboardComponent->ClearValue(TargetNameKey);
+		return;
+	}
+
+	if (Actor->ActorHasTag(FName("Enemy")))
+	{
+		return;
+	}
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		BlackboardComponent->SetValueAsObject(TargetNameKey, Actor);
