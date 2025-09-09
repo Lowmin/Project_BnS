@@ -68,6 +68,8 @@ void ABnsController::OnPossess(APawn* pawn)
 		Inventory->AddToViewport();
 		Inventory->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	UPopup::PopupCount = 0;
 }
 
 void ABnsController::SetupInputComponent()
