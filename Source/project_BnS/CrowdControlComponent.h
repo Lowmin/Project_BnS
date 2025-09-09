@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CrowdControlComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FDele_Multi);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDele_Multi);
 
 UENUM(BlueprintType)
 enum class ECrowdControlType : uint8

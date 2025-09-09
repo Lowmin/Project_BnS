@@ -59,6 +59,12 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (CrowdControl)
+	{
+		CrowdControl->OnAppliedCrowdControl.AddDynamic(this, &AEnemy::CCApplied);
+		CrowdControl->OnRemovedCrowdControl.AddDynamic(this, &AEnemy::CCRemoved);
+	}
+
 	if (EnemyDataHandle.DataTable)
 	{
 		const FEnemyData* Data = EnemyDataHandle.DataTable->FindRow<FEnemyData>(EnemyDataHandle.RowName, TEXT(""));
@@ -84,7 +90,8 @@ void AEnemy::OnDamaged(int32 damage)
 	Super::OnDamaged(damage);
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
+
+	if (AnimInstance && HitReactMontage && !CrowdControl->IsEffect())
 	{
 		if (!AnimInstance->IsAnyMontagePlaying())
 		{
@@ -92,10 +99,8 @@ void AEnemy::OnDamaged(int32 damage)
 		}
 	}
 
-
 	if (IsDead())
 	{
-		//GetMesh()->SetCollisionProfileName(TEXT("EnemyDie"));
 		Die();
 	}
 }
@@ -124,6 +129,42 @@ void AEnemy::Die()
 void AEnemy::DestroyEnemy()
 {
 	Destroy();
+}
+
+void AEnemy::CCApplied()
+{
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->GetBrainComponent())
+	{
+		AIController->GetBrainComponent()->StopLogic(TEXT("CrowdControlled Apply"));
+	}
+
+	GetCharacterMovement()->StopMovementImmediately();
+
+	ECrowdControlType currentCCType = CrowdControl->GetCrowdControlType();
+
+	if (CCMontages.Contains(currentCCType))
+	{
+		UAnimMontage* montageToPlay = CCMontages[currentCCType];
+		if (montageToPlay)
+		{
+			PlayAnimMontage(montageToPlay);
+		}
+	}
+}
+
+void AEnemy::CCRemoved()
+{
+	StopAnimMontage();
+
+	if (!IsDead())
+	{
+		AAIController* AIController = Cast<AAIController>(GetController());
+		if (AIController && AIController->GetBrainComponent())
+		{
+			AIController->GetBrainComponent()->RestartLogic();
+		}
+	}
 }
 
 bool AEnemy::IsActiveTarget_Implementation() const

@@ -71,6 +71,10 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 
 void UCrowdControlComponent::RemoveCrowdControl()
 {
+	// √ ±‚»≠
+	CurrentType = ECrowdControlType::None;
+	Stack = 0;
+
 	if (OnRemovedCrowdControl.IsBound())
 	{
 		OnRemovedCrowdControl.Broadcast();

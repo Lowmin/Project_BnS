@@ -6,6 +6,7 @@
 #include "CharacterBase.h"
 #include "TargetAble.h"
 #include "Engine/DataTable.h"
+#include "CrowdControlComponent.h"
 #include "Enemy.generated.h"
 
 
@@ -39,12 +40,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<class UAnimMontage> HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	TMap<ECrowdControlType, UAnimMontage*> CCMontages;
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWorldFloatingUiComponent> HpBar = nullptr;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
 	FText Name;
+
+	UFUNCTION()
+	void CCApplied();
+
+	UFUNCTION()
+	void CCRemoved();
 
 	// ITargetAble
 	bool IsActiveTarget_Implementation() const;
