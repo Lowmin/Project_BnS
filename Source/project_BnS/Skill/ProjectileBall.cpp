@@ -68,7 +68,10 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 		Destroy();
 		return;
 	}
-	ProjectileDamage(Other);
+	if (OnHitActor.IsBound())
+	{
+		OnHitActor.Broadcast(Other);
+	}
 
 	if (HitVFX)
 	{
@@ -86,18 +89,7 @@ void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimit
 	Destroy();
 }
 
-void AProjectileBall::ProjectileDamage(AActor* Enemy)
-{
-	if (!Enemy || Enemy == GetOwner()) return;
-	if (ACharacterBase* Character = Cast<ACharacterBase>(Enemy))
-	{
-		const int32 TotalDamage = FMath::Max(1, DamageValue);
-		Character->OnDamaged(TotalDamage);
-	}
-}
-
-
-void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage, UParticleSystem* InHitVFX, USoundBase* InHitSound, UParticleSystem* InTrailVFX, USoundBase* InMovingSound)
+void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor* InOwner, UParticleSystem* InHitVFX, USoundBase* InHitSound, UParticleSystem* InTrailVFX, USoundBase* InMovingSound)
 {
 	CurrentData = InData;
 	SetOwner(InOwner);
@@ -115,9 +107,7 @@ void AProjectileBall::SetupProjectileData(const FProjectileData& InData, AActor*
 
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 200.f, FColor::Cyan, false, 2.f, 0, 2.f);
 
-	DamageValue = (InDamage == INDEX_NONE) ? 0 : FMath::Max(1, InDamage);
 	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 
 	// ¿Ã∆Â∆Æ
 	HitVFX = InHitVFX;

@@ -48,7 +48,13 @@ void AMeleeSkill::PerformMeleeAttack()
 		AActor* Other = Hit.GetActor();
 		if (!Other || Other == Player || HitEnemy.Contains(Other)) continue;
 
+		// µð¹ö±ë
+		FString CCTypeString = UEnum::GetValueAsString(MyApplyCCType);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("Melee Hit! Applying CC: %s for %.1f sec"), *CCTypeString, MyApplyCCDuration));
+
+
 		ApplyDamageToCharacter(Cast<ACharacter>(Other));
+		ApplyCCToCharacter(Cast<ACharacter>(Other));
 
 		if (MyHitVFX)
 		{

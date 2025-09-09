@@ -44,7 +44,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetActivateStackCount(int32 count);
 	bool IsEffect();
-	ECrowdControlType GetCrowdControlType();
+	ECrowdControlType GetCrowdControlType() const;
 	void ApplyCrowdControl(ECrowdControlType type, float duration);
 	void RemoveCrowdControl();
 	FDele_Multi OnAppliedCrowdControl;

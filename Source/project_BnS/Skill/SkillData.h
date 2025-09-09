@@ -198,6 +198,13 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
 	TObjectPtr<USoundBase> HitSound;
 
+	// CC 상태 부여
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crowd Control")
+	ECrowdControlType ApplyCCType = ECrowdControlType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crowd Control")
+	float ApplyCCDuration = 0.f;
+
 	// 세팅한 리스트 상태(down, stun)가 모두 타겟에 있어야 사용 가능
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	TArray<ECrowdControlType> NeedTargetCC;

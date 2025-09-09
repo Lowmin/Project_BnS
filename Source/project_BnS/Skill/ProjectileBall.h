@@ -15,6 +15,8 @@ class ACharacterBase;
 class UParticleSystemComponent;
 class UAudioComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProjectileHitDelegate, AActor*, HitActor);
+
 UCLASS()
 class PROJECT_BNS_API AProjectileBall : public AActor
 {
@@ -23,6 +25,10 @@ class PROJECT_BNS_API AProjectileBall : public AActor
 public:
 	AProjectileBall();
 	virtual void BeginPlay() override;
+
+	// 발사체 Hit 처리 위한 델리게이트
+	UPROPERTY(BlueprintAssignable, Category = "Projectile")
+	FOnProjectileHitDelegate OnHitActor;
 
 protected:
 
@@ -42,15 +48,6 @@ protected:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	UFUNCTION()
-	void ProjectileDamage(AActor* Enemy);
-
-	UPROPERTY()
-	int32 DamageValue = 0;
-
-	UPROPERTY()
-	bool IsDamage = false;
-
 	// 이펙트
 	UPROPERTY()
 	TObjectPtr<UParticleSystem> HitVFX = nullptr;
@@ -66,7 +63,7 @@ protected:
 	TObjectPtr<UAudioComponent> MovingSoundComponent;
 
 public:
-	void SetupProjectileData(const FProjectileData& InData, AActor* InOwner, int32 InDamage = INDEX_NONE, 
+	void SetupProjectileData(const FProjectileData& InData, AActor* InOwner,
 		UParticleSystem* InHitVFX = nullptr, USoundBase* InHitSound = nullptr,
 		UParticleSystem* InTrailVFX = nullptr, USoundBase* InMovingSound = nullptr);
 

@@ -58,6 +58,7 @@ protected:
 	// 대미지
 	virtual int32 CalculateDamage() const;
 	void ApplyDamageToCharacter(ACharacter* DamagedCharacter) const;
+	void ApplyCCToCharacter(ACharacter* TargetCharacter) const;
 
 	// 타입 데이터 꺼내기
 	const FSkillType_Melee* GetTypeData_Melee() const { return SavedTypeData.GetPtr<FSkillType_Melee>(); }
@@ -79,11 +80,21 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> MyMontage = nullptr;
 
+	// 몽타주 종료 시 자동 소멸 여부 결정 (ex. Melee;true, Projectile;false)
+	UPROPERTY()
+	bool bAutoDestroyOnMontageEnd = true;
+
 	UPROPERTY()
 	bool bIsExecuting = false;
 
 	UPROPERTY()
 	float MyBaseDamage = 1.f;
+
+	// CC
+	UPROPERTY()
+	ECrowdControlType MyApplyCCType = ECrowdControlType::None;
+	UPROPERTY()
+	float MyApplyCCDuration = 0.f;
 
 	UPROPERTY()
 	FInstancedStruct SavedTypeData;		// 스킬 타입 저장

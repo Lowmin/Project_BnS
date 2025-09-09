@@ -5,7 +5,6 @@
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 #include "../CrowdControlComponent.h"
-#include "../USMoveComponent.h"
 #include "Engine/DataTable.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -23,10 +22,6 @@ void USkillSystemComponent::BeginPlay()
 	{
 		CachedStat = Character->GetStatusComponent();
 		CachedOwnerCC = Character->GetCrowdControlComponent();
-	}
-	if (AActor* Owner = GetOwner())
-	{
-		CachedSMoveComponent = Owner->FindComponentByClass<USMoveComponent>();
 	}
 	BuildSkillCache();
 
@@ -201,16 +196,18 @@ const FSkillDataRow* USkillSystemComponent::FindHighestPrioritySkillForSlot(ESki
 	if (!CandidateIDs) return nullptr;
 
 	const FSkillDataRow* BestSkillRow = nullptr;
-	int32 MaxPriority = TNumericLimits<int32>::Min();
 	for (const int32 SkillID : CandidateIDs->IDs)
 	{
 		const FSkillDataRow* CurrentRow = FindRowByID(SkillID);
 		if (!CurrentRow) continue;
 		if (CurrentRow->Layer == ESkillLayer::Chain || CurrentRow->Layer == ESkillLayer::Base) continue;
-		if (CheckActivationConditions(*CurrentRow, Target) && CurrentRow->Priority > MaxPriority)
+
+		if (CheckActivationConditions(*CurrentRow, Target))
 		{
-			BestSkillRow = CurrentRow;
-			MaxPriority = CurrentRow->Priority;
+			if (!BestSkillRow || CurrentRow->Priority > BestSkillRow->Priority)
+			{
+				BestSkillRow = CurrentRow;
+			}
 		}
 	}
 	return BestSkillRow;
@@ -228,8 +225,12 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 		if (!Target) return false;
 		if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
 		{
-			// CC 처리 필요
-			return true;
+			const ECrowdControlType CurrentTargetCC = TargetCC->GetCrowdControlType();
+
+			if (Row.NeedTargetCC.Contains(CurrentTargetCC))
+			{
+				return true;
+			}
 		}
 	}
 	}
@@ -288,21 +289,7 @@ void USkillSystemComponent::RefreshCooldownViewForSlot(ESkillSlot Slot, int32 Sk
 
 bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target) const
 {
-	if (CachedSMoveComponent.IsValid())
-	{
-		switch (CachedSMoveComponent->GetMoveState())
-		{
-		case EMoveState::Gliding:
-		case EMoveState::FastGliding:
-		case EMoveState::WallRunning:
-		case EMoveState::WaterRunning:
-		case EMoveState::ClimbingLedge:
-		case EMoveState::Swim:
-			return false;
-		default:
-			break;
-		}
-	}
+
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (const float* EndAt = CooldownEndAt.Find(Row.SkillID))
 	{
@@ -328,7 +315,11 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 	if (Row.NeedTargetCC.Num() > 0)
 	{
 		if (!Target) return false;
-		if (!Target->FindComponentByClass<UCrowdControlComponent>()) return false;
+
+		const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>();
+		if (!TargetCC) return false;
+
+		if (!Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType())) return false;
 	}
 
 	// 스킬 사용 유효 사거리
@@ -364,7 +355,6 @@ void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotR
 		if (End <= Now)
 		{
 			End = Now + Row.CooldownSec;
-			UE_LOG(LogTemp, Log, TEXT("[CommitStateAfterUse] 'RealCoolTime' Log: SkillID=%d, %.2f sec"), Row.SkillID, Row.CooldownSec);
 		}
 	}
 	// GCD 데이터
@@ -373,7 +363,6 @@ void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotR
 		SlotState.AnimLockEndAt = Now + Row.AnimLockSec;
 		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, SlotState.AnimLockEndAt);
 		GlobalLockPriority = Row.Priority;
-		UE_LOG(LogTemp, Log, TEXT("[CommitStateAfterUse] '(GCD)' Log: %.2f Sec"), Row.AnimLockSec);
 		if (SlotPanel)
 		{
 			SlotPanel->PlayCooldownShow_All(GlobalLockEndAt, Row.AnimLockSec, true);

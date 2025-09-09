@@ -52,7 +52,7 @@ bool UCrowdControlComponent::IsEffect()
 	return Stack >= ActivateStackCount && Duration > 0.f;
 }
 
-ECrowdControlType UCrowdControlComponent::GetCrowdControlType()
+ECrowdControlType UCrowdControlComponent::GetCrowdControlType() const
 {
 	return CurrentType;
 }

@@ -22,6 +22,10 @@ void ASkillBase::InitFromRow(const FSkillDataRow& InRow)
 	MyBaseDamage = InRow.Damage;
 	SavedTypeData = InRow.SkillTypeData;
 
+	// CC
+	MyApplyCCType = InRow.ApplyCCType;
+	MyApplyCCDuration = InRow.ApplyCCDuration;
+
 	// 스킬 이펙트
 	MyCastVFX = InRow.CastVFX;
 	MyCastSound = InRow.CastSound;
@@ -101,7 +105,7 @@ void ASkillBase::OnAnimNotifyBegin(FName NotifyName, const FBranchingPointNotify
 
 	if (NotifyName == TEXT("Hit"))
 	{
-		OnSkillNotify_Hit();	// 공격 판정 타이밍은 파생에서
+		OnSkillNotify_Hit();
 		return;
 	}
 
@@ -116,7 +120,10 @@ void ASkillBase::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	OnSkillMontageEnded(bInterrupted);
 	OnEnded.Broadcast(MySlot, bInterrupted);
 
-	Destroy();
+	if (bAutoDestroyOnMontageEnd)
+	{
+		Destroy();
+	}
 }
 
 ACharacter* ASkillBase::GetOwnerCharacter() const
@@ -154,6 +161,19 @@ void ASkillBase::ApplyDamageToCharacter(ACharacter* DamagedCharacter) const
 	{
 		const int32 Dmg = CalculateDamage();
 		Target->OnDamaged(Dmg);
+	}
+}
+
+void ASkillBase::ApplyCCToCharacter(ACharacter* TargetCharacter) const
+{
+	if (!TargetCharacter || MyApplyCCType == ECrowdControlType::None || MyApplyCCDuration <= 0.f)
+	{
+		return;
+	}
+
+	if (UCrowdControlComponent* TargetCC = TargetCharacter->FindComponentByClass<UCrowdControlComponent>())
+	{
+		TargetCC->ApplyCrowdControl(MyApplyCCType, MyApplyCCDuration);
 	}
 }
 

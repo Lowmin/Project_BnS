@@ -18,7 +18,6 @@ class USkillSlotController;
 class ASkillBase;
 class UStatComponent;
 class UCrowdControlComponent;
-class USMoveComponent;
 class AActor;
 
 // ½½·Ô¿¡ ¼ÓÇÑ ½ºÅ³µé Ä³½Ì

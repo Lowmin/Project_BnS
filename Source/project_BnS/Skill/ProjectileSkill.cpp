@@ -11,12 +11,18 @@
 
 void AProjectileSkill::ExecuteSkill_Implementation()
 {
+	bAutoDestroyOnMontageEnd = false;
+
 	const FSkillType_Projectile* Type = GetTypeData_Projectile();
-	if (!Type) return;
+	if (!Type || !Type->ProjectileClass)
+	{
+		Destroy();
+		return;
+	}
+
 	if (!MyMontage)
 	{
 		SpawnProjectile(*Type);
-		Destroy();
 		return;
 	}
 	Super::ExecuteSkill_Implementation();
@@ -84,8 +90,20 @@ void AProjectileSkill::SpawnProjectile(const FSkillType_Projectile& Type)
 		Data.ExplosionRadius = Type.ExplosionRadius;            // Æø¹ß ¹Ý°æ
 
 		const int32 Damage = CalculateDamage();
-		Ball->SetupProjectileData(Data, Player, Damage, MyHitVFX, MyHitSound, Type.TrailVFX, Type.MovingSound);
+		Ball->SetupProjectileData(Data, Player, MyHitVFX, MyHitSound, Type.TrailVFX, Type.MovingSound);
+		Ball->OnHitActor.AddDynamic(this, &AProjectileSkill::OnProjectileHit);
 	}
+}
+
+void AProjectileSkill::OnProjectileHit(AActor* HitActor)
+{
+	if (ACharacter* TargetCharacter = Cast<ACharacter>(HitActor))
+	{
+		ApplyDamageToCharacter(TargetCharacter);
+		ApplyCCToCharacter(TargetCharacter);
+	}
+
+	Destroy();
 }
 
 

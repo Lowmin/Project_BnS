@@ -21,6 +21,9 @@ private:
 	void CalcSpawnTransform(FVector& OutPos, FRotator& OutRot) const;
 	void SpawnProjectile(const struct FSkillType_Projectile& Type);
 
+	UFUNCTION()
+	void OnProjectileHit(AActor* HitActor);
+
 private:
 	float OffsetForward = 50.f;
 	float OffsetUp = 40.f;
