@@ -9,9 +9,58 @@
 int UPopup::PopupCount = 0;
 
 
+FReply UPopup::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "pop OnkeyDown");
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, InKeyEvent.ToText().ToString());
+
+	FKey Key = InKeyEvent.GetKey();
+
+	if (Key == EKeys::W)
+	{
+		ClosePopup();
+	}else if (Key == EKeys::A)
+	{
+		ClosePopup();
+	}
+	else if (Key == EKeys::S)
+	{
+		ClosePopup();
+	}
+	else if (Key == EKeys::D)
+	{
+		ClosePopup();
+	}
+	else if (Key == EKeys::SpaceBar)
+	{
+		ClosePopup();
+	}
+	else if (Key == EKeys::Escape)
+	{
+		ClosePopup();
+	}
+
+	return res;
+}
+
+FReply UPopup::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "pop Onkeyup");
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, InKeyEvent.ToText().ToString());
+
+	if (InKeyEvent.GetKey() == SelfShortCut)
+		ClosePopup();
+
+	return res;
+}
+
 void UPopup::NativeConstruct()
 {
 	BtnClose->OnClicked.AddDynamic(this, &UPopup::ClosePopup);
+
+	bIsFocusable = true;
 }
 
 void UPopup::ClosePopup()
@@ -23,6 +72,7 @@ void UPopup::SetVisiblePopup(bool isVisible)
 {
 	if (isVisible)
 	{
+		SetKeyboardFocus();
 		SetVisibility(ESlateVisibility::Visible);
 		++PopupCount;
 	}
@@ -39,7 +89,7 @@ void UPopup::SetVisiblePopup(bool isVisible)
 	// 인풋 모드 설정 
 	if (UPopup::PopupCount > 0)
 	{
-		playerCon->SetInputMode(FInputModeGameAndUI());
+		playerCon->SetInputMode(FInputModeUIOnly());
 	}
 	else
 	{

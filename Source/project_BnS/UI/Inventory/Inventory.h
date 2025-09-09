@@ -17,4 +17,7 @@ class PROJECT_BNS_API UInventory : public UPopup
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UItemList> ItemList;
+
+public:
+	virtual void NativeConstruct() override;
 };

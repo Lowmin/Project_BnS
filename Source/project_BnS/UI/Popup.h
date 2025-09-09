@@ -13,13 +13,20 @@ UCLASS()
 class PROJECT_BNS_API UPopup : public UUserWidget
 {
 	GENERATED_BODY()
+
+	// Input
+public:
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent);
+	virtual FReply NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent);
+
+protected:
+	FKey SelfShortCut = EKeys::Escape;
 	
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> BtnClose = nullptr;
 
 public:
-	//UPopup(const FObjectInitializer& ObjectInitializer);
 	virtual void NativeConstruct() override;
 	static int PopupCount;
 

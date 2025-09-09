@@ -5,3 +5,9 @@
 
 #include "ItemList.h"
 
+void UInventory::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	SelfShortCut = EKeys::I;
+}
