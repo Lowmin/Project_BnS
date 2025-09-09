@@ -2,6 +2,7 @@
 #include "MeleeSkill.h"
 #include "SkillData.h"
 #include "../CharacterBase.h"
+#include "../BossEnemy.h"
 
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"

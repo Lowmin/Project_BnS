@@ -41,6 +41,10 @@ void UCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UCrowdControlComponent::SetActivateStackCount(int32 count)
 {
 	ActivateStackCount = count;
+
+	// 합격기 스택 활성화 동시에 초기화
+	CurrentType = ECrowdControlType::None;
+	Stack = 0;
 }
 
 bool UCrowdControlComponent::IsEffect()
@@ -55,18 +59,46 @@ ECrowdControlType UCrowdControlComponent::GetCrowdControlType()
 
 void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float duration)
 {
+	// Boss의 패턴에서 SetAcivateStackCount 호출 후 StackCount를 초기화
+	if (ActivateStackCount > 0)
+	{
+		if (Stack == 0)
+		{
+			CurrentType = type;
+			Stack = 1;
+		}
+		else if (CurrentType == type)
+		{
+			Stack++;
+		}
+		else
+		{
+			return;
+		}
+
+		if (Stack >= ActivateStackCount)
+		{
+			Duration = duration;
+			OnAppliedCrowdControl.Broadcast();
+			SetActivateStackCount(0);
+		}
+	}
+	else 
+	{
+		CurrentType = type;
+		Duration = duration;
+
+		if (OnAppliedCrowdControl.IsBound())
+		{
+			OnAppliedCrowdControl.Broadcast();
+		}
+	}
+
 	if (Duration > 0.f)
 	{
 		RemoveCrowdControl();
 	}
 
-	CurrentType = type;
-	Duration = duration;
-
-	if (OnAppliedCrowdControl.IsBound())
-	{
-		OnAppliedCrowdControl.Broadcast();
-	}
 }
 
 void UCrowdControlComponent::RemoveCrowdControl()

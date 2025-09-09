@@ -14,7 +14,7 @@ class PROJECT_BNS_API ABossEnemy : public AEnemy
 {
 	GENERATED_BODY()
 	
+public:
+
 protected:
-	int ccCount{};
-	float ccDuplicateRemainTime{};
 };

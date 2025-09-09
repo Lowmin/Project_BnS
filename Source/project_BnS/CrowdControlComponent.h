@@ -13,7 +13,7 @@ enum class ECrowdControlType : uint8
 {
 	None,
 	Down,
-	Sturn
+	Stun
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -42,7 +42,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void SetActivateStackCount(int32 count);
 	bool IsEffect();
 	ECrowdControlType GetCrowdControlType();

@@ -99,7 +99,7 @@ public:
 
 	// Enemy º¸Á¶
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
-	bool EnemyUseBasicMelee(int32 SkillID, AActor* Target);
+	ASkillBase* EnemyUseBasicMelee(int32 SkillID, AActor* Target);
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
 	bool IsReady(int32 SkillID) const;
 

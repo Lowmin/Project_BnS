@@ -3,6 +3,7 @@
 
 #include "GruxBoss_Rush.h"
 #include "../../CharacterBase.h"
+#include "../../CrowdControlComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -25,13 +26,23 @@ void AGruxBoss_Rush::Tick(float DeltaTime)
 
 void AGruxBoss_Rush::ExecuteSkill_Implementation()
 {
-	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwnerCharacter());
 	AActor* Target = GetSkillTarget();
 
 	if (!OwnerCharacter || !Target)
 	{
 		Destroy();
 		return;
+	}
+
+	if (OwnerCharacter)
+	{
+		UCrowdControlComponent* CC_Comp = OwnerCharacter->GetCrowdControlComponent();
+		if (CC_Comp)
+		{
+			CC_Comp->SetActivateStackCount(2);
+			CC_Comp->OnAppliedCrowdControl.AddDynamic(this, &AGruxBoss_Rush::OnInterrupt);
+		}
 	}
 
 	if (MyMontage)
@@ -41,6 +52,7 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 			AnimInstance->Montage_Play(MyMontage);
 		}
 	}
+
 	
 	DashDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
 	DashDirection.Z = 0;
@@ -48,7 +60,7 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 	SetActorTickEnabled(false);
 
 	FTimerHandle AttackTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle, this, &AGruxBoss_Rush::PerformDash, 3.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(AttackTimerHandle, this, &AGruxBoss_Rush::PerformDash, 5.0f, false);
 }
 
 void AGruxBoss_Rush::PerformDash()
@@ -89,16 +101,51 @@ void AGruxBoss_Rush::OnDashOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
+void AGruxBoss_Rush::OnInterrupt()
+{
+	CancelSkill();
+}
+
+void AGruxBoss_Rush::CancelSkill()
+{
+	ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwnerCharacter());
+	if (OwnerCharacter)
+	{
+		UCrowdControlComponent* CC_Comp = OwnerCharacter->GetCrowdControlComponent();
+		if (CC_Comp)
+		{
+			CC_Comp->SetActivateStackCount(0);
+			CC_Comp->OnAppliedCrowdControl.RemoveDynamic(this, &AGruxBoss_Rush::OnInterrupt);
+		}
+		OwnerCharacter->StopAnimMontage();
+	}
+
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+
+	if (SpawndIndicator)
+	{
+		SpawndIndicator->Destroy();
+	}
+
+	Destroy();
+}
+
 void AGruxBoss_Rush::EndDash()
 {
 	SetActorTickEnabled(false);
 
-	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	ACharacterBase* OwnerCharacter = Cast<ACharacterBase>(GetOwnerCharacter());
+
 	if (OwnerCharacter)
 	{
-		// 2. 관성이 남지 않도록 속도를 0으로 만들고, 이벤트를 해제합니다.
-		OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
-		OwnerCharacter->GetCapsuleComponent()->OnComponentBeginOverlap.RemoveDynamic(this, &AGruxBoss_Rush::OnDashOverlap);
+		UCrowdControlComponent* CC_Comp = OwnerCharacter->GetCrowdControlComponent();
+
+		if (CC_Comp)
+		{
+			OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+			CC_Comp->SetActivateStackCount(0);
+			OwnerCharacter->GetCapsuleComponent()->OnComponentBeginOverlap.RemoveDynamic(this, &AGruxBoss_Rush::OnDashOverlap);
+		}
 	}
 
 	Destroy();

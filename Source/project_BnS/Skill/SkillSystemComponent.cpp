@@ -580,15 +580,15 @@ void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain
 }
 
 // Enemy: 단발 실행
-bool USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
+ASkillBase* USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
 {
-	if (!GetWorld() || !SkillTable) return false;
+	if (!GetWorld() || !SkillTable) return nullptr;
 	const FSkillDataRow* Row = FindRowByID(SkillID);
-	if (!Row || Row->Layer != ESkillLayer::Base) return false;
-	if (!CanUseSkill(*Row, Target)) return false;
+	if (!Row || Row->Layer != ESkillLayer::Base) return nullptr;
+	if (!CanUseSkill(*Row, Target)) return nullptr;
 
 	ASkillBase* skill = CreateSkill(*Row);
-	if (!skill) return false;
+	if (!skill) return nullptr;
 
 	if (TWeakObjectPtr<ASkillBase>* FoundActor = ActiveSkillActors.Find(Row->Slot))
 	{
@@ -605,7 +605,8 @@ bool USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
 
 	FSlotRuntimeState Dummy;
 	CommitStateAfterUse(*Row, Dummy);
-	return true;
+
+	return skill;
 }
 
 bool USkillSystemComponent::IsReady(int32 SkillID) const
