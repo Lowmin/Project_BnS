@@ -91,22 +91,32 @@ void AEnemy::OnDamaged(int32 damage)
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	if (AnimInstance && HitReactMontage && !CrowdControl->IsEffect())
+	if (!IsDead())
 	{
-		if (!AnimInstance->IsAnyMontagePlaying())
+		if (AnimInstance && HitReactMontage && !CrowdControl->IsEffect())
 		{
-			AnimInstance->Montage_Play(HitReactMontage, 1.0f);
+			if (!AnimInstance->IsAnyMontagePlaying())
+			{
+				AnimInstance->Montage_Play(HitReactMontage, 1.0f);
+			}
 		}
 	}
 
 	if (IsDead())
 	{
+		AnimInstance->Montage_Play(HitReactMontage, 1.0f);
 		Die();
 	}
 }
 
 void AEnemy::Die()
 {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Stop(0.0f);
+	}
+
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)
 	{
