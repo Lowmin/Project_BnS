@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "../Popup.h"
-#include "Inventory.generated.h"
+#include "InventoryPopup.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API UInventory : public UPopup
+class PROJECT_BNS_API UInventoryPopup : public UPopup
 {
 	GENERATED_BODY()
 	
@@ -20,4 +20,5 @@ protected:
 
 public:
 	virtual void NativeConstruct() override;
+	void SetItemSlot(int idx, const struct FItemData& data);
 };

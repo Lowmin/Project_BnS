@@ -32,12 +32,15 @@ private:
 	UPROPERTY()
 	TSubclassOf<class UUserWidget> InventoryClass = nullptr;
 	UPROPERTY()
-	TObjectPtr<class UInventory> Inventory = nullptr;
+	TObjectPtr<class UInventoryPopup> Inventory = nullptr;
 
 
 public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class AMainUIPresenter> UIPresenter = nullptr;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UInventoryPresenter> InventoryPresenter = nullptr;
 
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;

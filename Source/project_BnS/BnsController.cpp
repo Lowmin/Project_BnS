@@ -6,10 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/MainUi.h"
 #include "UI/MainUIPresenter.h"
+#include "UI/Inventory/InventoryPopup.h"
 #include "MyPlayer.h"
-#include "UI/Inventory/Inventory.h"
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
+#include "UI/Inventory/InventoryPresenter.h"
 
 
 ABnsController::ABnsController()
@@ -26,7 +27,7 @@ ABnsController::ABnsController()
 		IA_Inventory = iaInventory.Object;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> inventory(TEXT("/Game/UI/Inventory/WBP_Inventory.WBP_Inventory_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> inventory(TEXT("/Game/UI/Inventory/WBP_InventoryPopup.WBP_InventoryPopup_C"));
 	if (inventory.Succeeded())
 	{
 		InventoryClass = inventory.Class;
@@ -64,9 +65,13 @@ void ABnsController::OnPossess(APawn* pawn)
 
 	if (InventoryClass && IA_Inventory)
 	{ 
-		Inventory = CreateWidget<UInventory>(this, InventoryClass);
+		Inventory = CreateWidget<UInventoryPopup>(this, InventoryClass);
 		Inventory->AddToViewport();
 		Inventory->SetVisibility(ESlateVisibility::Hidden);
+
+		InventoryPresenter = NewObject<UInventoryPresenter>(this, TEXT("inventoryPresenter"));
+		InventoryPresenter->SetPlayer(player);
+		InventoryPresenter->SetInventoryPopup(Inventory);
 	}
 
 	UPopup::PopupCount = 0;
@@ -85,8 +90,10 @@ void ABnsController::SetupInputComponent()
 
 void ABnsController::ShowInventory()
 {
-	Inventory->SetVisiblePopup(!Inventory->IsVisible());
+	if (Inventory == nullptr)
+		return;
 
+	Inventory->SetVisiblePopup(!Inventory->IsVisible());
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "popup cnt : " + FString::FromInt(UPopup::PopupCount));
 }

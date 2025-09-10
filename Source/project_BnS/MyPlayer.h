@@ -124,4 +124,13 @@ public:
     void AddExp(float exp);
     float GetCurExp() const;
     float GetMaxExp() const;
+
+    // Inventory
+private:
+    UPROPERTY(VisibleAnywhere, Category = "Inventory")
+    TObjectPtr<class UInventoryComponent> InventoryComponent;
+
+public:
+    UInventoryComponent* GetInventoryComponent();
+
 };

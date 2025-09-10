@@ -1,13 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Inventory.h"
+#include "InventoryPopup.h"
 
 #include "ItemList.h"
 
-void UInventory::NativeConstruct()
+void UInventoryPopup::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	SelfShortCut = EKeys::I;
+}
+
+void UInventoryPopup::SetItemSlot(int idx, const FItemData& data)
+{
 }

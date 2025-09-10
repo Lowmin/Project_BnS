@@ -9,6 +9,7 @@
 #include "Skill/SkillSystemComponent.h"
 #include "StatComponent.h"
 #include "BossSensorComponent.h"
+#include "Inventory/InventoryComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -33,6 +34,8 @@ AMyPlayer::AMyPlayer()
 
     BossSensor = CreateDefaultSubobject<UBossSensorComponent>(TEXT("BossInfo"));
     BossSensor->SetupAttachment(RootComponent);
+
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 }
 
 void AMyPlayer::BeginPlay()
@@ -228,4 +231,9 @@ float AMyPlayer::GetCurExp() const
 float AMyPlayer::GetMaxExp() const
 {
     return MaxExp;
+}
+
+UInventoryComponent* AMyPlayer::GetInventoryComponent()
+{
+    return InventoryComponent;
 }
