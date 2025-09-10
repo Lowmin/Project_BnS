@@ -31,7 +31,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	int32 Stack = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int32 ActivateStackCount = 1;
+	int32 ActivateStackCount = 0;
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	ECrowdControlType CurrentType = ECrowdControlType::None;
 

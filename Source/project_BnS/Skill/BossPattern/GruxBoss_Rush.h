@@ -29,6 +29,8 @@ protected:
 	
 	UFUNCTION()
 	void OnInterrupt();
+
+	UFUNCTION()
 	void CancelSkill();
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Config")

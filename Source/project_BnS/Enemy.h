@@ -43,18 +43,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	TMap<ECrowdControlType, UAnimMontage*> CCMontages;
+
+	UFUNCTION()
+	virtual void CCApplied();
+	UFUNCTION()
+	virtual void CCRemoved();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWorldFloatingUiComponent> HpBar = nullptr;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> Nameplate = nullptr;
 	FText Name;
-
-	UFUNCTION()
-	void CCApplied();
-
-	UFUNCTION()
-	void CCRemoved();
 
 	// ITargetAble
 	bool IsActiveTarget_Implementation() const;

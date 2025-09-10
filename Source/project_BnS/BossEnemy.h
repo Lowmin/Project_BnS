@@ -15,6 +15,12 @@ class PROJECT_BNS_API ABossEnemy : public AEnemy
 	GENERATED_BODY()
 	
 public:
+	void SetCCImmune(bool bImmune);
 
 protected:
+	virtual void CCApplied() override;
+	virtual void CCRemoved() override;
+
+private:
+	bool bIsCCImmune = true;
 };
