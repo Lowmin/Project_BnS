@@ -44,7 +44,6 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 		if (CC_Comp)
 		{
 			CC_Comp->SetActivateStackCount(2);
-			CC_Comp->OnAppliedCrowdControl.AddDynamic(this, &AGruxBoss_Rush::OnInterrupt);
 		}
 	}
 
@@ -104,27 +103,8 @@ void AGruxBoss_Rush::OnDashOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	}
 }
 
-void AGruxBoss_Rush::OnInterrupt()
-{
-	UE_LOG(LogTemp, Log, TEXT("AAAAAAAAA."));
-	CancelSkill();
-}
-
 void AGruxBoss_Rush::CancelSkill()
 {
-	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwnerCharacter());
-	if (OwnerBoss)
-	{
-		// 보스의 면역 상태를 다시 켭니다.
-		OwnerBoss->SetCCImmune(true);
-		UCrowdControlComponent* CC_Comp = OwnerBoss->GetCrowdControlComponent();
-		if (CC_Comp)
-		{
-			CC_Comp->SetActivateStackCount(0);
-			CC_Comp->OnAppliedCrowdControl.RemoveDynamic(this, &AGruxBoss_Rush::OnInterrupt);
-		}
-		OwnerBoss->StopAnimMontage();
-	}
 
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
@@ -148,7 +128,6 @@ void AGruxBoss_Rush::EndDash()
 		if (CC_Comp)
 		{
 			CC_Comp->SetActivateStackCount(0);
-			CC_Comp->OnAppliedCrowdControl.RemoveDynamic(this, &AGruxBoss_Rush::OnInterrupt);
 		}
 		OwnerBoss->StopAnimMontage();
 	}

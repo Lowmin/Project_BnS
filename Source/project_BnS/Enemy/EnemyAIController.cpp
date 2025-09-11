@@ -76,10 +76,6 @@ void AEnemyAIController::TargetPercception(AActor* Actor, FAIStimulus Stimulus)
 	{
 		BlackboardComponent->SetValueAsObject(TargetNameKey, Actor);
 	}
-	else
-	{
-		BlackboardComponent->ClearValue(TargetNameKey);
-	}
 }
 
 

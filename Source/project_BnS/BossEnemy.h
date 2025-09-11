@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "BossEnemy.generated.h"
 
+class ASkillBase;
 /**
  * 
  */
@@ -16,6 +17,7 @@ class PROJECT_BNS_API ABossEnemy : public AEnemy
 	
 public:
 	void SetCCImmune(bool bImmune);
+	void SetCurrentSkill(ASkillBase* Skill);
 
 protected:
 	virtual void CCApplied() override;
@@ -23,4 +25,7 @@ protected:
 
 private:
 	bool bIsCCImmune = true;
+
+	UPROPERTY()
+	TObjectPtr<ASkillBase> CurrentSkill;
 };

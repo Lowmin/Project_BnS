@@ -66,30 +66,28 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 		{
 			CurrentType = type;
 			Stack = 1;
-			UE_LOG(LogTemp, Log, TEXT(" -> Logic: Starting new stack."));
 		}
 		else if (CurrentType == type)
 		{
 			Stack++;
-			UE_LOG(LogTemp, Log, TEXT(" -> Logic: Incrementing stack."));
 		}
 		else
 		{
 			return;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Stack is now: %d"), Stack);
 
 		if (Stack >= ActivateStackCount)
 		{
-			RemoveCrowdControl();
-			SetActivateStackCount(2);
-			UE_LOG(LogTemp, Warning, TEXT("Stack is now: %d"), Stack);
 			Duration = duration;
+
 			OnAppliedCrowdControl.Broadcast();
+
+			Stack = 0;
+			CurrentType = ECrowdControlType::None;
 		}
 	}
-	else 
+	else
 	{
 		CurrentType = type;
 		Duration = duration;
@@ -99,12 +97,6 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 			OnAppliedCrowdControl.Broadcast();
 		}
 	}
-
-	if (Duration > 0.f)
-	{
-		//RemoveCrowdControl();
-	}
-
 }
 
 void UCrowdControlComponent::RemoveCrowdControl()
@@ -117,5 +109,10 @@ void UCrowdControlComponent::RemoveCrowdControl()
 	{
 		OnRemovedCrowdControl.Broadcast();
 	}
+}
+
+int32 UCrowdControlComponent::GetActivateStackCount() const
+{
+	return ActivateStackCount;
 }
 

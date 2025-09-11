@@ -104,7 +104,6 @@ void AEnemy::OnDamaged(int32 damage)
 
 	if (IsDead())
 	{
-		AnimInstance->Montage_Play(HitReactMontage, 1.0f);
 		Die();
 	}
 }
@@ -143,6 +142,8 @@ void AEnemy::DestroyEnemy()
 
 void AEnemy::CCApplied()
 {
+	if (IsDead()) return;
+
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController && AIController->GetBrainComponent())
 	{
@@ -165,6 +166,8 @@ void AEnemy::CCApplied()
 
 void AEnemy::CCRemoved()
 {
+	if (IsDead()) return;
+
 	StopAnimMontage();
 
 	if (!IsDead())
