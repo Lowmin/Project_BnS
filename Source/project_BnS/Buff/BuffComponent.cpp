@@ -39,6 +39,7 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	BuffTick(DeltaTime);
+	UpdateBuffDuration(DeltaTime);
 }
 
 void UBuffComponent::ParsingData()
@@ -98,6 +99,11 @@ void UBuffComponent::UpdateBuffDuration(float deltaTime)
 
 		if (bRemove)
 		{
+			//디버그
+			if (GEngine && target)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Buff ID: %d removed from %s"), buff->GetBuffData().Idx, *target->GetName()));
+			}
 			// 버프 종료 델리게이트
 			buff->OnBuffFinish.Broadcast(buff->GetBuffData());
 
@@ -112,6 +118,18 @@ void UBuffComponent::UpdateBuffDuration(float deltaTime)
 	}
 }
 
+UBuff* UBuffComponent::FindBuff(int32 buffIdx) const
+{
+	for (UBuff* buff : BuffList)
+	{
+		if (buff && buff->GetBuffData().Idx == buffIdx)
+		{
+			return buff;
+		}
+	}
+	return nullptr;
+}
+
 const TArray<class UBuff*> UBuffComponent::GetBuffList() const
 {
 	return BuffList;
@@ -119,32 +137,37 @@ const TArray<class UBuff*> UBuffComponent::GetBuffList() const
 
 void UBuffComponent::AddBuff(class ACharacterBase* target, int32 buffIdx)
 {
-	const FBuffData* data = GetBuffData(buffIdx);
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, "add buff");
-	if (data == nullptr)
-		return;
+	UBuff* existingBuff = FindBuff(buffIdx);
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, "add buff 2");
-	UBuff* buff = NewObject<UBuff>(this, data->BuffClass);
-	buff->SetBuffData(data);
-	buff->SetTarget(target);
-	BuffList.Add(buff);
-
-	IBuffTick* buffTick = Cast<IBuffTick>(buff);
-	if (buffTick)
+	if (existingBuff)
 	{
-		BuffTickList.push_back(buffTick);
+		existingBuff->RefreshDuration();
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("Buff ID: %d Refreshed."), buffIdx));
+	}
+	else
+	{
+		const FBuffData* data = GetBuffData(buffIdx);
+		if (data == nullptr)
+			return;
+
+		UBuff* newBuff = NewObject<UBuff>(this, data->BuffClass);
+		newBuff->SetBuffData(data);
+		newBuff->SetTarget(target);
+		BuffList.Add(newBuff);
+
+		newBuff->OnBuffStart.Broadcast(newBuff->GetBuffData());
+
+		IBuffTick* buffTick = Cast<IBuffTick>(newBuff);
+		if (buffTick)
+		{
+			BuffTickList.push_back(buffTick);
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Buff ID: %d Added."), buffIdx));
 	}
 }
 
 bool UBuffComponent::IsBuff(int32 buffIdx) const
 {
-	for (UBuff* buff : BuffList)
-	{
-		if (buff->GetBuffData().Idx == buffIdx)
-			return true;
-	}
-
-	return false;
+	return FindBuff(buffIdx) != nullptr;
 }
 

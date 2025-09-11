@@ -101,6 +101,7 @@ void AProjectileSkill::OnProjectileHit(AActor* HitActor)
 	{
 		ApplyDamageToCharacter(TargetCharacter);
 		ApplyCCToCharacter(TargetCharacter);
+		ApplyBuffToCharacter(TargetCharacter);
 	}
 
 	Destroy();

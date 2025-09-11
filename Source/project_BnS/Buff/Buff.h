@@ -33,6 +33,7 @@ public:
 	bool CheckTickDuration(float deltaTime);
 	// UI 표시; 남은 시간
 	float GetRemainTime() const;
+	void RefreshDuration();
 
 	FBuffSetupDele OnBuffStart;
 	FBuffSetupDele OnBuffFinish;

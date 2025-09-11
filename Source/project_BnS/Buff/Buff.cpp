@@ -31,6 +31,14 @@ float UBuff::GetRemainTime() const
 	return RemainTime;
 }
 
+void UBuff::RefreshDuration()
+{
+	if (Data)
+	{
+		RemainTime = Data->Duration;
+	}
+}
+
 bool UBuff::CheckTickDuration(float deltaTime)
 {
 	RemainTime -= deltaTime;

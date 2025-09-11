@@ -3,6 +3,7 @@
 #include "SkillBase.h"
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
+#include "../Buff/BuffComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -25,6 +26,9 @@ void ASkillBase::InitFromRow(const FSkillDataRow& InRow)
 	// CC
 	MyApplyCCType = InRow.ApplyCCType;
 	MyApplyCCDuration = InRow.ApplyCCDuration;
+
+	// 버프
+	MyApplyBuffID = InRow.ApplyBuffID;
 
 	// 스킬 이펙트
 	MyCastVFX = InRow.CastVFX;
@@ -174,6 +178,22 @@ void ASkillBase::ApplyCCToCharacter(ACharacter* TargetCharacter) const
 	if (UCrowdControlComponent* TargetCC = TargetCharacter->FindComponentByClass<UCrowdControlComponent>())
 	{
 		TargetCC->ApplyCrowdControl(MyApplyCCType, MyApplyCCDuration);
+	}
+}
+
+void ASkillBase::ApplyBuffToCharacter(ACharacter* TargetCharacter) const
+{
+	if (MyApplyBuffID <= 0 || !TargetCharacter)
+	{
+		return;
+	}
+
+	if (ACharacterBase* TargetBase = Cast<ACharacterBase>(TargetCharacter))
+	{
+		if (UBuffComponent* TargetBuffComp = TargetBase->GetBuffComponent())
+		{
+			TargetBuffComp->AddBuff(TargetBase, MyApplyBuffID);
+		}
 	}
 }
 

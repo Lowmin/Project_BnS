@@ -45,16 +45,16 @@ void AMeleeSkill::PerformMeleeAttack()
 	TSet<AActor*> HitEnemy;
 	for (const FHitResult& Hit : HitObject)
 	{
-		AActor* Other = Hit.GetActor();
-		if (!Other || Other == Player || HitEnemy.Contains(Other)) continue;
-
+		ACharacterBase* TargetCharacter = Cast<ACharacterBase>(Hit.GetActor());
+		if (!TargetCharacter || TargetCharacter == Player || HitEnemy.Contains(TargetCharacter)) continue;
 		// µð¹ö±ë
 		FString CCTypeString = UEnum::GetValueAsString(MyApplyCCType);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("Melee Hit! Applying CC: %s for %.1f sec"), *CCTypeString, MyApplyCCDuration));
 
 
-		ApplyDamageToCharacter(Cast<ACharacter>(Other));
-		ApplyCCToCharacter(Cast<ACharacter>(Other));
+		ApplyDamageToCharacter(TargetCharacter);
+		ApplyCCToCharacter(TargetCharacter);
+		ApplyBuffToCharacter(TargetCharacter);
 
 		if (MyHitVFX)
 		{
@@ -66,7 +66,7 @@ void AMeleeSkill::PerformMeleeAttack()
 			UGameplayStatics::PlaySoundAtLocation(this, MyHitSound, Hit.ImpactPoint);
 		}
 
-		HitEnemy.Add(Other);
+		HitEnemy.Add(TargetCharacter);
 
 		if (!Data->bCanHitMultiTarget) break;
 	}

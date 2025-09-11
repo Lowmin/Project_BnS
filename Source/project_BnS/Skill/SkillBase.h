@@ -59,6 +59,7 @@ protected:
 	virtual int32 CalculateDamage() const;
 	void ApplyDamageToCharacter(ACharacter* DamagedCharacter) const;
 	void ApplyCCToCharacter(ACharacter* TargetCharacter) const;
+	void ApplyBuffToCharacter(ACharacter* TargetCharacter) const;
 
 	// 타입 데이터 꺼내기
 	const FSkillType_Melee* GetTypeData_Melee() const { return SavedTypeData.GetPtr<FSkillType_Melee>(); }
@@ -95,6 +96,10 @@ protected:
 	ECrowdControlType MyApplyCCType = ECrowdControlType::None;
 	UPROPERTY()
 	float MyApplyCCDuration = 0.f;
+
+	// 버프
+	UPROPERTY()
+	int32 MyApplyBuffID = -1;
 
 	UPROPERTY()
 	FInstancedStruct SavedTypeData;		// 스킬 타입 저장

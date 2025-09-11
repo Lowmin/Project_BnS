@@ -221,7 +221,7 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 	case ESkillLayer::Finisher:
 	case ESkillLayer::BossCC:
 	{
-		if (Row.NeedTargetCC.Num() == 0) return true;
+		if (Row.NeedTargetCC.Num() == 0) return false;
 		if (!Target) return false;
 		if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
 		{
