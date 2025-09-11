@@ -152,15 +152,14 @@ void AEnemy::CCApplied()
 
 	GetCharacterMovement()->StopMovementImmediately();
 
-	ECrowdControlType currentCCType = CrowdControl->GetCrowdControlType();
+	if (!CrowdControl) return;
 
-	if (CCMontages.Contains(currentCCType))
+	ECrowdControlType currentCCType = CrowdControl->GetCrowdControlType();
+	UAnimMontage** MontageToPlayPtr = CCMontages.Find(currentCCType);
+
+	if (MontageToPlayPtr && *MontageToPlayPtr)
 	{
-		UAnimMontage* montageToPlay = CCMontages[currentCCType];
-		if (montageToPlay)
-		{
-			PlayAnimMontage(montageToPlay);
-		}
+		PlayAnimMontage(*MontageToPlayPtr);
 	}
 }
 

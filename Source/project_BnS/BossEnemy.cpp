@@ -3,10 +3,16 @@
 
 #include "BossEnemy.h"
 #include "Skill/SkillBase.h"
+#include "Engine/Engine.h"
 
 void ABossEnemy::SetCurrentSkill(ASkillBase* Skill)
 {
 	CurrentSkill = Skill;
+}
+
+bool ABossEnemy::IsCCImmune() const
+{
+	return bIsCCImmune;
 }
 
 void ABossEnemy::SetCCImmune(bool bImmune)
@@ -42,4 +48,25 @@ void ABossEnemy::CCApplied()
 void ABossEnemy::CCRemoved()
 {
 	Super::CCRemoved();
+}
+
+void ABossEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GEngine && CrowdControl)
+	{
+		FString StateString = UEnum::GetValueAsString(CrowdControl->GetCrowdControlType());
+
+		int32 CurrentStack = CrowdControl->GetCurrentStack();
+		int32 MaxStack = CrowdControl->GetActivateStackCount();
+		FString DebugString = FString::Printf(TEXT("Boss CC State: %s | Stack: %d / %d | Status: %s"),
+			*StateString,
+			CurrentStack,
+			MaxStack,
+			(bIsCCImmune ? TEXT("IMMUNE") : TEXT("VULNERABLE"))
+		);
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, DebugString);
+	}
 }

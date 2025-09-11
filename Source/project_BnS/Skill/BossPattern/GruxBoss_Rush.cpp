@@ -81,7 +81,7 @@ void AGruxBoss_Rush::PerformDash()
 
 	OwnerCharacter->GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGruxBoss_Rush::OnDashOverlap);
 
-	DashSpeed = 1500.0f;
+	DashSpeed = 3000.0f;
 	const float DashDistance = 3000.f;
 
 	const float DashDuration = (DashSpeed > 0) ? (DashDistance / DashSpeed) : 0.0f;

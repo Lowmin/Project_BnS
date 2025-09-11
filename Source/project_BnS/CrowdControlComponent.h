@@ -50,5 +50,8 @@ public:
 	FDele_Multi OnAppliedCrowdControl;
 	FDele_Multi OnRemovedCrowdControl;
 	UFUNCTION(BlueprintPure, Category = "CrowdControl")
+
 	int32 GetActivateStackCount() const;
+	UFUNCTION(BlueprintPure, Category = "CrowdControl")
+	int32 GetCurrentStack() const;
 };

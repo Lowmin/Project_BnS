@@ -17,11 +17,14 @@ class PROJECT_BNS_API ABossEnemy : public AEnemy
 	
 public:
 	void SetCCImmune(bool bImmune);
-	void SetCurrentSkill(ASkillBase* Skill);
+	void SetCurrentSkill(ASkillBase* Skill); 
+	UFUNCTION(BlueprintPure, Category = "Boss")
+	bool IsCCImmune() const;
 
 protected:
 	virtual void CCApplied() override;
 	virtual void CCRemoved() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	bool bIsCCImmune = true;

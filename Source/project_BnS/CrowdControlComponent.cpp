@@ -2,6 +2,7 @@
 
 
 #include "CrowdControlComponent.h"
+#include "BossEnemy.h"
 
 // Sets default values for this component's properties
 UCrowdControlComponent::UCrowdControlComponent()
@@ -59,7 +60,13 @@ ECrowdControlType UCrowdControlComponent::GetCrowdControlType() const
 
 void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float duration)
 {
-	// Boss의 패턴에서 SetAcivateStackCount 호출 후 StackCount를 초기화
+	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwner());
+
+	if (OwnerBoss && OwnerBoss->IsCCImmune())
+	{
+		return;
+	}
+
 	if (ActivateStackCount > 0)
 	{
 		if (Stack == 0)
@@ -75,7 +82,6 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 		{
 			return;
 		}
-
 
 		if (Stack >= ActivateStackCount)
 		{
@@ -114,5 +120,10 @@ void UCrowdControlComponent::RemoveCrowdControl()
 int32 UCrowdControlComponent::GetActivateStackCount() const
 {
 	return ActivateStackCount;
+}
+
+int32 UCrowdControlComponent::GetCurrentStack() const
+{
+	return Stack;
 }
 
