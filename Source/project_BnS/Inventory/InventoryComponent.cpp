@@ -28,7 +28,8 @@ void UInventoryComponent::BeginPlay()
 	ParsingData();
 	SetInventorySlotCount(40);
 
-	AddItem(1, 1);
+	AddItem(1, 2);
+	AddItem(2, 1);
 }
 
 
@@ -81,6 +82,30 @@ const FItemData* UInventoryComponent::GetItemData(int32 itemId) const
 	return nullptr;
 }
 
+void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
+{
+	if (indexA == indexB)
+		return;
+	if (indexA >= ItemList.Num())
+		return;
+	if (indexB >= ItemList.Num())
+		return;
+
+	//std::swap<FItemData>(ItemList[indexA], ItemList[indexB]);
+	FItemData temp = ItemList[indexA];
+	ItemList[indexA] = ItemList[indexB];
+	ItemList[indexB] = temp;
+
+	ItemList[indexA].UpdatedItem = false;
+	ItemList[indexB].UpdatedItem = false;
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(indexA, ItemList[indexA]);
+		OnItemSlotChanged.Execute(indexB, ItemList[indexB]);
+	}
+}
+
 void UInventoryComponent::SetInventorySlotCount(int32 count)
 {
 	// 인벤토리는 더 작아지지 않음 
@@ -107,8 +132,6 @@ void UInventoryComponent::AddItem(int32 id, int32 count)
 	ItemList[idx] = *newData;
 	ItemList[idx].Count = count;
 	ItemList[idx].UpdatedItem = true;
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "add item");
 
 	if (OnItemSlotChanged.IsBound())
 	{

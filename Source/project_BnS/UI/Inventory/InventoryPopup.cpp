@@ -12,6 +12,12 @@ void UInventoryPopup::NativeConstruct()
 	SelfShortCut = EKeys::I;
 }
 
-void UInventoryPopup::SetItemSlot(int idx, const FItemData& data)
+void UInventoryPopup::SetItemSlot(int32 idx, const FItemData& data)
 {
+	ItemList->SetItemSlot(idx, data);
+}
+
+UItemList* UInventoryPopup::GetItemList() const
+{
+	return ItemList;
 }

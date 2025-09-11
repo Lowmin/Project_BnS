@@ -4,6 +4,9 @@
 #include "ItemList.h"
 
 #include "Components/VerticalBox.h"
+#include "Components/HorizontalBox.h"
+#include "ItemSlot.h"
+#include "../../Inventory/ItemData.h"
 
 UItemList::UItemList(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -35,7 +38,17 @@ bool UItemList::Initialize()
 	{
 		UUserWidget* widget = CreateWidget(this, InventoryRowClass);
 		Root->AddChild(widget);
+
+		UHorizontalBox* box = Cast<UHorizontalBox>(widget->GetRootWidget());
+		for (int j = 0; j < box->GetChildrenCount(); ++j)
+		{
+			UItemSlot* itemSlot = Cast<UItemSlot>(box->GetChildAt(j));
+			itemSlot->SetIndex(ItemSlots.Num());
+			ItemSlots.Add(itemSlot);
+		}
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::FromInt(ItemSlots.Num()));
 
 	for (int i = 5; i < 11; ++i)
 	{
@@ -46,7 +59,15 @@ bool UItemList::Initialize()
 	return true;
 }
 
-void UItemList::SetItemSlot(int idx, const FItemData& data)
+void UItemList::SetItemSlot(int32 idx, const FItemData& data)
 {
+	if (idx >= ItemSlots.Num())
+		return;
 
+	ItemSlots[idx]->SetInfo(data.Icon, data.UpdatedItem, data.Count);
+}
+
+TArray<class UItemSlot*> UItemList::GetItemSlotList() const
+{
+	return ItemSlots;
 }

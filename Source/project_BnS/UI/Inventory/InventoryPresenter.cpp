@@ -7,6 +7,8 @@
 #include "../../Inventory/InventoryComponent.h"
 #include "../../Inventory/ItemData.h"
 #include "InventoryPopup.h"
+#include "ItemList.h"
+#include "ItemSlot.h"
 
 void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 {
@@ -18,14 +20,24 @@ void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 {
 	InventoryPopup = popup;
+
+	// 인벤토리 아이템 슬롯 바인드 
+	UItemList* itemList = InventoryPopup->GetItemList();
+	for (UItemSlot* itemSlot : itemList->GetItemSlotList())
+	{
+		itemSlot->OnSwapItemSlot.BindUObject(this, &UInventoryPresenter::OnSwapItemSlot);
+	}
 }
 
-void UInventoryPresenter::OnInventoryChanged(int idx, const FItemData& data)
+void UInventoryPresenter::OnInventoryChanged(int32 idx, const FItemData& data)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::FromInt(idx) + " : " + FString::FromInt(data.Id));
-
 	if (InventoryPopup == nullptr)
 		return;
 
 	InventoryPopup->SetItemSlot(idx, data);
+}
+
+void UInventoryPresenter::OnSwapItemSlot(int32 indexA, int32 indexB)
+{
+	Player->GetInventoryComponent()->SwapItem(indexA, indexB);
 }

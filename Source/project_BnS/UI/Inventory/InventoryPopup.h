@@ -20,5 +20,7 @@ protected:
 
 public:
 	virtual void NativeConstruct() override;
-	void SetItemSlot(int idx, const struct FItemData& data);
+	void SetItemSlot(int32 idx, const struct FItemData& data);
+
+	class UItemList* GetItemList() const;
 };

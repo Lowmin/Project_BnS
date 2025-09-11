@@ -50,6 +50,7 @@ private:
 	const struct FItemData* GetItemData(int32 itemId) const;
 
 public:
+	void SwapItem(int32 indexA, int32 indexB);
 	void SetInventorySlotCount(int32 count);
 	void AddItem(int32 id, int32 count);
 	void RemoveItem(int32 inventoryIdx);

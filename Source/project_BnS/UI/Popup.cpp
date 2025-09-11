@@ -12,8 +12,6 @@ int UPopup::PopupCount = 0;
 FReply UPopup::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "pop OnkeyDown");
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, InKeyEvent.ToText().ToString());
 
 	FKey Key = InKeyEvent.GetKey();
 
@@ -47,8 +45,6 @@ FReply UPopup::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InK
 FReply UPopup::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "pop Onkeyup");
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, InKeyEvent.ToText().ToString());
 
 	if (InKeyEvent.GetKey() == SelfShortCut)
 		ClosePopup();

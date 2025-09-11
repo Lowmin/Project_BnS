@@ -22,5 +22,11 @@ public:
 	void SetPlayer(class AMyPlayer* player);
 	void SetInventoryPopup(class UInventoryPopup* popup);
 
-	void OnInventoryChanged(int idx, const struct FItemData& data);
+	// Model to View
+public:
+	void OnInventoryChanged(int32 idx, const struct FItemData& data);
+
+	// View to Model
+public:
+	void OnSwapItemSlot(int32 indexA, int32 indexB);
 };

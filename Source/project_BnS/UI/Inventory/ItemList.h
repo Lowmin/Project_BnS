@@ -16,7 +16,7 @@ class PROJECT_BNS_API UItemList : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	TArray<class UItemSlot> ItemSlots;
+	TArray<class UItemSlot*> ItemSlots;
 
 protected:
 	UPROPERTY()
@@ -29,8 +29,9 @@ protected:
 
 public:
 	UItemList(const FObjectInitializer& ObjectInitializer);
-	
 	virtual bool Initialize() override;
 
-	void SetItemSlot(int idx, const struct FItemData& data);
+	void SetItemSlot(int32 idx, const struct FItemData& data);
+
+	TArray<class UItemSlot*> GetItemSlotList() const;
 };
