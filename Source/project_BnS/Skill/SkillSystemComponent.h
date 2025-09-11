@@ -167,5 +167,4 @@ private:
 	// ==== 외부 시스템 ====
 	TWeakObjectPtr<UStatComponent>         CachedStat;
 	TWeakObjectPtr<UCrowdControlComponent> CachedOwnerCC;
-	TWeakObjectPtr<USMoveComponent>        CachedSMoveComponent;
 };

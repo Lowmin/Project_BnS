@@ -160,9 +160,13 @@ struct FSkillDataRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
 	float CooldownSec = 0.f;
 
-	// 스킬 사용 직후 다른 스킬 사용 불가 시간
+	// 스킬 사용 직후 캐릭터의 행동 불가 시간
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
-	float AnimLockSec = 0.3f;
+	float AnimationLockSec = 0.3f;
+
+	// 스킬 사용 직후 다른 스킬 사용 비활성화 시간
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
+	float GlobalCooldownSec = 0.3f;
 
 	// Combo (없으면 -1)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common")
@@ -197,6 +201,10 @@ struct FSkillDataRow : public FTableRowBase
 	// 타격 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
 	TObjectPtr<USoundBase> HitSound;
+
+	// 버프 부여 (버프 데이터 테이블 Idx)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Buff")
+	int32 ApplyBuffID = -1;
 
 	// CC 상태 부여
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crowd Control")

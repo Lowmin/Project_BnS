@@ -358,14 +358,21 @@ void USkillSystemComponent::CommitStateAfterUse(const FSkillDataRow& Row, FSlotR
 		}
 	}
 	// GCD 데이터
-	if (Row.AnimLockSec > 0.f)
+	if (Row.AnimationLockSec > 0.f)
 	{
-		SlotState.AnimLockEndAt = Now + Row.AnimLockSec;
-		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, SlotState.AnimLockEndAt);
+		SlotState.AnimLockEndAt = Now + Row.AnimationLockSec;
+	}
+
+	if (Row.GlobalCooldownSec > 0.f)
+	{
+		float NewGlobalLockEndAt = Now + Row.GlobalCooldownSec;
+		GlobalLockEndAt = FMath::Max(GlobalLockEndAt, NewGlobalLockEndAt);
+
 		GlobalLockPriority = Row.Priority;
+
 		if (SlotPanel)
 		{
-			SlotPanel->PlayCooldownShow_All(GlobalLockEndAt, Row.AnimLockSec, true);
+			SlotPanel->PlayCooldownShow_All(GlobalLockEndAt, Row.GlobalCooldownSec, true);
 		}
 	}
 	// 연계 상태 데이터
