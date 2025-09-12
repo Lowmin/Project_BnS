@@ -11,7 +11,7 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> itemData(TEXT("/Game/ItemData.ItemData"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> itemData(TEXT("/Game/DT_ItemData.DT_ItemData"));
 	if (itemData.Succeeded())
 	{
 		ItemDataTable = itemData.Object;
