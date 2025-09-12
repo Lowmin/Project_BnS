@@ -3,6 +3,7 @@
 
 #include "BossEnemy.h"
 #include "Skill/SkillBase.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 
 void ABossEnemy::SetCurrentSkill(ASkillBase* Skill)

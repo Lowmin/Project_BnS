@@ -42,6 +42,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	float WarningDuration = 3.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	TObjectPtr<class UParticleSystem> RushVFX;
+
 	UPROPERTY()
 	TObjectPtr<AWarningIndicator> SpawndIndicator;
 

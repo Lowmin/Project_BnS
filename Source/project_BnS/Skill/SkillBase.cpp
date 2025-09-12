@@ -58,6 +58,7 @@ void ASkillBase::ExecuteSkill_Implementation()
 	ACharacter* OwnerCharacter = GetOwnerCharacter();
 	if (OwnerCharacter)
 	{
+
 		if (MyCastVFX)
 		{
 			// 소켓 생성 시 위치 수정

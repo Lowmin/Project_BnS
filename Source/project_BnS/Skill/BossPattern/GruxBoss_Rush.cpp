@@ -6,11 +6,20 @@
 #include "../../CrowdControlComponent.h"
 #include "../../BossEnemy.h"
 #include "Components/CapsuleComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 AGruxBoss_Rush::AGruxBoss_Rush()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> RushVFX_Finder(TEXT("/Game/Enemy/Boss/TestBoss/P_Grux_Magma_StampedTrail.P_Grux_Magma_StampedTrail"));
+
+	if (RushVFX_Finder.Succeeded())
+	{
+		RushVFX = RushVFX_Finder.Object;
+	}
 }
 
 void AGruxBoss_Rush::Tick(float DeltaTime)
@@ -54,7 +63,6 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 			AnimInstance->Montage_Play(MyMontage);
 		}
 	}
-
 	
 	DashDirection = (Target->GetActorLocation() - OwnerBoss->GetActorLocation()).GetSafeNormal();
 	DashDirection.Z = 0;
@@ -79,9 +87,24 @@ void AGruxBoss_Rush::PerformDash()
 		return;
 	}
 
+	FRotator SpawnRotation = OwnerCharacter->GetActorRotation();
+	SpawnRotation.Yaw += 270.0f;
+
+	if (RushVFX)
+	{
+		UGameplayStatics::SpawnEmitterAttached(
+			RushVFX,                         
+			OwnerCharacter->GetMesh(),        
+			NAME_None,                          
+			FVector(0.f, 0.f, 30.f),                      
+			FRotator(0.f, 90.f, 0.f),
+			EAttachLocation::KeepRelativeOffset
+		);
+	}
+
 	OwnerCharacter->GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGruxBoss_Rush::OnDashOverlap);
 
-	DashSpeed = 3000.0f;
+	DashSpeed = 1500.0f;
 	const float DashDistance = 3000.f;
 
 	const float DashDuration = (DashSpeed > 0) ? (DashDistance / DashSpeed) : 0.0f;
