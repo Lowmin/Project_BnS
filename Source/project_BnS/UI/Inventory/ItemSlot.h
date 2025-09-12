@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ItemSlot.generated.h"
 
+DECLARE_DELEGATE_OneParam(FDele_ItemUse, int32);
 DECLARE_DELEGATE_TwoParams(FDele_SwapItemSlot, int32, int32);
 
 /**
@@ -42,8 +43,9 @@ protected:
 	TObjectPtr<class UTextBlock> TextCount;
 
 public:
+	FDele_ItemUse OnItemUse;
 	FDele_SwapItemSlot OnSwapItemSlot;
 
 	void SetIndex(int32 index);
-	void SetInfo(UTexture2D* texture, bool isNewBadge, int count = 1);
+	void SetInfo(const class UItem* data);
 };

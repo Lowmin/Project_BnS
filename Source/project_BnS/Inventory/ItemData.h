@@ -22,8 +22,19 @@ enum class EItemRarity : uint8 {
 	Legendary
 };
 
+UENUM(BlueprintType)
+enum class EEquipDetailCategory : uint8 {
+	Weapon,
+	Armor,
+	Ring,
+	EarRing,
+	Count
+};
+
+
 USTRUCT(BlueprintType)
-struct FItemData : public FTableRowBase {
+struct FItemData : public FTableRowBase 
+{
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
@@ -34,8 +45,6 @@ struct FItemData : public FTableRowBase {
 	EItemRarity Rarity;
 	UPROPERTY(EditAnywhere)
 	bool IsStackAble;
-	UPROPERTY(EditAnywhere)
-	int32 Count;
 	UPROPERTY(EditAnywhere)
 	UTexture2D* Icon;
 	UPROPERTY(EditAnywhere)
@@ -49,9 +58,31 @@ struct FItemData : public FTableRowBase {
 		Category = EItemCategory::Etc;
 		Rarity = EItemRarity::Common;
 		IsStackAble = false;
-		Count = 0;
 		Icon = nullptr;
 		UpdatedItem = false;
 		Description = "";
+	};
+};
+
+
+USTRUCT(BlueprintType)
+struct FEquipData : public FItemData {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	EEquipDetailCategory DetailCategory;
+	UPROPERTY(EditAnywhere)
+	float Hp;
+	UPROPERTY(EditAnywhere)
+	float Atk;
+	UPROPERTY(EditAnywhere)
+	float Def;
+
+	FEquipData() : FItemData()
+	{
+		DetailCategory = EEquipDetailCategory::Weapon;
+		Hp = 0.f;
+		Atk = 0.f;
+		Def = 0.f;
 	};
 };

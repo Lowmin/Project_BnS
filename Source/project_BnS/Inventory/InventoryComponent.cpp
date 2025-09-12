@@ -2,7 +2,8 @@
 
 
 #include "InventoryComponent.h"
-#include "ItemData.h"
+#include "Item.h"
+#include "EquipItem.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -11,10 +12,10 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> itemData(TEXT("/Game/DT_ItemData.DT_ItemData"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> itemData(TEXT("/Game/DT_EquipData.DT_EquipData"));
 	if (itemData.Succeeded())
 	{
-		ItemDataTable = itemData.Object;
+		EquipDataTable = itemData.Object;
 	}
 }
 
@@ -26,6 +27,7 @@ void UInventoryComponent::BeginPlay()
 
 	// ...
 	ParsingData();
+	EquipList.SetNum((int)EEquipDetailCategory::Count);
 	SetInventorySlotCount(40);
 
 	AddItem(1, 2);
@@ -43,20 +45,19 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UInventoryComponent::ParsingData()
 {
-	if (!ItemDataTable)
+	if (!EquipDataTable)
 		return;
 
 	// Load the UDataTable
-	TArray<FItemData*> arr;
-	ItemDataTable->GetAllRows<FItemData>("itemdata", arr);
-	auto a = ItemDataTable->FindRow<FItemData>(TEXT("2"), "");
+	TArray<FEquipData*> arr;
+	EquipDataTable->GetAllRows<FEquipData>("equipData", arr);
 
 	if (arr.Num() <= 0)
 		return;
 
-	for (FItemData* data : arr)
+	for (FEquipData* data : arr)
 	{
-		DataMap.Add(data->Id, data);
+		EquipDataMap.Add(data->Id, data);
 	}
 }
 
@@ -65,21 +66,33 @@ int32 UInventoryComponent::FindItemSlotIndex(int32 itemId) const
 	int emptyIdx = -1;
 	for(int i=0; i<ItemList.Num(); ++i)
 	{
-		if (ItemList[i].Id == itemId)
+		if (ItemList[i] == nullptr)
+		{
+			if(emptyIdx < 0)
+			{
+				emptyIdx = i;
+			}
+
+			continue;
+		}
+
+		if (ItemList[i]->Id == itemId)
 			return i;
-		if (emptyIdx < 0 && ItemList[i].Id == 0)
-			emptyIdx = i;
 	}
 
 	return emptyIdx;
 }
 
-const FItemData* UInventoryComponent::GetItemData(int32 itemId) const
+UItem* UInventoryComponent::CreateItem(int32 itemId) const
 {
-	if (DataMap.Contains(itemId))
-		return DataMap[itemId];
+	if (!EquipDataMap.Contains(itemId))
+		return nullptr;
 
-	return nullptr;
+	UEquipItem* equipItem = NewObject<UEquipItem>(GetOwner());
+	equipItem->SetData(EquipDataMap[itemId]);
+
+	return equipItem;
+
 }
 
 void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
@@ -91,19 +104,25 @@ void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
 	if (indexB >= ItemList.Num())
 		return;
 
-	//std::swap<FItemData>(ItemList[indexA], ItemList[indexB]);
-	FItemData temp = ItemList[indexA];
+	UItem* temp = ItemList[indexA];
 	ItemList[indexA] = ItemList[indexB];
 	ItemList[indexB] = temp;
 
-	ItemList[indexA].UpdatedItem = false;
-	ItemList[indexB].UpdatedItem = false;
+	if(ItemList[indexA] != nullptr)
+	{
+		ItemList[indexA]->UpdatedItem = false;
+	}
+	if(ItemList[indexB] != nullptr)
+	{
+		ItemList[indexB]->UpdatedItem = false;
+	}
 
 	if (OnItemSlotChanged.IsBound())
 	{
 		OnItemSlotChanged.Execute(indexA, ItemList[indexA]);
 		OnItemSlotChanged.Execute(indexB, ItemList[indexB]);
 	}
+	
 }
 
 void UInventoryComponent::SetInventorySlotCount(int32 count)
@@ -126,12 +145,14 @@ void UInventoryComponent::AddItem(int32 id, int32 count)
 	if (idx < 0)
 		return;
 
-	const FItemData* newData = GetItemData(id);
-	if (newData == nullptr)
+	UItem* item = CreateItem(id);
+	if (item == nullptr)
 		return;
-	ItemList[idx] = *newData;
-	ItemList[idx].Count = count;
-	ItemList[idx].UpdatedItem = true;
+
+	item->Count += count;
+	item->UpdatedItem = true;
+
+	ItemList[idx] = item;
 
 	if (OnItemSlotChanged.IsBound())
 	{
@@ -141,14 +162,81 @@ void UInventoryComponent::AddItem(int32 id, int32 count)
 
 void UInventoryComponent::RemoveItem(int32 inventoryIdx)
 {
+	ItemList[inventoryIdx] = nullptr;
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx]);
+	}
 }
+
 
 void UInventoryComponent::UseItem(int32 inventoryIdx)
 {
+	UItem* item = ItemList[inventoryIdx];
+	if (item == nullptr)
+		return;
+
+	switch (item->Category)
+	{
+	case EItemCategory::Equip:
+		Equip(inventoryIdx, Cast<UEquipItem>(item));
+		break;
+	default:
+		break;
+	}
 }
 
-void UInventoryComponent::Unequip(int32 equipIdx)
+bool UInventoryComponent::IsEquipAbleSlot(int32 equipIdx) const
 {
+	if (equipIdx >= EquipList.Num())
+		return false;
+
+	return EquipList[equipIdx] == nullptr;
+}
+
+void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
+{
+	if (equipItem == nullptr)
+		return;
+
+	TObjectPtr<UEquipItem> temp = equipItem;
+	RemoveItem(inventoryIdx);
+
+	int32 equipIndex = (int32)equipItem->DetailCategory;
+
+	if (EquipList[equipIndex] != nullptr)
+	{
+		Unequip(equipIndex, inventoryIdx);
+	}
+
+	if (IsEquipAbleSlot(equipIndex))
+	{
+		EquipList[equipIndex] = temp;
+		//xx
+	}
+
+	
+	if(OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx]);
+	}
+}
+
+void UInventoryComponent::Unequip(int32 equipIdx, int32 targetInventoryIdx)
+{
+	if (targetInventoryIdx < 0)
+	{
+		targetInventoryIdx = FindItemSlotIndex(-1);
+	}
+
+	if (targetInventoryIdx < 0)
+		return;
+
+	ItemList[targetInventoryIdx] = EquipList[equipIdx];
+	EquipList[equipIdx] = nullptr;
+
+	//xx
 }
 
 void UInventoryComponent::UnequipSoulShield(int32 soulShieldSlotIdx)

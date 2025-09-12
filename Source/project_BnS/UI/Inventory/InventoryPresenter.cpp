@@ -25,16 +25,22 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	UItemList* itemList = InventoryPopup->GetItemList();
 	for (UItemSlot* itemSlot : itemList->GetItemSlotList())
 	{
+		itemSlot->OnItemUse.BindUObject(this, &UInventoryPresenter::OnItemUse);
 		itemSlot->OnSwapItemSlot.BindUObject(this, &UInventoryPresenter::OnSwapItemSlot);
 	}
 }
 
-void UInventoryPresenter::OnInventoryChanged(int32 idx, const FItemData& data)
+void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data)
 {
 	if (InventoryPopup == nullptr)
 		return;
 
 	InventoryPopup->SetItemSlot(idx, data);
+}
+
+void UInventoryPresenter::OnItemUse(int32 index)
+{
+	Player->GetInventoryComponent()->UseItem(index);
 }
 
 void UInventoryPresenter::OnSwapItemSlot(int32 indexA, int32 indexB)

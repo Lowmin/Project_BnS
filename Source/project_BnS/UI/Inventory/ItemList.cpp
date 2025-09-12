@@ -7,6 +7,7 @@
 #include "Components/HorizontalBox.h"
 #include "ItemSlot.h"
 #include "../../Inventory/ItemData.h"
+#include "../../Inventory/Item.h"
 
 UItemList::UItemList(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -48,8 +49,6 @@ bool UItemList::Initialize()
 		}
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, FString::FromInt(ItemSlots.Num()));
-
 	for (int i = 5; i < 11; ++i)
 	{
 		UUserWidget* widget = CreateWidget(this, InventoryLockClass);
@@ -59,12 +58,12 @@ bool UItemList::Initialize()
 	return true;
 }
 
-void UItemList::SetItemSlot(int32 idx, const FItemData& data)
+void UItemList::SetItemSlot(int32 idx, const UItem* data)
 {
 	if (idx >= ItemSlots.Num())
 		return;
 
-	ItemSlots[idx]->SetInfo(data.Icon, data.UpdatedItem, data.Count);
+	ItemSlots[idx]->SetInfo(data);
 }
 
 TArray<class UItemSlot*> UItemList::GetItemSlotList() const

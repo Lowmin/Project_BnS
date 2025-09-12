@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "itemData.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FDele_ItemSlotChange, int32, const struct FItemData&);
+DECLARE_DELEGATE_TwoParams(FDele_ItemSlotChange, int32, const class UItem*);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -29,14 +30,14 @@ public:
 
 	// Inventory
 private:
-	TArray<struct FItemData> ItemList;
-	TArray<struct FItemData> EquipList;
-	TArray<struct FItemData> SoulSHieldList;
+	TArray<TObjectPtr<class UItem>> ItemList;
+	TArray<TObjectPtr<class UEquipItem>> EquipList;
+	// TArray<class USoulShieldItem> SoulShieldList;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UDataTable> ItemDataTable;
+	TObjectPtr<UDataTable> EquipDataTable;
 
-	TMap<int32, struct FItemData*> DataMap;
+	TMap<int32, const FEquipData*> EquipDataMap;
 	void ParsingData();
 
 private:
@@ -47,7 +48,7 @@ private:
 	/// <returns> 동일한 슬롯 인덱스 반환, 동일한 슬롯이 없는경우 가장 앞번호의 빈 슬롯 인덱스 반환, 빈 슬롯도 없는경우 -1 리턴 </returns>
 	int32 FindItemSlotIndex(int32 itemId) const;
 
-	const struct FItemData* GetItemData(int32 itemId) const;
+	class UItem* CreateItem(int32 itemId) const;
 
 public:
 	void SwapItem(int32 indexA, int32 indexB);
@@ -55,7 +56,9 @@ public:
 	void AddItem(int32 id, int32 count);
 	void RemoveItem(int32 inventoryIdx);
 	void UseItem(int32 inventoryIdx);
-	void Unequip(int32 equipIdx);
+	bool IsEquipAbleSlot(int32 equipIdx) const;
+	void Equip(int32 inventoryIdx, UEquipItem* equipItem);
+	void Unequip(int32 equipIdx, int32 targetInventoryIdx);
 	void UnequipSoulShield(int32 soulShieldSlotIdx);
 		
 	FDele_ItemSlotChange OnItemSlotChanged;

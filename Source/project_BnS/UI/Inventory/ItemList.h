@@ -31,7 +31,7 @@ public:
 	UItemList(const FObjectInitializer& ObjectInitializer);
 	virtual bool Initialize() override;
 
-	void SetItemSlot(int32 idx, const struct FItemData& data);
+	void SetItemSlot(int32 idx, const class UItem* data);
 
 	TArray<class UItemSlot*> GetItemSlotList() const;
 };

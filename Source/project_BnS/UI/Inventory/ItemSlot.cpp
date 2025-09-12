@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "InventoryDragDropOperation.h"
 #include "InventoryDragIcon.h"
+#include "../../Inventory/Item.h"
 
 UItemSlot::UItemSlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -21,6 +22,19 @@ FReply UItemSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, co
 {
 	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
 
+	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	{
+		if (OnItemUse.IsBound())
+		{
+			OnItemUse.Execute(Index);
+		}
+		return FReply::Unhandled();
+	}
+	else if (!InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+	{
+		return FReply::Unhandled();
+	}
+		
 	return FReply::Handled().DetectDrag(this->GetCachedWidget().ToSharedRef(), EKeys::LeftMouseButton);
 }
 
@@ -55,16 +69,24 @@ void UItemSlot::SetIndex(int32 index)
 	Index = index;
 }
 
-void UItemSlot::SetInfo(UTexture2D* texture, bool isNewBadge, int count)
+void UItemSlot::SetInfo(const UItem* data)
 {
-	Texture = texture;
-
-	ImgIcon->SetBrushFromTexture(texture);
-	ImgIcon->SetColorAndOpacity(count > 0 ? FColor::White : FColor(0, 0, 0, 255));
-
-	if(count > 1)
+	if (data == nullptr)
 	{
-		TextCount->SetText(FText::AsNumber(count));
+		Texture = nullptr;
+		ImgIcon->SetBrushFromTexture(Texture);
+		ImgIcon->SetColorAndOpacity(FColor::Red);
+		return;
+	}
+
+	Texture = data->Icon;
+
+	ImgIcon->SetBrushFromTexture(Texture);
+	ImgIcon->SetColorAndOpacity(data->Count> 0 ? FColor::White : FColor(0, 0, 0, 255));
+
+	if(data->IsStackAble)
+	{
+		TextCount->SetText(FText::AsNumber(data->Count));
 		TextCount->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
@@ -72,5 +94,5 @@ void UItemSlot::SetInfo(UTexture2D* texture, bool isNewBadge, int count)
 		TextCount->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	ImgNewBadge->SetVisibility(isNewBadge ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	ImgNewBadge->SetVisibility(data->UpdatedItem ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }

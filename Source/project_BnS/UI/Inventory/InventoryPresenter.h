@@ -24,9 +24,10 @@ public:
 
 	// Model to View
 public:
-	void OnInventoryChanged(int32 idx, const struct FItemData& data);
+	void OnInventoryChanged(int32 idx, const class UItem* data);
 
 	// View to Model
 public:
+	void OnItemUse(int32 index);
 	void OnSwapItemSlot(int32 indexA, int32 indexB);
 };
