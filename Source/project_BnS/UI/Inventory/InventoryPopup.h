@@ -18,9 +18,18 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UItemList> ItemList;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UEquipSlot> WeaponSlot = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UGridPanel> EquipRoot = nullptr;
+	
+	TArray<class UEquipSlot*> EquipSlots;
+
 public:
 	virtual void NativeConstruct() override;
-	void SetItemSlot(int32 idx, const class UItem* data);
+	void SetItemSlot(int32 idx, const class UItem* data) const;
+	void SetEquipSlot(int32 idx, const class UItem* data) const;
 
+	TArray<class UEquipSlot*> GetEquipList() const;
 	class UItemList* GetItemList() const;
 };

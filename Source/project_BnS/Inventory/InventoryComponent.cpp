@@ -19,7 +19,6 @@ UInventoryComponent::UInventoryComponent()
 	}
 }
 
-
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {
@@ -127,7 +126,7 @@ void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
 
 void UInventoryComponent::SetInventorySlotCount(int32 count)
 {
-	// �κ��丮�� �� �۾����� ���� 
+	// 인벤토리는 더 작아지지 않음 
 	if (ItemList.Num() >= count)
 		return;
 
@@ -136,11 +135,11 @@ void UInventoryComponent::SetInventorySlotCount(int32 count)
 
 void UInventoryComponent::AddItem(int32 id, int32 count)
 {
-	// 1�� �̸� �߰� �Ұ� 
+	// 1개 미만 추가 불가 
 	if (count <= 0)
 		return;
 
-	// ���� ���� �� ������ �߰� �Ұ��� 
+	// 슬롯 부족 시 아이템 추가 불가능 
 	int idx = FindItemSlotIndex(id);
 	if (idx < 0)
 		return;
@@ -170,7 +169,6 @@ void UInventoryComponent::RemoveItem(int32 inventoryIdx)
 	}
 }
 
-
 void UInventoryComponent::UseItem(int32 inventoryIdx)
 {
 	UItem* item = ItemList[inventoryIdx];
@@ -195,6 +193,44 @@ bool UInventoryComponent::IsEquipAbleSlot(int32 equipIdx) const
 	return EquipList[equipIdx] == nullptr;
 }
 
+void UInventoryComponent::Equip(int32 inventoryIdx, int32 equipIdx)
+{
+	// 장착 할 슬롯 아이템이 없는경우 불가 
+	if(inventoryIdx >= ItemList.Num())
+		return;
+	UItem* item = ItemList[inventoryIdx];
+	if(item == nullptr)
+		return;
+
+	// 아이템이 장비가 아닌경우 장착 불가 
+	UEquipItem* equipItem = Cast<UEquipItem>(item);
+	if(equipItem == nullptr)
+		return;
+
+	// 아이템 타입이 다른경우 장착 불가 
+	if((int)equipItem->DetailCategory != equipIdx)
+		return;
+
+	// 장착 슬롯 체크
+	Equip(inventoryIdx, equipItem);
+
+	// if(equipIdx >= EquipList.Num())
+	// 	return;
+	// UEquipItem* equipSlot = EquipList[equipIdx];
+	// if(equipSlot != nullptr)
+	// {
+	// 	EquipList[equipIdx] = nullptr;
+	// }
+	//
+	// // 장비 장착 
+	// Equip(inventoryIdx, equipItem);
+	//
+	// if(equipSlot != nullptr)
+	// {
+	// 	ItemList[inventoryIdx] = equipSlot;
+	// }
+}
+
 void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 {
 	if (equipItem == nullptr)
@@ -207,13 +243,17 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 
 	if (EquipList[equipIndex] != nullptr)
 	{
-		Unequip(equipIndex, inventoryIdx);
+		UnEquip(equipIndex, inventoryIdx);
 	}
 
 	if (IsEquipAbleSlot(equipIndex))
 	{
 		EquipList[equipIndex] = temp;
-		//xx
+
+		if(OnEquipSlotChanged.IsBound())
+		{
+			OnEquipSlotChanged.Execute(equipIndex, temp);
+		}
 	}
 
 	
@@ -223,7 +263,7 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 	}
 }
 
-void UInventoryComponent::Unequip(int32 equipIdx, int32 targetInventoryIdx)
+void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 {
 	if (targetInventoryIdx < 0)
 	{
@@ -233,13 +273,24 @@ void UInventoryComponent::Unequip(int32 equipIdx, int32 targetInventoryIdx)
 	if (targetInventoryIdx < 0)
 		return;
 
+	if(ItemList[targetInventoryIdx] != nullptr)
+		return;
+
 	ItemList[targetInventoryIdx] = EquipList[equipIdx];
 	EquipList[equipIdx] = nullptr;
 
-	//xx
+	if(OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(targetInventoryIdx, ItemList[targetInventoryIdx]);
+	}
+	
+	if(OnEquipSlotChanged.IsBound())
+	{
+		OnEquipSlotChanged.Execute(equipIdx, nullptr);
+	}
 }
 
-void UInventoryComponent::UnequipSoulShield(int32 soulShieldSlotIdx)
+void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx)
 {
 }
 

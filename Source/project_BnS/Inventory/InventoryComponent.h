@@ -30,7 +30,9 @@ public:
 
 	// Inventory
 private:
+	UPROPERTY()
 	TArray<TObjectPtr<class UItem>> ItemList;
+	UPROPERTY()
 	TArray<TObjectPtr<class UEquipItem>> EquipList;
 	// TArray<class USoulShieldItem> SoulShieldList;
 
@@ -42,10 +44,10 @@ private:
 
 private:
 	/// <summary>
-	/// ¾ÆÀÌÅÛ ID°ª°ú °°Àº ½½·Ô ÀÎµ¦½º¸¦ Ã£À½ 
+	/// ì•„ì´í…œ IDê°’ê³¼ ê°™ì€ ìŠ¬ë¡¯ ì¸ë±ìŠ¤ë¥¼ ì°¾ìŒ 
 	/// </summary>
-	/// <param name="itemId"> ¾ÆÀÌÅÛ ID </param>
-	/// <returns> µ¿ÀÏÇÑ ½½·Ô ÀÎµ¦½º ¹İÈ¯, µ¿ÀÏÇÑ ½½·ÔÀÌ ¾ø´Â°æ¿ì °¡Àå ¾Õ¹øÈ£ÀÇ ºó ½½·Ô ÀÎµ¦½º ¹İÈ¯, ºó ½½·Ôµµ ¾ø´Â°æ¿ì -1 ¸®ÅÏ </returns>
+	/// <param name="itemId"> ì•„ì´í…œ ID </param>
+	/// <returns> ë™ì¼í•œ ìŠ¬ë¡¯ ì¸ë±ìŠ¤ ë°˜í™˜, ë™ì¼í•œ ìŠ¬ë¡¯ì´ ì—†ëŠ”ê²½ìš° ê°€ì¥ ì•ë²ˆí˜¸ì˜ ë¹ˆ ìŠ¬ë¡¯ ì¸ë±ìŠ¤ ë°˜í™˜, ë¹ˆ ìŠ¬ë¡¯ë„ ì—†ëŠ”ê²½ìš° -1 ë¦¬í„´ </returns>
 	int32 FindItemSlotIndex(int32 itemId) const;
 
 	class UItem* CreateItem(int32 itemId) const;
@@ -57,9 +59,16 @@ public:
 	void RemoveItem(int32 inventoryIdx);
 	void UseItem(int32 inventoryIdx);
 	bool IsEquipAbleSlot(int32 equipIdx) const;
+	void Equip(int32 inventoryIdx, int32 equipIdx);
+	/**
+	 * @brief ì¥ë¹„ ì¥ì°© 
+	 * @param inventoryIdx ì¥ì°© í•  ì¸ë²¤íŠ¸ë¡œ ìŠ¬ë¡¯ ì¸ë±ìŠ¤ 
+	 * @param equipItem ì¥ì°© í•  ì¥ë¹„ ì •ë³´ 
+	 */
 	void Equip(int32 inventoryIdx, UEquipItem* equipItem);
-	void Unequip(int32 equipIdx, int32 targetInventoryIdx);
-	void UnequipSoulShield(int32 soulShieldSlotIdx);
+	void UnEquip(int32 equipIdx, int32 targetInventoryIdx = -1);
+	void UnEquipSoulShield(int32 soulShieldSlotIdx);
 		
 	FDele_ItemSlotChange OnItemSlotChanged;
+	FDele_ItemSlotChange OnEquipSlotChanged;
 };

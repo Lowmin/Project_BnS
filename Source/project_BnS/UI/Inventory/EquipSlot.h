@@ -4,25 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ItemSlot.generated.h"
+#include "EquipSlot.generated.h"
 
-DECLARE_DELEGATE_OneParam(FDele_ItemUse, int32);
-DECLARE_DELEGATE_TwoParams(FDele_UnEquipToSlot, int32, int32);
-DECLARE_DELEGATE_TwoParams(FDele_SwapItemSlot, int32, int32);
+DECLARE_DELEGATE_OneParam(FDele_UnEquip, int32);
+DECLARE_DELEGATE_TwoParams(FDele_Equip, int32, int32);
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API UItemSlot : public UUserWidget
+class PROJECT_BNS_API UEquipSlot : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UItemSlot(const FObjectInitializer& ObjectInitializer);
+	UEquipSlot(const FObjectInitializer& ObjectInitializer);
 
 	// Input
-	private:
+private:
 	TSubclassOf<UUserWidget> DragIconClass;
 	TObjectPtr<UTexture2D> Texture = nullptr;
 	
@@ -31,25 +30,17 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
+	// Item
 private:
 	int32 Index = 0;
 	
 protected:
-
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<class UImage> ImgIcon;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<class UImage> ImgNewBadge;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<class UTextBlock> TextCount;
+	TObjectPtr<class UImage> ImgIcon = nullptr;
 
 public:
-	FDele_ItemUse OnItemUse;
-	FDele_UnEquipToSlot OnUnEquipToSlot;
-	FDele_SwapItemSlot OnSwapItemSlot;
-
+	FDele_Equip OnEquip;
+	FDele_UnEquip OnUnEquip;
 	void SetIndex(int32 index);
 	void SetInfo(const class UItem* data);
 };

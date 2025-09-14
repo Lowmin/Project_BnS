@@ -3,6 +3,7 @@
 
 #include "ItemList.h"
 
+#include "EquipSlot.h"
 #include "Components/VerticalBox.h"
 #include "Components/HorizontalBox.h"
 #include "ItemSlot.h"

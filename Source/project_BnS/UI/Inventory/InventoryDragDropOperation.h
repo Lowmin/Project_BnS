@@ -6,6 +6,13 @@
 #include "Blueprint/DragDropOperation.h"
 #include "InventoryDragDropOperation.generated.h"
 
+UENUM(BlueprintType)
+enum EDragSource : uint8
+{
+	ItemSlot,
+	EquipSlot,
+};
+
 /**
  * 
  */
@@ -15,6 +22,6 @@ class PROJECT_BNS_API UInventoryDragDropOperation : public UDragDropOperation
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY()
+	EDragSource Source = EDragSource::ItemSlot;
 	int32 Index;
 };

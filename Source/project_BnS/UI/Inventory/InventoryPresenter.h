@@ -24,10 +24,14 @@ public:
 
 	// Model to View
 public:
-	void OnInventoryChanged(int32 idx, const class UItem* data);
+	void OnInventoryChanged(int32 idx, const class UItem* data) const;
+	void OnEquipChanged(int32 idx, const class UItem* data) const;
 
 	// View to Model
 public:
 	void OnItemUse(int32 index);
+	void OnUnEquipToSlot(int32 equipIdx, int32 inventoryIdx);
 	void OnSwapItemSlot(int32 indexA, int32 indexB);
+	void OnUnEquip(int32 index);
+	void OnEquip(int32 inventoryIdx, int32 equipIdx);
 };
