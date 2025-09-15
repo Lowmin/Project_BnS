@@ -6,6 +6,7 @@
 #include "EquipSlot.h"
 #include "Components/VerticalBox.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Button.h"
 #include "ItemSlot.h"
 #include "../../Inventory/ItemData.h"
 #include "../../Inventory/Item.h"
@@ -57,6 +58,66 @@ bool UItemList::Initialize()
 	}
 	
 	return true;
+}
+
+void UItemList::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	BtnAll->OnClicked.AddDynamic(this, &UItemList::HighlightAll);
+	BtnEquip->OnClicked.AddDynamic(this, &UItemList::HighlightEquip);
+	BtnSoulShield->OnClicked.AddDynamic(this, &UItemList::HighlightSoulShield);
+	BtnUsable->OnClicked.AddDynamic(this, &UItemList::HighlightUsable);
+	BtnMaterial->OnClicked.AddDynamic(this, &UItemList::HighlightMaterial);
+	BtnEtc->OnClicked.AddDynamic(this, &UItemList::HighlightEtc);
+}
+
+void UItemList::HighlightAll()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::All);
+	}
+}
+
+void UItemList::HighlightEquip()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::Equip);
+	}
+}
+
+void UItemList::HighlightSoulShield()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::SoulShield);
+	}
+}
+
+void UItemList::HighlightUsable()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::Usable);
+	}
+}
+
+void UItemList::HighlightMaterial()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::Material);
+	}
+}
+
+void UItemList::HighlightEtc()
+{
+	if (OnHighlightItem.IsBound())
+	{
+		OnHighlightItem.Execute(EItemCategory::Etc);
+	}
 }
 
 void UItemList::SetItemSlot(int32 idx, const UItem* data, bool isHighlight)

@@ -314,3 +314,16 @@ void UInventoryComponent::OnInventoryOpen()
 	}
 }
 
+void UInventoryComponent::SetHighlightItem(EItemCategory highlightCategory)
+{
+	HighlightCategory = highlightCategory;
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		for (int i = 0; i < ItemList.Num(); ++i)
+		{
+			OnItemSlotChanged.Execute(i, ItemList[i], HighlightCategory);
+		}
+	}
+}
+

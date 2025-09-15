@@ -37,4 +37,5 @@ public:
 	void OnSwapItemSlot(int32 indexA, int32 indexB);
 	void OnUnEquip(int32 index);
 	void OnEquip(int32 inventoryIdx, int32 equipIdx);
+	void OnHighlightItem(const EItemCategory highlightCategory);
 };

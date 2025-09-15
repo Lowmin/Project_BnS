@@ -27,8 +27,12 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	InventoryPopup->OnInventoryOpen.BindUObject(this, &UInventoryPresenter::OnInventoryOpen);
 	InventoryPopup->OnInventorySort.BindUObject(this, &UInventoryPresenter::OnInventorySort);
 
-	// 인벤토리 아이템 슬롯 바인드 
+	// 인벤토리 아이템 리스트 바인드 
 	UItemList* itemList = InventoryPopup->GetItemList();
+	itemList->OnHighlightItem.BindUObject(this, &UInventoryPresenter::OnHighlightItem);
+
+
+	// 인벤토리 아이템 슬롯 바인드 
 	for (UItemSlot* itemSlot : itemList->GetItemSlotList())
 	{
 		itemSlot->OnItemUse.BindUObject(this, &UInventoryPresenter::OnItemUse);
@@ -97,4 +101,9 @@ void UInventoryPresenter::OnUnEquip(int32 index)
 void UInventoryPresenter::OnEquip(int32 inventoryIdx, int32 equipIdx)
 {
 	Player->GetInventoryComponent()->Equip(inventoryIdx, equipIdx);
+}
+
+void UInventoryPresenter::OnHighlightItem(const EItemCategory highlightCategory)
+{
+	Player->GetInventoryComponent()->SetHighlightItem(highlightCategory);
 }

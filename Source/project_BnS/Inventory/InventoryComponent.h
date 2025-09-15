@@ -71,6 +71,7 @@ public:
 	void UnEquip(int32 equipIdx, int32 targetInventoryIdx = -1);
 	void UnEquipSoulShield(int32 soulShieldSlotIdx);
 	void OnInventoryOpen();
+	void SetHighlightItem(EItemCategory highlightCategory);
 		
 	FDele_ItemSlotChange OnItemSlotChanged;
 	FDele_EquipSlotChange OnEquipSlotChanged;
