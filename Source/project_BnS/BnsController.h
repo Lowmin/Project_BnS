@@ -34,6 +34,10 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UInventoryPopup> Inventory = nullptr;
 
+	// 미니맵
+	UPROPERTY()
+	TObjectPtr<class UMinimapPresenter> MinimapPresenter = nullptr;
+
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -53,4 +57,7 @@ private:
 	class UInputAction* IA_Inventory = nullptr;
 
 	void ShowInventory();
+
+protected:
+	virtual void Tick(float DeltaSeconds) override;
 };

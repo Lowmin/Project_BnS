@@ -71,6 +71,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UBossInfo> BossInfo = nullptr;
 
+	// Minimap
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UMinimapWidget> MinimapView;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<class UPlayerIconWidget> PlayerIconView;
+
 public:
 	virtual void NativeConstruct() override;
 	
@@ -128,4 +134,8 @@ public:
 	void SetBossHp(float current, float max);
 	void SetBossCrowdControlCount(int current, int max);
 	void SetBossDistance(float distance);
+
+	// Minimap
+	UMinimapWidget* GetMinimapWidget() const;
+	UPlayerIconWidget* GetPlayerIconWidget() const;
 };

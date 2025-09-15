@@ -12,6 +12,12 @@
 #include "EnhancedInputComponent.h"
 #include "UI/Inventory/InventoryPresenter.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "UI/Minimap/MinimapPresenter.h"
+#include "UI/Minimap/MinimapWidget.h"
+#include "UI/Minimap/PlayerIconWidget.h"
+#include "UI/Minimap/MinimapBounds.h"
+
 
 ABnsController::ABnsController()
 {
@@ -75,6 +81,29 @@ void ABnsController::OnPossess(APawn* pawn)
 	}
 
 	UPopup::PopupCount = 0;
+
+
+	if (player && MainUi && MainUi->GetMinimapWidget() && MainUi->GetPlayerIconWidget())
+	{
+		AMinimapBounds* MapBoundary = Cast<AMinimapBounds>(UGameplayStatics::GetActorOfClass(GetWorld(), AMinimapBounds::StaticClass()));
+
+		if (MapBoundary)
+		{
+			MinimapPresenter = NewObject<UMinimapPresenter>(this);
+
+			UMinimapWidget* MinimapView = MainUi->GetMinimapWidget();
+			UPlayerIconWidget* PlayerIcon = MainUi->GetPlayerIconWidget();
+
+			MinimapPresenter->OnMapPositionUpdated.AddDynamic(MinimapView, &UMinimapWidget::SetMapPosition);
+			MinimapPresenter->OnPlayerRotationUpdated.AddDynamic(PlayerIcon, &UPlayerIconWidget::UpdateRotation);
+
+			FVector2D MapWorldOrigin;
+			FVector2D MapWorldSize;
+			MapBoundary->GetMapBounds(MapWorldOrigin, MapWorldSize);
+
+			MinimapPresenter->Init(player, MapWorldOrigin, MapWorldSize);
+		}
+	}
 }
 
 void ABnsController::SetupInputComponent()
@@ -96,4 +125,15 @@ void ABnsController::ShowInventory()
 	Inventory->SetVisiblePopup(!Inventory->IsVisible());
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "popup cnt : " + FString::FromInt(UPopup::PopupCount));
+}
+
+void ABnsController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (MinimapPresenter)
+	{
+		// Presenter 업데이트 -> 플레이어 정보 델리게이트 방송
+		MinimapPresenter->SetMinimap();
+	}
 }

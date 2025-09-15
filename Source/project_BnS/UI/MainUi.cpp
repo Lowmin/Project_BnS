@@ -155,3 +155,13 @@ void UMainUi::SetBossDistance(float distance)
 {
 	BossInfo->SetDistance(distance);
 }
+
+UMinimapWidget* UMainUi::GetMinimapWidget() const
+{
+	return MinimapView;
+}
+
+UPlayerIconWidget* UMainUi::GetPlayerIconWidget() const
+{
+	return PlayerIconView;
+}
