@@ -62,6 +62,18 @@ void AProjectileBall::DoExplore(const FVector& HitPos)
 
 void AProjectileBall::OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	AActor* MyOwner = GetOwner();
+
+	if (Other && Other == GetOwner())
+	{
+		return;
+	}
+
+	if (MyOwner->ActorHasTag("Enemy") && Other->ActorHasTag("Enemy"))
+	{
+		return;
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *GetNameSafe(Other));
 	if (!Other || Other == GetOwner())
 	{

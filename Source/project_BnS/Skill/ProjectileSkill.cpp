@@ -11,6 +11,8 @@
 
 void AProjectileSkill::ExecuteSkill_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("AProjectileSkill: ExecuteSkill is running."));
+
 	bAutoDestroyOnMontageEnd = false;
 
 	const FSkillType_Projectile* Type = GetTypeData_Projectile();
@@ -60,6 +62,8 @@ void AProjectileSkill::CalcSpawnTransform(FVector& OutPos, FRotator& OutRot) con
 
 void AProjectileSkill::SpawnProjectile(const FSkillType_Projectile& Type)
 {
+	UE_LOG(LogTemp, Warning, TEXT("AProjectileSkill: SpawnProjectile is running. Attempting to spawn projectile."));
+
 	if (!Type.ProjectileClass) return;
 
 	ACharacter* Player = GetOwnerCharacter();
@@ -93,6 +97,8 @@ void AProjectileSkill::SpawnProjectile(const FSkillType_Projectile& Type)
 		Ball->SetupProjectileData(Data, Player, MyHitVFX, MyHitSound, Type.TrailVFX, Type.MovingSound);
 		Ball->OnHitActor.AddDynamic(this, &AProjectileSkill::OnProjectileHit);
 	}
+
+	SetLifeSpan(Type.LifeSec);
 }
 
 void AProjectileSkill::OnProjectileHit(AActor* HitActor)
