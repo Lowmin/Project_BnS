@@ -29,6 +29,16 @@ void UInventoryPopup::NativeConstruct()
 	}
 }
 
+void UInventoryPopup::SetVisiblePopup(bool isVisible)
+{
+	Super::SetVisiblePopup(isVisible);
+
+	if (OnInventoryOpen.IsBound())
+	{
+		OnInventoryOpen.Execute();
+	}
+}
+
 void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data) const
 {
 	ItemList->SetItemSlot(idx, data);

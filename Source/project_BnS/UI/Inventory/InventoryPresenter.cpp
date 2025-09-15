@@ -22,6 +22,9 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 {
 	InventoryPopup = popup;
 
+	// 인벤토리 바인드 
+	InventoryPopup->OnInventoryOpen.BindUObject(this, &UInventoryPresenter::OnInventoryOpen);
+
 	// 인벤토리 아이템 슬롯 바인드 
 	UItemList* itemList = InventoryPopup->GetItemList();
 	for (UItemSlot* itemSlot : itemList->GetItemSlotList())
@@ -51,6 +54,11 @@ void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data) const
 		return;
 
 	InventoryPopup->SetEquipSlot(idx, data);
+}
+
+void UInventoryPresenter::OnInventoryOpen()
+{
+	Player->GetInventoryComponent()->OnInventoryOpen();
 }
 
 void UInventoryPresenter::OnItemUse(int32 index)

@@ -6,6 +6,8 @@
 #include "../Popup.h"
 #include "InventoryPopup.generated.h"
 
+DECLARE_DELEGATE(DFele_InventoryOpen);
+
 /**
  * 
  */
@@ -27,6 +29,10 @@ protected:
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void SetVisiblePopup(bool isVisible) override;
+
+	DFele_InventoryOpen OnInventoryOpen;
+
 	void SetItemSlot(int32 idx, const class UItem* data) const;
 	void SetEquipSlot(int32 idx, const class UItem* data) const;
 

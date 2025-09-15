@@ -33,5 +33,5 @@ public:
 	UFUNCTION()
 	void ClosePopup();
 
-	void SetVisiblePopup(bool isVisible);
+	virtual void SetVisiblePopup(bool isVisible);
 };

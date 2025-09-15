@@ -294,3 +294,19 @@ void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx)
 {
 }
 
+void UInventoryComponent::OnInventoryOpen()
+{
+	for(int i=0; i<ItemList.Num(); ++i)
+	{
+		if (OnItemSlotChanged.IsBound())
+		{
+			OnItemSlotChanged.Execute(i, ItemList[i]);
+		}
+
+		if (ItemList[i] == nullptr)
+			continue;
+
+		ItemList[i]->UpdatedItem = false;
+	}
+}
+
