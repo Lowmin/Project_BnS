@@ -49,10 +49,10 @@ private:
 	/// <param name="itemId"> 아이템 ID </param>
 	/// <returns> 동일한 슬롯 인덱스 반환, 동일한 슬롯이 없는경우 가장 앞번호의 빈 슬롯 인덱스 반환, 빈 슬롯도 없는경우 -1 리턴 </returns>
 	int32 FindItemSlotIndex(int32 itemId) const;
-
 	class UItem* CreateItem(int32 itemId) const;
 
 public:
+	void InventorySort();
 	void SwapItem(int32 indexA, int32 indexB);
 	void SetInventorySlotCount(int32 count);
 	void AddItem(int32 id, int32 count);

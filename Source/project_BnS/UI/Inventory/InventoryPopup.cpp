@@ -6,12 +6,14 @@
 #include "EquipSlot.h"
 #include "ItemList.h"
 #include "Components/GridPanel.h"
+#include "Components/Button.h"
 
 void UInventoryPopup::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	SelfShortCut = EKeys::I;
+	BtnSort->OnClicked.AddDynamic(this, &UInventoryPopup::InventorySort);
 
 	// 무기슬롯 등록
 	EquipSlots.Add(WeaponSlot);
@@ -60,4 +62,13 @@ TArray<UEquipSlot*> UInventoryPopup::GetEquipList() const
 UItemList* UInventoryPopup::GetItemList() const
 {
 	return ItemList;
+}
+
+void UInventoryPopup::InventorySort()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, "sort inv");
+	if (OnInventorySort.IsBound())
+	{
+		OnInventorySort.Execute();
+	}
 }

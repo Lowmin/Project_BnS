@@ -30,6 +30,7 @@ public:
 	// View to Model
 public:
 	void OnInventoryOpen();
+	void OnInventorySort();
 	void OnItemUse(int32 index);
 	void OnUnEquipToSlot(int32 equipIdx, int32 inventoryIdx);
 	void OnSwapItemSlot(int32 indexA, int32 indexB);

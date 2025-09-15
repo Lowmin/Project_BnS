@@ -6,7 +6,8 @@
 #include "../Popup.h"
 #include "InventoryPopup.generated.h"
 
-DECLARE_DELEGATE(DFele_InventoryOpen);
+DECLARE_DELEGATE(FDele_InventoryOpen);
+DECLARE_DELEGATE(FDele_InventorySort);
 
 /**
  * 
@@ -15,27 +16,34 @@ UCLASS()
 class PROJECT_BNS_API UInventoryPopup : public UPopup
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void NativeConstruct() override;
+	virtual void SetVisiblePopup(bool isVisible) override;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemList> ItemList;
+	TObjectPtr<class UItemList> ItemList = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UEquipSlot> WeaponSlot = nullptr;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UGridPanel> EquipRoot = nullptr;
 	
+	UPROPERTY()
 	TArray<class UEquipSlot*> EquipSlots;
 
-public:
-	virtual void NativeConstruct() override;
-	virtual void SetVisiblePopup(bool isVisible) override;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> BtnSort = nullptr;
 
-	DFele_InventoryOpen OnInventoryOpen;
+public:
+	FDele_InventoryOpen OnInventoryOpen;
+	FDele_InventorySort OnInventorySort;
 
 	void SetItemSlot(int32 idx, const class UItem* data) const;
 	void SetEquipSlot(int32 idx, const class UItem* data) const;
-
 	TArray<class UEquipSlot*> GetEquipList() const;
 	class UItemList* GetItemList() const;
+	UFUNCTION()
+	void InventorySort();
 };

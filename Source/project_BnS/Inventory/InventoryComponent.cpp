@@ -94,6 +94,26 @@ UItem* UInventoryComponent::CreateItem(int32 itemId) const
 
 }
 
+void UInventoryComponent::InventorySort()
+{
+	ItemList.HeapSort([](const TObjectPtr<UItem>& A, const TObjectPtr<UItem>& B) {
+		if (A == nullptr)
+			return false;
+		if (B == nullptr)
+			return true;
+
+		return A->Id < B->Id;
+		});
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		for (int i = 0; i < ItemList.Num(); ++i)
+		{
+			OnItemSlotChanged.Execute(i, ItemList[i]);
+		}
+	}
+}
+
 void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
 {
 	if (indexA == indexB)
@@ -213,22 +233,6 @@ void UInventoryComponent::Equip(int32 inventoryIdx, int32 equipIdx)
 
 	// 장착 슬롯 체크
 	Equip(inventoryIdx, equipItem);
-
-	// if(equipIdx >= EquipList.Num())
-	// 	return;
-	// UEquipItem* equipSlot = EquipList[equipIdx];
-	// if(equipSlot != nullptr)
-	// {
-	// 	EquipList[equipIdx] = nullptr;
-	// }
-	//
-	// // 장비 장착 
-	// Equip(inventoryIdx, equipItem);
-	//
-	// if(equipSlot != nullptr)
-	// {
-	// 	ItemList[inventoryIdx] = equipSlot;
-	// }
 }
 
 void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
