@@ -98,14 +98,14 @@ public:
 
 	// Enemy 보조
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
-	ASkillBase* EnemyUseBasicMelee(int32 SkillID, AActor* Target);
+	ASkillBase* UseSkillbyID(int32 SkillID, AActor* Target);
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
 	bool IsReady(int32 SkillID) const;
 
 private:
 	// ==== 실행 파이프라인 ====
 	bool  UseSlot_Internal(ESkillSlot Slot, AActor* Target);
-	bool  CanUseSkill(const FSkillDataRow& Row, AActor* Target) const;
+	bool  CanUseSkill(const FSkillDataRow& Row, AActor* Target, bool bCheckMPCost = true) const;
 	void  CommitStateAfterUse(const FSkillDataRow& Row, FSlotRuntimeState& SlotState);
 	void  OnChainExpire(ESkillSlot Slot);
 	void  UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target);

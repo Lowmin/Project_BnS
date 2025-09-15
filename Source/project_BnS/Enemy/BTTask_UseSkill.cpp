@@ -31,7 +31,7 @@ EBTNodeResult::Type UBTTask_UseSkill::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	if (!SkillSystem || !Blackboard) return EBTNodeResult::Failed;
 
 	AActor* TargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey.SelectedKeyName));
-	ASkillBase* SpawnedSkill = SkillSystem->EnemyUseBasicMelee(SkillIDToExecute, TargetActor);
+	ASkillBase* SpawnedSkill = SkillSystem->UseSkillbyID(SkillIDToExecute, TargetActor);
 
 	if (SpawnedSkill)
 	{
@@ -39,7 +39,7 @@ EBTNodeResult::Type UBTTask_UseSkill::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		return EBTNodeResult::InProgress;
 	}
 
-	if (SkillSystem->EnemyUseBasicMelee(SkillIDToExecute, TargetActor))
+	if (SkillSystem->UseSkillbyID(SkillIDToExecute, TargetActor))
 	{
 		return EBTNodeResult::Succeeded;
 	}

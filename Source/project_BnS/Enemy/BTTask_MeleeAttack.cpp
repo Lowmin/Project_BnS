@@ -39,7 +39,7 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
     FRotator TargetRotation = LookDirection.Rotation();
     Enemy->SetActorRotation(TargetRotation);
 
-    SkillSystem->EnemyUseBasicMelee(AttackSkillID, TargetActor);
+    SkillSystem->UseSkillbyID(AttackSkillID, TargetActor);
 
     return EBTNodeResult::Succeeded;
 }

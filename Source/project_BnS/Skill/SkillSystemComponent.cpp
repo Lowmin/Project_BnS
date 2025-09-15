@@ -287,7 +287,7 @@ void USkillSystemComponent::RefreshCooldownViewForSlot(ESkillSlot Slot, int32 Sk
 
 }
 
-bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target) const
+bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target, bool bCheckMPCost) const
 {
 
 	const float Now = GetWorld()->GetTimeSeconds();
@@ -295,7 +295,7 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 	{
 		if (*EndAt > Now) return false;
 	}
-	if (Row.MpCost != 0)
+	if (bCheckMPCost && Row.MpCost != 0)
 	{
 		if (!CachedStat.IsValid()) return false;
 		if (Row.MpCost > 0)
@@ -303,6 +303,8 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 			if (CachedStat->GetCurMp() < Row.MpCost) return false;
 		}
 	}
+
+	if (Row.Layer == ESkillLayer::Chain)
 	if (Row.Layer == ESkillLayer::Chain)
 	{
 		const FSlotRuntimeState* SlotState = TryGetState(Row.Slot);
@@ -575,13 +577,13 @@ void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain
 	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total, isVisibleNum);
 }
 
-// Enemy: 단발 실행
-ASkillBase* USkillSystemComponent::EnemyUseBasicMelee(int32 SkillID, AActor* Target)
+ASkillBase* USkillSystemComponent::UseSkillbyID(int32 SkillID, AActor* Target)
 {
 	if (!GetWorld() || !SkillTable) return nullptr;
 	const FSkillDataRow* Row = FindRowByID(SkillID);
-	if (!Row || Row->Layer != ESkillLayer::Base) return nullptr;
-	if (!CanUseSkill(*Row, Target)) return nullptr;
+	if (!Row) return nullptr;
+
+	if (!CanUseSkill(*Row, Target, false)) return nullptr;
 
 	ASkillBase* skill = CreateSkill(*Row);
 	if (!skill) return nullptr;
