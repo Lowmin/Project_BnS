@@ -41,9 +41,9 @@ void UInventoryPopup::SetVisiblePopup(bool isVisible)
 	}
 }
 
-void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data) const
+void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data, bool isHighlight) const
 {
-	ItemList->SetItemSlot(idx, data);
+	ItemList->SetItemSlot(idx, data, isHighlight);
 }
 
 void UInventoryPopup::SetEquipSlot(int32 idx, const UItem* data) const

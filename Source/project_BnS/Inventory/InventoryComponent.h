@@ -7,7 +7,8 @@
 #include "itemData.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FDele_ItemSlotChange, int32, const class UItem*);
+DECLARE_DELEGATE_ThreeParams(FDele_ItemSlotChange, int32, const class UItem*, const EItemCategory&);
+DECLARE_DELEGATE_TwoParams(FDele_EquipSlotChange, int32, const class UItem*);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -30,6 +31,7 @@ public:
 
 	// Inventory
 private:
+	EItemCategory HighlightCategory = EItemCategory::All;
 	UPROPERTY()
 	TArray<TObjectPtr<class UItem>> ItemList;
 	UPROPERTY()
@@ -71,5 +73,5 @@ public:
 	void OnInventoryOpen();
 		
 	FDele_ItemSlotChange OnItemSlotChanged;
-	FDele_ItemSlotChange OnEquipSlotChanged;
+	FDele_EquipSlotChange OnEquipSlotChanged;
 };

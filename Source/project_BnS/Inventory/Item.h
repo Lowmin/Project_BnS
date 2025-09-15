@@ -26,4 +26,5 @@ public:
 	FString Description = "";
 
 	void SetData(const FItemData* data);
+	bool IsHighlight(EItemCategory category) const;
 };

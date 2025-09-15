@@ -59,12 +59,12 @@ bool UItemList::Initialize()
 	return true;
 }
 
-void UItemList::SetItemSlot(int32 idx, const UItem* data)
+void UItemList::SetItemSlot(int32 idx, const UItem* data, bool isHighlight)
 {
 	if (idx >= ItemSlots.Num())
 		return;
 
-	ItemSlots[idx]->SetInfo(data);
+	ItemSlots[idx]->SetInfo(data, isHighlight);
 }
 
 TArray<class UItemSlot*> UItemList::GetItemSlotList() const

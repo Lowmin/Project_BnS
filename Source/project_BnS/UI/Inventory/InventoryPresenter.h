@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "../../Inventory/ItemData.h"
 #include "InventoryPresenter.generated.h"
 
 /**
@@ -24,7 +25,7 @@ public:
 
 	// Model to View
 public:
-	void OnInventoryChanged(int32 idx, const class UItem* data) const;
+	void OnInventoryChanged(int32 idx, const class UItem* data, const EItemCategory& highlightCategory) const;
 	void OnEquipChanged(int32 idx, const class UItem* data) const;
 
 	// View to Model

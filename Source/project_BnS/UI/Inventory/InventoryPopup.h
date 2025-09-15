@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../Popup.h"
+#include "../../Inventory/ItemData.h"
 #include "InventoryPopup.generated.h"
 
 DECLARE_DELEGATE(FDele_InventoryOpen);
@@ -40,7 +41,7 @@ public:
 	FDele_InventoryOpen OnInventoryOpen;
 	FDele_InventorySort OnInventorySort;
 
-	void SetItemSlot(int32 idx, const class UItem* data) const;
+	void SetItemSlot(int32 idx, const class UItem* data, bool isHighlight) const;
 	void SetEquipSlot(int32 idx, const class UItem* data) const;
 	TArray<class UEquipSlot*> GetEquipList() const;
 	class UItemList* GetItemList() const;

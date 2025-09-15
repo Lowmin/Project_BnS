@@ -14,3 +14,11 @@ void UItem::SetData(const FItemData* data)
 	UpdatedItem = data->UpdatedItem;
 	Description = data->Description;
 }
+
+bool UItem::IsHighlight(EItemCategory category) const
+{
+	if (category == EItemCategory::All)
+		return true;
+
+	return Category == category;
+}

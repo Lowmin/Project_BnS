@@ -5,6 +5,7 @@
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/RetainerBox.h"
 #include "InventoryDragDropOperation.h"
 #include "InventoryDragIcon.h"
 #include "../../Inventory/Item.h"
@@ -15,6 +16,24 @@ UItemSlot::UItemSlot(const FObjectInitializer& ObjectInitializer) : Super(Object
 	if (dragIcon.Succeeded())
 	{
 		DragIconClass = dragIcon.Class;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> grayscaleMat(TEXT("/Game/UI/umatGrayScale.umatGrayScale"));
+	if (grayscaleMat.Succeeded())
+	{
+		MatGrayscaleBase = grayscaleMat.Object;
+
+	}
+}
+
+void UItemSlot::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	MatGrayscale = UMaterialInstanceDynamic::Create(MatGrayscaleBase, this);
+	if(MatGrayscale != nullptr)
+	{
+		Retainer->SetEffectMaterial(MatGrayscale);
 	}
 }
 
@@ -76,18 +95,26 @@ bool UItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 	return true;
 }
 
+void UItemSlot::SetGrayscale(bool isGray)
+{
+	MatGrayscale->SetScalarParameterValue(TEXT("Percent"), isGray ? 1.f : 0.f);
+}
+
 void UItemSlot::SetIndex(int32 index)
 {
 	Index = index;
 }
 
-void UItemSlot::SetInfo(const UItem* data)
+void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 {
 	if (data == nullptr)
 	{
 		Texture = nullptr;
 		ImgIcon->SetBrushFromTexture(Texture);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
+		TextCount->SetVisibility(ESlateVisibility::Hidden);
+		ImgNewBadge->SetVisibility(ESlateVisibility::Hidden);
+		SetGrayscale(false);
 		return;
 	}
 
@@ -107,4 +134,5 @@ void UItemSlot::SetInfo(const UItem* data)
 	}
 
 	ImgNewBadge->SetVisibility(data->UpdatedItem ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	SetGrayscale(!isHighlight);
 }

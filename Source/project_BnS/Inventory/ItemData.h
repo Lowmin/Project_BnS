@@ -11,7 +11,8 @@ enum class EItemCategory : uint8 {
 	SoulShield,
 	Usable,
 	Material,
-	Etc
+	Etc,
+	All
 };
 
 UENUM(BlueprintType)

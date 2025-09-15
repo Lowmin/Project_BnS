@@ -109,7 +109,7 @@ void UInventoryComponent::InventorySort()
 	{
 		for (int i = 0; i < ItemList.Num(); ++i)
 		{
-			OnItemSlotChanged.Execute(i, ItemList[i]);
+			OnItemSlotChanged.Execute(i, ItemList[i], HighlightCategory);
 		}
 	}
 }
@@ -138,8 +138,8 @@ void UInventoryComponent::SwapItem(int32 indexA, int32 indexB)
 
 	if (OnItemSlotChanged.IsBound())
 	{
-		OnItemSlotChanged.Execute(indexA, ItemList[indexA]);
-		OnItemSlotChanged.Execute(indexB, ItemList[indexB]);
+		OnItemSlotChanged.Execute(indexA, ItemList[indexA], HighlightCategory);
+		OnItemSlotChanged.Execute(indexB, ItemList[indexB], HighlightCategory);
 	}
 	
 }
@@ -175,7 +175,7 @@ void UInventoryComponent::AddItem(int32 id, int32 count)
 
 	if (OnItemSlotChanged.IsBound())
 	{
-		OnItemSlotChanged.Execute(idx, ItemList[idx]);
+		OnItemSlotChanged.Execute(idx, ItemList[idx], HighlightCategory);
 	}
 }
 
@@ -185,7 +185,7 @@ void UInventoryComponent::RemoveItem(int32 inventoryIdx)
 
 	if (OnItemSlotChanged.IsBound())
 	{
-		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx]);
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx], HighlightCategory);
 	}
 }
 
@@ -263,7 +263,7 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 	
 	if(OnItemSlotChanged.IsBound())
 	{
-		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx]);
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx], HighlightCategory);
 	}
 }
 
@@ -285,7 +285,7 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 
 	if(OnItemSlotChanged.IsBound())
 	{
-		OnItemSlotChanged.Execute(targetInventoryIdx, ItemList[targetInventoryIdx]);
+		OnItemSlotChanged.Execute(targetInventoryIdx, ItemList[targetInventoryIdx], HighlightCategory);
 	}
 	
 	if(OnEquipSlotChanged.IsBound())
@@ -304,7 +304,7 @@ void UInventoryComponent::OnInventoryOpen()
 	{
 		if (OnItemSlotChanged.IsBound())
 		{
-			OnItemSlotChanged.Execute(i, ItemList[i]);
+			OnItemSlotChanged.Execute(i, ItemList[i], HighlightCategory);
 		}
 
 		if (ItemList[i] == nullptr)

@@ -9,6 +9,7 @@
 #include "InventoryPopup.h"
 #include "ItemList.h"
 #include "ItemSlot.h"
+#include "../../Inventory/Item.h"
 
 void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 {
@@ -41,12 +42,18 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	}
 }
 
-void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data) const
+void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data, const EItemCategory& highlightCategory) const
 {
 	if (InventoryPopup == nullptr)
 		return;
 
-	InventoryPopup->SetItemSlot(idx, data);
+	bool isHighlight = true;
+	if (data != nullptr)
+	{
+		isHighlight = data->IsHighlight(highlightCategory);
+	}
+
+	InventoryPopup->SetItemSlot(idx, data, isHighlight);
 }
 
 void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data) const
