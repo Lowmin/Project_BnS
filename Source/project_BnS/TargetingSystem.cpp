@@ -101,7 +101,10 @@ void ATargetingSystem::SetTargetBox()
 
 	targetBoxSize *= targetBoxRatio;
 
-	OnTargetBoxChange.Execute(targetCenter + FVector2D(x, y), targetBoxSize);
+	if(OnTargetBoxChange.IsBound())
+	{
+		OnTargetBoxChange.Execute(targetCenter + FVector2D(x, y), targetBoxSize);
+	}
 }
 
 void ATargetingSystem::RemoveCurrentTarget()
@@ -109,7 +112,10 @@ void ATargetingSystem::RemoveCurrentTarget()
 	ITargetAble::Execute_OnTargeted(Target, false);
 	Target = nullptr;
 
-	OnTargetBoxChange.Execute(FVector2D::ZeroVector, FVector2D(100.0f, 100.0f));
+	if (OnTargetBoxChange.IsBound())
+	{
+		OnTargetBoxChange.Execute(FVector2D::ZeroVector, FVector2D(100.0f, 100.0f));
+	}
 }
 
 void ATargetingSystem::SetCurTarget()
