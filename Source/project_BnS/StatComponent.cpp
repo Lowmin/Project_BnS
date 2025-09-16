@@ -50,7 +50,7 @@ void UStatComponent::SetCurHp(float hp)
 
 float UStatComponent::GetMaxHp() const 
 {
-	return MaxHp;
+	return MaxHp + ExtraMaxHp;
 }
 
 void UStatComponent::SetMaxHp(float hp)
@@ -97,7 +97,7 @@ int32 UStatComponent::GetLevel() const
 
 float UStatComponent::GetAtk() const
 {
-	return Atk;
+	return Atk + ExtraAtk;
 }
 
 void UStatComponent::SetAtk(float atk)
@@ -107,7 +107,7 @@ void UStatComponent::SetAtk(float atk)
 
 float UStatComponent::GetDef() const
 {
-	return Def;
+	return Def + ExtraDef;
 }
 
 void UStatComponent::SetDef(float def)
@@ -123,4 +123,25 @@ const FString& UStatComponent::GetCharacterName() const
 void UStatComponent::SetCharacterName(const FString name)
 {
 	CharacterName = name;
+}
+
+void UStatComponent::AddExtraMaxHp(float value)
+{
+	ExtraMaxHp += value;
+	CurHp = FMath::Max(CurHp + value, 1);
+
+	if (OnHpChange.IsBound())
+	{
+		OnHpChange.Broadcast(GetCurHp(), GetMaxHp());
+	}
+}
+
+void UStatComponent::AddExtraAtk(float value)
+{
+	ExtraAtk += value;
+}
+
+void UStatComponent::AddExtraDef(float value)
+{
+	ExtraDef += value;
 }

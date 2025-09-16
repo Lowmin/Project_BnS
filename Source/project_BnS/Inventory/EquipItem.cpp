@@ -8,6 +8,7 @@ void UEquipItem::SetData(const FEquipData* data)
 	Super::SetData(data);
 
 	DetailCategory = data->DetailCategory;
-	Hp = data->Hp;
+	MaxHp = data->MaxHp;
 	Atk = data->Atk;
+	Def = data->Def;
 }

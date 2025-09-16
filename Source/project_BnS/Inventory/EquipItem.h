@@ -16,7 +16,7 @@ class PROJECT_BNS_API UEquipItem : public UItem
 	
 public:
 	EEquipDetailCategory DetailCategory = EEquipDetailCategory::Weapon;
-	float Hp = 0;
+	float MaxHp = 0;
 	float Atk = 0;
 	float Def = 0;
 

@@ -26,9 +26,10 @@ enum class EItemRarity : uint8 {
 UENUM(BlueprintType)
 enum class EEquipDetailCategory : uint8 {
 	Weapon,
-	Armor,
 	Ring,
 	EarRing,
+	Neckless,
+	Bracelit,
 	Count
 };
 
@@ -73,7 +74,7 @@ struct FEquipData : public FItemData {
 	UPROPERTY(EditAnywhere)
 	EEquipDetailCategory DetailCategory;
 	UPROPERTY(EditAnywhere)
-	float Hp;
+	float MaxHp;
 	UPROPERTY(EditAnywhere)
 	float Atk;
 	UPROPERTY(EditAnywhere)
@@ -82,7 +83,7 @@ struct FEquipData : public FItemData {
 	FEquipData() : FItemData()
 	{
 		DetailCategory = EEquipDetailCategory::Weapon;
-		Hp = 0.f;
+		MaxHp = 0.f;
 		Atk = 0.f;
 		Def = 0.f;
 	};

@@ -44,6 +44,13 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	float Def = 10.0f;
 
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	float ExtraMaxHp = 0.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	float ExtraAtk = 0.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	float ExtraDef = 0.0f;
+
 public:
 	FDele_Multi_FF OnHpChange{};
 	FDele_Multi_I OnMpChange{};
@@ -75,4 +82,13 @@ public:
 	// Name
 	const FString& GetCharacterName() const;
 	void SetCharacterName(const FString name);
+
+	// ExtraHp
+	void AddExtraMaxHp(float value);
+
+	// ExtraAtk
+	void AddExtraAtk(float value);
+
+	// ExtraDef
+	void AddExtraDef(float value);
 };

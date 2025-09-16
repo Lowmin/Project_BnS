@@ -31,6 +31,8 @@ public:
 
 	// Inventory
 private:
+	TWeakObjectPtr<class UStatComponent> StatComponent = nullptr;
+
 	EItemCategory HighlightCategory = EItemCategory::All;
 	UPROPERTY()
 	TArray<TObjectPtr<class UItem>> ItemList;

@@ -4,6 +4,8 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "EquipItem.h"
+#include "../CharacterBase.h"
+#include "../StatComponent.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -23,6 +25,12 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ACharacterBase* characterBase = Cast<ACharacterBase>(GetOwner());
+	if(characterBase != nullptr)
+	{
+		StatComponent = characterBase->GetStatusComponent();
+	}
 
 	// ...
 	ParsingData();
@@ -255,6 +263,13 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 	{
 		EquipList[equipIndex] = temp;
 
+		if (StatComponent != nullptr)
+		{
+			StatComponent->AddExtraMaxHp(EquipList[equipIndex]->MaxHp);
+			StatComponent->AddExtraAtk(EquipList[equipIndex]->Atk);
+			StatComponent->AddExtraDef(EquipList[equipIndex]->Def);
+		}
+
 		if(OnEquipSlotChanged.IsBound())
 		{
 			OnEquipSlotChanged.Execute(equipIndex, temp);
@@ -287,6 +302,14 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 
 	if(ItemList[targetInventoryIdx] != nullptr)
 		return;
+
+
+	if(StatComponent != nullptr)
+	{
+		StatComponent->AddExtraMaxHp(-EquipList[equipIdx]->MaxHp);
+		StatComponent->AddExtraAtk(-EquipList[equipIdx]->Atk);
+		StatComponent->AddExtraDef(-EquipList[equipIdx]->Def);
+	}
 
 	ItemList[targetInventoryIdx] = EquipList[equipIdx];
 	EquipList[equipIdx] = nullptr;
