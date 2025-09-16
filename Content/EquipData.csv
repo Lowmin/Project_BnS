@@ -1,3 +1,4 @@
 ﻿Raw,ID,Category,Rarity,IsStackAble,Icon,UpdatedItem,Description,DetailCategory,Hp,Atk,Def
-1,1,Equip,Common,TRUE,/Game/GuiParts/RPGIcons/stoune_icon.stoune_icon,FALSE,기본아이템,Weapon,0,10,0
+1,1,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/stoune_icon.stoune_icon,TRUE,기본아이템,Weapon,0,10,0
 2,2,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/weapon_icon.weapon_icon,TRUE,기본아이템2,Weapon,20,21,22
+3,3,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/skill_icon_03_nobg.skill_icon_03_nobg,TRUE,기본아이템3,Armor,0,0,0

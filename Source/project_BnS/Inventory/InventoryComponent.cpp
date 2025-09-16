@@ -29,8 +29,9 @@ void UInventoryComponent::BeginPlay()
 	EquipList.SetNum((int)EEquipDetailCategory::Count);
 	SetInventorySlotCount(40);
 
-	AddItem(1, 2);
+	AddItem(1, 1);
 	AddItem(2, 1);
+	AddItem(3, 1);
 }
 
 
@@ -275,6 +276,13 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 	}
 
 	if (targetInventoryIdx < 0)
+		return;
+	if (equipIdx < 0)
+		return;
+
+	if (equipIdx >= EquipList.Num())
+		return;
+	if (targetInventoryIdx >= ItemList.Num())
 		return;
 
 	if(ItemList[targetInventoryIdx] != nullptr)

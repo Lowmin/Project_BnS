@@ -39,6 +39,7 @@ void UInventoryPopup::SetVisiblePopup(bool isVisible)
 	{
 		OnInventoryOpen.Execute();
 	}
+	ItemList->HighlightAll();
 }
 
 void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data, bool isHighlight) const

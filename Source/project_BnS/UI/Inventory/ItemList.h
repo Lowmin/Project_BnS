@@ -26,6 +26,20 @@ public:
 private:
 	TArray<class UItemSlot*> ItemSlots;
 
+	TObjectPtr<UTexture2D> TextureAllEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureAllDisable = nullptr;
+	TObjectPtr<UTexture2D> TextureEquipEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureEquipDisable = nullptr;
+	TObjectPtr<UTexture2D> TextureSoulShieldEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureSoulShieldDisable = nullptr;
+	TObjectPtr<UTexture2D> TextureUsableEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureUsableDisable = nullptr;
+	TObjectPtr<UTexture2D> TextureMaterialEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureMaterialDisable = nullptr;
+	TObjectPtr<UTexture2D> TextureEtcEnable = nullptr;
+	TObjectPtr<UTexture2D> TextureEtcDisable = nullptr;
+
+public:
 	UFUNCTION()
 	void HighlightAll();
 	UFUNCTION()
@@ -38,6 +52,10 @@ private:
 	void HighlightMaterial();
 	UFUNCTION()
 	void HighlightEtc();
+
+private:
+	void SetCategoryImage(enum EItemCategory category);
+	void SetButtonImage(UButton* btn, UTexture2D* texture);
 
 protected:
 	UPROPERTY()
@@ -60,6 +78,7 @@ protected:
 	TObjectPtr<class UButton> BtnMaterial = nullptr;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> BtnEtc = nullptr;
+
 
 public:
 	FDele_HighlightItem OnHighlightItem;
