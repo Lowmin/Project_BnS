@@ -129,6 +129,7 @@ void USkillSlotController::StopCooldownShow(ESkillSlot SkillSlot)
 			World->GetTimerManager().ClearTimer(*Handle);
 		}
 	}
+	OnSlotCooldownTick.Broadcast(SkillSlot, 0.f, 1.f, ECooldownUIType::Skill);
 }
 
 void USkillSlotController::PlayCooldownShow_All(float EndAt, float TotalSec, bool bSkipSlotCool)

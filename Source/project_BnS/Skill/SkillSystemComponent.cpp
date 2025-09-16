@@ -5,6 +5,8 @@
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 #include "../CrowdControlComponent.h"
+#include "../BossEnemy.h"
+#include "../TargetingSystem.h"
 #include "Engine/DataTable.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -12,7 +14,7 @@
 
 USkillSystemComponent::USkillSystemComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void USkillSystemComponent::BeginPlay()
@@ -38,6 +40,42 @@ void USkillSystemComponent::BeginPlay()
 		{
 			SlotPanel->EquipBaseSkill(BaseAttack.Key, BaseAttack.Value);
 		}
+	}
+
+	LastCheckedTarget = nullptr;
+	LastCheckedCCType = ECrowdControlType::None;
+	bLastTargetValid = false;
+}
+
+void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	ATargetingSystem* OwnerAsTargetingSystem = Cast<ATargetingSystem>(GetOwner());
+	if (!OwnerAsTargetingSystem) return;
+
+	AActor* CurrentTarget = OwnerAsTargetingSystem->GetTarget();
+	const bool bIsTargetValidNow = IsValid(CurrentTarget);
+	ECrowdControlType CurrentCCType = ECrowdControlType::None;
+	int32 CurrentStackCount = 0;
+
+	if (bIsTargetValidNow)
+	{
+		if (const UCrowdControlComponent* TargetCC = CurrentTarget->FindComponentByClass<UCrowdControlComponent>())
+		{
+			CurrentCCType = TargetCC->GetCrowdControlType();
+			CurrentStackCount = TargetCC->GetCurrentStack();
+		}
+	}
+
+	if (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get() || CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount)
+	{
+		UpdateAllSkillDisplays(CurrentTarget);
+
+		LastCheckedTarget = CurrentTarget;
+		bLastTargetValid = bIsTargetValidNow;
+		LastCheckedCCType = CurrentCCType;
+		LastCheckedStackCount = CurrentStackCount;
 	}
 }
 
@@ -196,6 +234,7 @@ const FSkillDataRow* USkillSystemComponent::FindHighestPrioritySkillForSlot(ESki
 	if (!CandidateIDs) return nullptr;
 
 	const FSkillDataRow* BestSkillRow = nullptr;
+
 	for (const int32 SkillID : CandidateIDs->IDs)
 	{
 		const FSkillDataRow* CurrentRow = FindRowByID(SkillID);
@@ -219,21 +258,50 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 	{
 	case ESkillLayer::Proc: return false;
 	case ESkillLayer::Finisher:
+	{
+		if (Row.NeedTargetCC.Num() > 0)
+		{
+			if (!Target) return false;
+
+			if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
+			{
+				if (TargetCC->IsEffect() && Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType()))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
 	case ESkillLayer::BossCC:
 	{
-		if (Row.NeedTargetCC.Num() == 0) return false;
 		if (!Target) return false;
-		if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
+		if (ABossEnemy* BossTarget = Cast<ABossEnemy>(Target))
 		{
-			const ECrowdControlType CurrentTargetCC = TargetCC->GetCrowdControlType();
-
-			if (Row.NeedTargetCC.Contains(CurrentTargetCC))
+			if (UCrowdControlComponent* TargetCC = BossTarget->GetCrowdControlComponent())
 			{
-				return true;
+				// ¡å¡å¡å Add UE_LOG for Debugging ¡å¡å¡å
+				UE_LOG(LogTemp, Warning, TEXT("BossCC Skill Check --> Target: %s | CurrentStack: %d | ActivateCount: %d | IsEffect Returns: %s"),
+					*Target->GetName(),
+					TargetCC->GetCurrentStack(),
+					TargetCC->GetActivateStackCount(),
+					TargetCC->IsEffect() ? TEXT("true") : TEXT("false")
+				);
+				// ¡ã¡ã¡ã Add UE_LOG for Debugging ¡ã¡ã¡ã
+				if (TargetCC->IsEffect())
+				{
+					if (Row.NeedTargetCC.Num() == 0 || Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType()))
+					{
+						return true;
+					}
+				}
 			}
 		}
+		return false;
 	}
-	}
+	} // switch ³¡
 	return false;
 }
 
@@ -289,7 +357,6 @@ void USkillSystemComponent::RefreshCooldownViewForSlot(ESkillSlot Slot, int32 Sk
 
 bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target, bool bCheckMPCost) const
 {
-
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (const float* EndAt = CooldownEndAt.Find(Row.SkillID))
 	{
@@ -305,7 +372,6 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 	}
 
 	if (Row.Layer == ESkillLayer::Chain)
-	if (Row.Layer == ESkillLayer::Chain)
 	{
 		const FSlotRuntimeState* SlotState = TryGetState(Row.Slot);
 		if (!SlotState || SlotState->LastUsedSkillID < 0) return false;
@@ -314,6 +380,7 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 		const bool bOk = (Last->ChainNextID == Row.SkillID) && ((Now - SlotState->LastUsedSkillAt) <= Last->ChainWindowSec);
 		if (!bOk) return false;
 	}
+
 	if (Row.NeedTargetCC.Num() > 0)
 	{
 		if (!Target) return false;
@@ -330,18 +397,7 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 		const float Distance = GetOwner()->GetDistanceTo(Target);
 		if (Distance > Row.MaxRange)
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("[Failed] %s: Distance Over (%.0f / %.0f cm)"), *Row.SkillName.ToString(), Distance, Row.MaxRange));
-			}
 			return false;
-		}
-		else
-		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("[Success] %s: Distance Ok (%.0f / %.0f cm)"), *Row.SkillName.ToString(), Distance, Row.MaxRange));
-			}
 		}
 	}
 	return true;
@@ -415,7 +471,6 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 	if (Slot == ESkillSlot::Slot0)
 	{
 		const int32 BaseID = GetBaseID(Slot);
-
 		int32 FinalPrevID = (PrevID > 0) ? PrevID : BaseID;
 		int32 FinalNextID = (NextID > 0) ? NextID : BaseID;
 
@@ -430,13 +485,6 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 	}
 	else
 	{
-		UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
-		UTexture2D* NextIcon = IconCache.FindRef(NextID);
-
-		const int32 BaseID = GetBaseID(Slot);
-		if (!PrevIcon) PrevIcon = IconCache.FindRef(BaseID);
-		if (!NextIcon) NextIcon = IconCache.FindRef(BaseID);
-
 		if (NextID <= 0)
 		{
 			SlotPanel->ResetToBase(Slot);
@@ -446,12 +494,18 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 			SlotPanel->ShowSkill(Slot, NextID);
 		}
 
+		UTexture2D* PrevIcon = IconCache.FindRef(PrevID);
+		UTexture2D* NextIcon = IconCache.FindRef(NextID);
+		const int32 BaseID = GetBaseID(Slot);
+
+		if (!PrevIcon) PrevIcon = IconCache.FindRef(BaseID);
+		if (!NextIcon) NextIcon = IconCache.FindRef(BaseID);
+
 		if (PrevIcon && NextIcon)
 		{
 			UI_OnAnimatedSetIcon.Broadcast(SlotToIndex(Slot), PrevIcon, NextIcon);
 		}
 	}
-
 	RefreshCooldownViewForSlot(Slot, NextID > 0 ? NextID : GetBaseID(Slot));
 }
 

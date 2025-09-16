@@ -43,7 +43,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetActivateStackCount(int32 count);
-	bool IsEffect();
+	bool IsEffect() const;
 	ECrowdControlType GetCrowdControlType() const;
 	void ApplyCrowdControl(ECrowdControlType type, float duration);
 	void RemoveCrowdControl();

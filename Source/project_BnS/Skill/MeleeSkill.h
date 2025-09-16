@@ -19,4 +19,7 @@ protected:
 
 private:
 	void PerformMeleeAttack();
+
+	UPROPERTY()
+	TSet<TObjectPtr<AActor>> HitActors;
 };

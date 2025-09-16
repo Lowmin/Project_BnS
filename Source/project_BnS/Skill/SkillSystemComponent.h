@@ -56,6 +56,9 @@ class USkillSystemComponent : public UActorComponent
 public:
 	USkillSystemComponent();
 	virtual void BeginPlay() override;
+	// Target 상태에 따른 스킬 사용 및 표시를 위해
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 
 	// ==== 데이터 ====
 	UPROPERTY(EditAnywhere, Category = "Skill Config")
@@ -117,7 +120,7 @@ private:
 	const FSkillDataRow* FindHighestPrioritySkillForSlot(ESkillSlot Slot, AActor* Target) const;
 	bool CheckActivationConditions(const FSkillDataRow& Row, AActor* Target) const;
 
-	void RefreshCooldownViewForSlot(ESkillSlot Slot, int32 SkillID);	// SkillID = Current Skill ID
+	void RefreshCooldownViewForSlot(ESkillSlot Slot, int32 SkillID);
 
 	// ==== 스폰 / 캐시 / 유틸 ====
 	ASkillBase* CreateSkill(const FSkillDataRow& Row);
@@ -167,4 +170,10 @@ private:
 	// ==== 외부 시스템 ====
 	TWeakObjectPtr<UStatComponent>         CachedStat;
 	TWeakObjectPtr<UCrowdControlComponent> CachedOwnerCC;
+
+	// ==== Tick 최적화 상태 캐시 ====
+	TWeakObjectPtr<AActor> LastCheckedTarget;
+	ECrowdControlType LastCheckedCCType = ECrowdControlType::None;
+	bool bLastTargetValid = false;
+	int32 LastCheckedStackCount = 0;
 };

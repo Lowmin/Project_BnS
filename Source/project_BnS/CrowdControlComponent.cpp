@@ -43,12 +43,9 @@ void UCrowdControlComponent::SetActivateStackCount(int32 count)
 {
 	ActivateStackCount = count;
 
-	// 합격기 스택 활성화 동시에 초기화
-	CurrentType = ECrowdControlType::None;
-	Stack = 0;
 }
 
-bool UCrowdControlComponent::IsEffect()
+bool UCrowdControlComponent::IsEffect() const
 {
 	return Stack >= ActivateStackCount && Duration > 0.f;
 }
@@ -88,9 +85,6 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 			Duration = duration;
 
 			OnAppliedCrowdControl.Broadcast();
-
-			Stack = 0;
-			CurrentType = ECrowdControlType::None;
 		}
 	}
 	else
