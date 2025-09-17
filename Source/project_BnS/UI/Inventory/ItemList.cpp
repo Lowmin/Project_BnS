@@ -24,61 +24,61 @@ UItemList::UItemList(const FObjectInitializer& ObjectInitializer) : UUserWidget(
 		InventoryLockClass = inventoryLock.Class;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> allEnable(TEXT("/Game/Image/Inventory/Category_All_Enable.Category_All_Enable"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> allEnable(TEXT("/Game/Image/UI/Inventory/Category_All_Enable.Category_All_Enable"));
 	if (allEnable.Succeeded())
 	{
 		TextureAllEnable = allEnable.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UTexture2D> allDisable(TEXT("/Game/Image/Inventory/Category_All_Disable.Category_All_Disable"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> allDisable(TEXT("/Game/Image/UI/Inventory/Category_All_Disable.Category_All_Disable"));
 	if(allDisable.Succeeded())
 	{
 		TextureAllDisable = allDisable.Object;
 	}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> equipEnable(TEXT("/Game/Image/Inventory/Category_Equip_Enable.Category_Equip_Enable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> equipEnable(TEXT("/Game/Image/UI/Inventory/Category_Equip_Enable.Category_Equip_Enable"));
 		if(equipEnable.Succeeded())
 		{
 			TextureEquipEnable = equipEnable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> equipDisable (TEXT("/Game/Image/Inventory/Category_Equip_Disable.Category_Equip_Disable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> equipDisable (TEXT("/Game/Image/UI/Inventory/Category_Equip_Disable.Category_Equip_Disable"));
 		{
 			TextureEquipDisable = equipDisable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> soulShieldEnable(TEXT("/Game/Image/Inventory/Category_SoulShield_Enable.Category_SoulShield_Enable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> soulShieldEnable(TEXT("/Game/Image/UI/Inventory/Category_SoulShield_Enable.Category_SoulShield_Enable"));
 		if(soulShieldEnable.Succeeded())
 		{
 			TextureSoulShieldEnable = soulShieldEnable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> soulShieldDisable(TEXT("/Game/Image/Inventory/Category_SoulShield_Disable.Category_SoulShield_Disable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> soulShieldDisable(TEXT("/Game/Image/UI/Inventory/Category_SoulShield_Disable.Category_SoulShield_Disable"));
 		if(soulShieldDisable.Succeeded())
 		{
 			TextureSoulShieldDisable = soulShieldDisable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> usableEnable(TEXT("/Game/Image/Inventory/Category_Usable_Enable.Category_Usable_Enable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> usableEnable(TEXT("/Game/Image/UI/Inventory/Category_Usable_Enable.Category_Usable_Enable"));
 		if(usableEnable.Succeeded())
 		{
 			TextureUsableEnable = usableEnable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> usableDisable(TEXT("/Game/Image/Inventory/Category_Usable_Disable.Category_Usable_Disable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> usableDisable(TEXT("/Game/Image/UI/Inventory/Category_Usable_Disable.Category_Usable_Disable"));
 		if(usableDisable.Succeeded())
 		{
 			TextureUsableDisable = usableDisable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> materialEnable(TEXT("/Game/Image/Inventory/Category_Material_Enable.Category_Material_Enable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> materialEnable(TEXT("/Game/Image/UI/Inventory/Category_Material_Enable.Category_Material_Enable"));
 		if(materialEnable.Succeeded())
 		{
 			TextureMaterialEnable = materialEnable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> materialDisable(TEXT("/Game/Image/Inventory/Category_Material_Disable.Category_Material_Disable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> materialDisable(TEXT("/Game/Image/UI/Inventory/Category_Material_Disable.Category_Material_Disable"));
 		if(materialDisable.Succeeded())
 		{
 			TextureMaterialDisable = materialDisable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> etcEnable(TEXT("/Game/Image/Inventory/Category_Etc_Enable.Category_Etc_Enable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> etcEnable(TEXT("/Game/Image/UI/Inventory/Category_Etc_Enable.Category_Etc_Enable"));
 		if(etcEnable.Succeeded())
 		{
 			TextureEtcEnable = etcEnable.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UTexture2D> etcDisable(TEXT("/Game/Image/Inventory/Category_Etc_Disable.Category_Etc_Disable"));
+		static ConstructorHelpers::FObjectFinder<UTexture2D> etcDisable(TEXT("/Game/Image/UI/Inventory/Category_Etc_Disable.Category_Etc_Disable"));
 		if(etcDisable.Succeeded())
 		{
 			TextureEtcDisable = etcDisable.Object;

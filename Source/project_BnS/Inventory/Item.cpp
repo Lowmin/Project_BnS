@@ -11,7 +11,6 @@ void UItem::SetData(const FItemData* data)
 	Rarity = data->Rarity;
 	IsStackAble = data->IsStackAble;
 	Icon = data->Icon;
-	UpdatedItem = data->UpdatedItem;
 	Description = data->Description;
 }
 

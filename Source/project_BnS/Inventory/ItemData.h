@@ -6,7 +6,8 @@
 #include "ItemData.generated.h"
 
 UENUM(BlueprintType)
-enum class EItemCategory : uint8 {
+enum class EItemCategory : uint8 
+{
 	Equip,
 	SoulShield,
 	Usable,
@@ -16,7 +17,8 @@ enum class EItemCategory : uint8 {
 };
 
 UENUM(BlueprintType)
-enum class EItemRarity : uint8 {
+enum class EItemRarity : uint8 
+{
 	Common,
 	UnCommon,
 	Rare,
@@ -24,7 +26,8 @@ enum class EItemRarity : uint8 {
 };
 
 UENUM(BlueprintType)
-enum class EEquipDetailCategory : uint8 {
+enum class EEquipDetailCategory : uint8 
+{
 	Weapon,
 	Ring,
 	EarRing,
@@ -33,6 +36,18 @@ enum class EEquipDetailCategory : uint8 {
 	Count
 };
 
+UENUM(BlueprintType)
+enum class ESoulShieldDetailCategory : uint8
+{
+	SoulShield_0,
+	SoulShield_1,
+	SoulShield_2,
+	SoulShield_3,
+	SoulShield_4,
+	SoulShield_5,
+	SoulShield_6,
+	SoulShield_7,
+};
 
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase 
@@ -50,8 +65,6 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere)
 	UTexture2D* Icon;
 	UPROPERTY(EditAnywhere)
-	bool UpdatedItem;
-	UPROPERTY(EditAnywhere)
 	FString Description;
 
 	FItemData()
@@ -61,14 +74,14 @@ struct FItemData : public FTableRowBase
 		Rarity = EItemRarity::Common;
 		IsStackAble = false;
 		Icon = nullptr;
-		UpdatedItem = false;
 		Description = "";
 	};
 };
 
 
 USTRUCT(BlueprintType)
-struct FEquipData : public FItemData {
+struct FEquipData : public FItemData 
+{
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
@@ -87,4 +100,35 @@ struct FEquipData : public FItemData {
 		Atk = 0.f;
 		Def = 0.f;
 	};
+};
+
+USTRUCT(BlueprintType)
+struct FSoulShieldData : public FItemData 
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	ESoulShieldDetailCategory DetailCategory;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHp;
+	UPROPERTY(EditAnywhere)
+	float Atk;
+	UPROPERTY(EditAnywhere)
+	float Def;
+	UPROPERTY(VisibleAnywhere)
+	int SetIndex;
+
+	UPROPERTY(VisibleAnywhere)
+	UTexture2D* SoulShieldTexture;
+
+	FSoulShieldData() : FItemData()
+	{
+		DetailCategory = ESoulShieldDetailCategory::SoulShield_0;
+		MaxHp = 0.f;
+		Atk = 0.f;
+		Def = 0.f;
+		SetIndex = 0;
+		SoulShieldTexture = nullptr;
+	}
 };

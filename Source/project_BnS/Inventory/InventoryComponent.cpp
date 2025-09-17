@@ -302,13 +302,14 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 
 	if(ItemList[targetInventoryIdx] != nullptr)
 		return;
-
+	if (EquipList[equipIdx] == nullptr) 
+		return;
 
 	if(StatComponent != nullptr)
 	{
-		StatComponent->AddExtraMaxHp(-EquipList[equipIdx]->MaxHp);
-		StatComponent->AddExtraAtk(-EquipList[equipIdx]->Atk);
-		StatComponent->AddExtraDef(-EquipList[equipIdx]->Def);
+		StatComponent->AddExtraMaxHp(-(EquipList[equipIdx]->MaxHp));
+		StatComponent->AddExtraAtk(-(EquipList[equipIdx]->Atk));
+		StatComponent->AddExtraDef(-(EquipList[equipIdx]->Def));
 	}
 
 	ItemList[targetInventoryIdx] = EquipList[equipIdx];
