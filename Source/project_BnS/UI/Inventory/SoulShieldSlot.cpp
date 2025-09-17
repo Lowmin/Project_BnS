@@ -15,9 +15,22 @@ USoulShieldSlot::USoulShieldSlot(const FObjectInitializer& ObjectInitializer) : 
 	}
 }
 
-FReply USoulShieldSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+void USoulShieldSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
-	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+}
+
+bool USoulShieldSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+
+	return false;
+}
+
+void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::OnMouseRightClick(InGeometry, InMouseEvent);
 
 	FVector2D v2 = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	FVector2D center = FVector2D(50.f, 50.f);
@@ -36,30 +49,11 @@ FReply USoulShieldSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeomet
 	if (index > 7)
 		index = 0;
 
-	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	if (OnUnEquipSoulShield.IsBound())
 	{
-		if (OnUnEquipSoulShield.IsBound())
-		{
-			OnUnEquipSoulShield.Execute(index);
-		}
-
-		return FReply::Unhandled();
+		OnUnEquipSoulShield.Execute(index);
 	}
 
-	return FReply::Unhandled();
-}
-
-void USoulShieldSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
-{
-	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-
-}
-
-bool USoulShieldSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
-
-	return false;
 }
 
 void USoulShieldSlot::SetTexture(UImage* image, const class UItem* data)

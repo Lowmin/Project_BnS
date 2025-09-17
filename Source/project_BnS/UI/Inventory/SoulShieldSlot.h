@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "InventorySlot.h"
 #include "SoulShieldSlot.generated.h"
 
 DECLARE_DELEGATE_OneParam(FDele_UnEquipSoulShield, int32);
@@ -13,7 +13,7 @@ DECLARE_DELEGATE_TwoParams(FDele_EquipSoulShield, int32, int32);
  * 
  */
 UCLASS()
-class PROJECT_BNS_API USoulShieldSlot : public UUserWidget
+class PROJECT_BNS_API USoulShieldSlot : public UInventorySlot
 {
 	GENERATED_BODY()
 
@@ -27,9 +27,11 @@ private:
 	TObjectPtr<UTexture2D> Texture = nullptr;
 
 protected:
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+protected:
+	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 protected:
 	UPROPERTY(meta = (BindWidget))

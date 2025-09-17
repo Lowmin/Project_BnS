@@ -12,17 +12,11 @@
 
 UItemSlot::UItemSlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> dragIcon(TEXT("/Game/UI/Inventory/WBP_InventoryDragIcon.WBP_InventoryDragIcon_C"));
-	if (dragIcon.Succeeded())
-	{
-		DragIconClass = dragIcon.Class;
-	}
-
+	
 	static ConstructorHelpers::FObjectFinder<UMaterial> grayscaleMat(TEXT("/Game/UI/umatGrayScale.umatGrayScale"));
 	if (grayscaleMat.Succeeded())
 	{
 		MatGrayscaleBase = grayscaleMat.Object;
-
 	}
 }
 
@@ -31,53 +25,38 @@ void UItemSlot::NativeConstruct()
 	Super::NativeConstruct();
 
 	MatGrayscale = UMaterialInstanceDynamic::Create(MatGrayscaleBase, this);
-	if(MatGrayscale != nullptr)
+	if (MatGrayscale != nullptr)
 	{
 		Retainer->SetEffectMaterial(MatGrayscale);
 	}
 }
 
-FReply UItemSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+void UItemSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+	Super::OnMouseRightClick(InGeometry, InMouseEvent);
 
-	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	if (OnItemUse.IsBound())
 	{
-		if (OnItemUse.IsBound())
-		{
-			OnItemUse.Execute(Index);
-		}
-		return FReply::Unhandled();
+		OnItemUse.Execute(Index);
+	}
+}
+
+UInventoryDragDropOperation* UItemSlot::CreateDragOperation()
+{
+	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
+	if (dragDropOperation != nullptr)
+	{
+		dragDropOperation->Source = EDragSource::ItemSlot;
+		dragDropOperation->Index = Index;
 	}
 	
-	if (!InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-	{
-		return FReply::Unhandled();
-	}
-		
-	return FReply::Handled().DetectDrag(this->GetCachedWidget().ToSharedRef(), EKeys::LeftMouseButton);
+	return dragDropOperation;
 }
-
-void UItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+void UItemSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 {
-	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+	Super::OnDrop(dragDropOperation);
 
-	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
-	dragDropOperation->Source = EDragSource::ItemSlot;
-	dragDropOperation->Index = Index;
-
-	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(Texture);
-
-	OutOperation = dragDropOperation;
-}
-
-bool UItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
-
-	UInventoryDragDropOperation* dragDropOperation = Cast<UInventoryDragDropOperation>(InOperation);
-
-	if(dragDropOperation->Source == EDragSource::ItemSlot)
+	if (dragDropOperation->Source == EDragSource::ItemSlot)
 	{
 		if (OnSwapItemSlot.IsBound())
 		{
@@ -86,13 +65,11 @@ bool UItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 	}
 	else
 	{
-		if(OnUnEquipToSlot.IsBound())
+		if (OnUnEquipToSlot.IsBound())
 		{
 			OnUnEquipToSlot.Execute(dragDropOperation->Index, Index);
 		}
 	}
-
-	return true;
 }
 
 void UItemSlot::SetGrayscale(bool isGray)
@@ -109,8 +86,8 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 {
 	if (data == nullptr)
 	{
-		Texture = nullptr;
-		ImgIcon->SetBrushFromTexture(Texture);
+		SetTexture(nullptr);
+		ImgIcon->SetBrushFromTexture(nullptr);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
 		TextCount->SetVisibility(ESlateVisibility::Hidden);
 		ImgNewBadge->SetVisibility(ESlateVisibility::Hidden);
@@ -118,9 +95,9 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 		return;
 	}
 
-	Texture = data->Icon;
+	SetTexture(data->Icon);
 
-	ImgIcon->SetBrushFromTexture(Texture);
+	ImgIcon->SetBrushFromTexture(data->Icon);
 	ImgIcon->SetColorAndOpacity(data->Count> 0 ? FColor::White : FColor(0, 0, 0, 255));
 
 	if(data->IsStackAble)

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "InventorySlot.h"
 #include "ItemSlot.generated.h"
 
 DECLARE_DELEGATE_OneParam(FDele_ItemUse, int32);
@@ -14,23 +14,20 @@ DECLARE_DELEGATE_TwoParams(FDele_SwapItemSlot, int32, int32);
  * 
  */
 UCLASS()
-class PROJECT_BNS_API UItemSlot : public UUserWidget
+class PROJECT_BNS_API UItemSlot : public UInventorySlot
 {
 	GENERATED_BODY()
 
 public:
 	UItemSlot(const FObjectInitializer& ObjectInitializer);
-
-	// Input
-	private:
-	TSubclassOf<UUserWidget> DragIconClass;
-	TObjectPtr<UTexture2D> Texture = nullptr;
 	
 protected:
 	virtual void NativeConstruct() override;
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
-	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+protected:
+	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual class UInventoryDragDropOperation* CreateDragOperation() override;
+	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
 
 private:
 	int32 Index = 0;
