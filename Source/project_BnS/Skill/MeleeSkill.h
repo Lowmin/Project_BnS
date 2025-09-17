@@ -17,9 +17,4 @@ public:
 protected:
 	virtual void OnSkillNotify_Custom(FName NotifyName) override;
 
-private:
-	void PerformMeleeAttack();
-
-	UPROPERTY()
-	TSet<TObjectPtr<AActor>> HitActors;
 };

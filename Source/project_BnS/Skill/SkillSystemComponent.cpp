@@ -282,14 +282,6 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 		{
 			if (UCrowdControlComponent* TargetCC = BossTarget->GetCrowdControlComponent())
 			{
-				// ¡å¡å¡å Add UE_LOG for Debugging ¡å¡å¡å
-				UE_LOG(LogTemp, Warning, TEXT("BossCC Skill Check --> Target: %s | CurrentStack: %d | ActivateCount: %d | IsEffect Returns: %s"),
-					*Target->GetName(),
-					TargetCC->GetCurrentStack(),
-					TargetCC->GetActivateStackCount(),
-					TargetCC->IsEffect() ? TEXT("true") : TEXT("false")
-				);
-				// ¡ã¡ã¡ã Add UE_LOG for Debugging ¡ã¡ã¡ã
 				if (TargetCC->IsEffect())
 				{
 					if (Row.NeedTargetCC.Num() == 0 || Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType()))

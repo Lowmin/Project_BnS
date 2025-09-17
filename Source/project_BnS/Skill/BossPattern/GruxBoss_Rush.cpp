@@ -36,6 +36,8 @@ void AGruxBoss_Rush::Tick(float DeltaTime)
 
 void AGruxBoss_Rush::ExecuteSkill_Implementation()
 {
+	HitActors.Empty();
+
 	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwnerCharacter());
 	AActor* Target = GetSkillTarget();
 
@@ -63,7 +65,7 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 			AnimInstance->Montage_Play(MyMontage);
 		}
 	}
-	
+
 	DashDirection = (Target->GetActorLocation() - OwnerBoss->GetActorLocation()).GetSafeNormal();
 	DashDirection.Z = 0;
 
@@ -93,10 +95,10 @@ void AGruxBoss_Rush::PerformDash()
 	if (RushVFX)
 	{
 		UGameplayStatics::SpawnEmitterAttached(
-			RushVFX,                         
-			OwnerCharacter->GetMesh(),        
-			NAME_None,                          
-			FVector(0.f, 0.f, 30.f),                      
+			RushVFX,
+			OwnerCharacter->GetMesh(),
+			NAME_None,
+			FVector(0.f, 0.f, 30.f),
 			FRotator(0.f, 90.f, 0.f),
 			EAttachLocation::KeepRelativeOffset
 		);

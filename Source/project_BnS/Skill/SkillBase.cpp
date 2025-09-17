@@ -198,3 +198,50 @@ void ASkillBase::ApplyBuffToCharacter(ACharacter* TargetCharacter) const
 	}
 }
 
+void ASkillBase::PerformMelee(const FSkillType_Melee* MeleeData)
+{
+	ACharacter* OwnerCharacter = GetOwnerCharacter();
+	if (!MeleeData || !OwnerCharacter || !GetWorld()) return;
+
+	const FVector Start = OwnerCharacter->GetActorLocation();
+	const FVector Dir = OwnerCharacter->GetActorForwardVector();
+	const FVector End = Start + Dir * MeleeData->AttackLength;
+
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(MeleeData->AttackRadius);
+	FCollisionQueryParams QP(SCENE_QUERY_STAT(MeleeTrace), false, OwnerCharacter);
+	FCollisionObjectQueryParams Obj;
+	Obj.AddObjectTypesToQuery(ECC_Pawn);
+	Obj.AddObjectTypesToQuery(ECC_GameTraceChannel6);
+
+	TArray<FHitResult> HitResults;
+	const bool bAnyHit = GetWorld()->SweepMultiByObjectType(HitResults, Start, End, FQuat::Identity, Obj, Sphere, QP);
+
+	if (bAnyHit)
+	{
+		for (const FHitResult& Hit : HitResults)
+		{
+			ACharacterBase* TargetCharacter = Cast<ACharacterBase>(Hit.GetActor());
+			if (!TargetCharacter || TargetCharacter == OwnerCharacter || HitActors.Contains(TargetCharacter))
+			{
+				continue;
+			}
+			ApplyDamageToCharacter(TargetCharacter);
+			ApplyCCToCharacter(TargetCharacter);
+			ApplyBuffToCharacter(TargetCharacter);
+
+			if (MyHitVFX)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MyHitVFX, Hit.ImpactPoint, Dir.Rotation());
+			}
+			if (MyHitSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, MyHitSound, Hit.ImpactPoint);
+			}
+
+			HitActors.Add(TargetCharacter);
+
+			if (!MeleeData->bCanHitMultiTarget) break;
+		}
+	}
+}
+

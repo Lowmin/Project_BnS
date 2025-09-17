@@ -8,7 +8,7 @@
 #include "GruxBoss_Rush.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class PROJECT_BNS_API AGruxBoss_Rush : public ASkillBase
@@ -49,7 +49,4 @@ private:
 	TObjectPtr<AWarningIndicator> SpawndIndicator;
 
 	FVector DashDirection;
-
-	UPROPERTY()
-	TSet<AActor*> HitActors;
 };

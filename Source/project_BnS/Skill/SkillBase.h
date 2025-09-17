@@ -48,7 +48,7 @@ protected:
 	// 노티
 	virtual void OnSkillMontageEnded(bool bInterrupted) {}		// 몽타주 종료 후 정리
 
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	ACharacter* GetOwnerCharacter() const;
 
@@ -61,8 +61,12 @@ protected:
 	void ApplyCCToCharacter(ACharacter* TargetCharacter) const;
 	void ApplyBuffToCharacter(ACharacter* TargetCharacter) const;
 
+	// 근접 공격
+	void PerformMelee(const FSkillType_Melee* MeleeData);
+
 	// 타입 데이터 꺼내기
 	const FSkillType_Melee* GetTypeData_Melee() const { return SavedTypeData.GetPtr<FSkillType_Melee>(); }
+	const FSkillType_Dash* GetTypeData_Dash() const { return SavedTypeData.GetPtr<FSkillType_Dash>(); }
 	const FSkillType_Projectile* GetTypeData_Projectile() const { return SavedTypeData.GetPtr<FSkillType_Projectile>(); }
 	const FSkillType_Area* GetTypeData_Area() const { return SavedTypeData.GetPtr<FSkillType_Area>(); }
 
@@ -77,6 +81,9 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> MyTarget;
+
+	UPROPERTY()
+	TSet<TObjectPtr<AActor>> HitActors;
 
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> MyMontage = nullptr;
