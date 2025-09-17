@@ -38,17 +38,16 @@ UENUM(BlueprintType)
 enum class ESkillLayer : uint8
 {
 	// 발동 조건 없는 기본 공격
-	Base		= 0,
+	Base = 0,
 	// 연계 스킬
-	Chain		= 1,
+	Chain = 1,
 	// 막기/회피시 활성화
-	Proc		= 2,
-	// 특정 조건 이후 활성화되는 스킬 (3콤보 후 강한 공격)
-	Finisher	= 3,
+	Proc = 2,
+	// 특정 조건 이후 활성화되는 스킬
+	Finisher = 3,
 	// 합격기 타이밍에 활성화되는 스킬
-	BossCC		= 4 
+	BossCC = 4
 };
-
 
 // 스킬 타입 세팅	(Melee, Projectile, Heal/Buff, Area of Field, Dash Attack...)
 USTRUCT(BlueprintType)
@@ -73,6 +72,20 @@ struct FSkillType_Melee : public FSkillTypeBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName HitNotifyName = TEXT("Hit");
+};
+
+USTRUCT(BlueprintType)
+struct FSkillType_Dash : public FSkillType_Melee
+{
+	GENERATED_BODY()
+
+	// 목표 지점까지 속도
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashSpeed = 3000.f;
+
+	// 목표 지점 앞 멈출 거리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float StopDistance = 150.f;
 };
 
 USTRUCT(BlueprintType)
