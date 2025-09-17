@@ -33,13 +33,20 @@ void UInventoryPopup::NativeConstruct()
 
 void UInventoryPopup::SetVisiblePopup(bool isVisible)
 {
+
 	Super::SetVisiblePopup(isVisible);
+
+	// 신규 아이템 갱신 덮어쓰기 방지를 위해 OnInventoryOpen 델리게이트보다 빨리 호출해야함 
+	if (isVisible)
+	{
+		ItemList->HighlightAll();
+	}
 
 	if (OnInventoryOpen.IsBound())
 	{
 		OnInventoryOpen.Execute();
 	}
-	ItemList->HighlightAll();
+
 }
 
 void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data, bool isHighlight) const
