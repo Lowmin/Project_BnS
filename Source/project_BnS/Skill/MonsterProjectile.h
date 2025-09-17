@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Components/SphereComponent.h"
 #include "ProjectileData.h"
-#include "ProjectileBall.generated.h"
+#include "Components/SphereComponent.h"
+#include "MonsterProjectile.generated.h"
 
 class UParticleSystem;
 class USoundBase;
@@ -15,28 +15,28 @@ class ACharacterBase;
 class UParticleSystemComponent;
 class UAudioComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProjectileHitDelegate, AActor*, HitActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterProjectileHitDelegate, AActor*, HitActor);
 
 UCLASS()
-class PROJECT_BNS_API AProjectileBall : public AActor
+class PROJECT_BNS_API AMonsterProjectile : public AActor
 {
 	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	AMonsterProjectile();
 
-public:
-	AProjectileBall();
 	virtual void BeginPlay() override;
 
-	// 발사체 Hit 처리 위한 델리게이트
 	UPROPERTY(BlueprintAssignable, Category = "Projectile")
-	FOnProjectileHitDelegate OnHitActor;
+	FOnMonsterProjectileHitDelegate OnHitActor;
 
 protected:
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* HitSphere;
 
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* HitSphere = nullptr;
-
-	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* MoveSphere = nullptr;
+	UProjectileMovementComponent* MoveSphere;
 
 	UPROPERTY(Transient)
 	FProjectileData CurrentData;
@@ -46,9 +46,6 @@ protected:
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	//UFUNCTION()
-	//void OnHit(UPrimitiveComponent* HitComp, AActor* Other, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	// 이펙트
 	UPROPERTY()
@@ -64,9 +61,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UAudioComponent> MovingSoundComponent;
 
-public:
+public:	
 	void SetupProjectileData(const FProjectileData& InData, AActor* InOwner,
 		UParticleSystem* InHitVFX = nullptr, USoundBase* InHitSound = nullptr,
 		UParticleSystem* InTrailVFX = nullptr, USoundBase* InMovingSound = nullptr);
-
 };
