@@ -23,6 +23,7 @@ public:
 	// Input
 private:
 	TSubclassOf<UUserWidget> DragIconClass;
+	UPROPERTY()
 	TObjectPtr<UTexture2D> Texture = nullptr;
 	
 protected:

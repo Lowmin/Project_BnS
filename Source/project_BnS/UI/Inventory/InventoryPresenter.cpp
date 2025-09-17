@@ -5,11 +5,12 @@
 
 #include "EquipSlot.h"
 #include "../../MyPlayer.h"
+#include "../../Inventory/Item.h"
 #include "../../Inventory/InventoryComponent.h"
 #include "InventoryPopup.h"
 #include "ItemList.h"
 #include "ItemSlot.h"
-#include "../../Inventory/Item.h"
+#include "SoulShieldSlot.h"
 
 void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 {
@@ -27,6 +28,13 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	// 인벤토리 바인드 
 	InventoryPopup->OnInventoryOpen.BindUObject(this, &UInventoryPresenter::OnInventoryOpen);
 	InventoryPopup->OnInventorySort.BindUObject(this, &UInventoryPresenter::OnInventorySort);
+
+	// 보패 바인드
+	USoulShieldSlot* soulShieldSlot = InventoryPopup->GetSoulShieldSlot();
+	if (soulShieldSlot)
+	{
+		soulShieldSlot->OnUnEquipSoulShield.BindUObject(this, &UInventoryPresenter::OnUnEquipSoulShield);
+	}
 
 	// 인벤토리 아이템 리스트 바인드 
 	UItemList* itemList = InventoryPopup->GetItemList();
@@ -110,6 +118,11 @@ void UInventoryPresenter::OnUnEquip(int32 index)
 void UInventoryPresenter::OnEquip(int32 inventoryIdx, int32 equipIdx)
 {
 	Player->GetInventoryComponent()->Equip(inventoryIdx, equipIdx);
+}
+
+void UInventoryPresenter::OnUnEquipSoulShield(int32 index)
+{
+	Player->GetInventoryComponent()->UnEquipSoulShield(index);
 }
 
 void UInventoryPresenter::OnHighlightItem(const EItemCategory highlightCategory)

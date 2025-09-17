@@ -6,6 +6,62 @@
 #include "Components/Image.h"
 #include "../../Inventory/Item.h"
 
+USoulShieldSlot::USoulShieldSlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	static ConstructorHelpers::FClassFinder<UUserWidget> dragIcon(TEXT("/Game/UI/Inventory/WBP_InventoryDragIcon.WBP_InventoryDragIcon_C"));
+	if (dragIcon.Succeeded())
+	{
+		DragIconClass = dragIcon.Class;
+	}
+}
+
+FReply USoulShieldSlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+
+	FVector2D v2 = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
+	FVector2D center = FVector2D(50.f, 50.f);
+
+	FVector2D dir = v2 - center;
+	dir.Normalize();
+	dir.Y *= -1;
+
+	float degree = FMath::RadiansToDegrees(FMath::Acos(FVector2D::DotProduct(dir, FVector2D(0.0f, 1.0f))));
+	if (FVector2D::DotProduct(dir, FVector2D(1.0f, 0.0f)) < 0)
+	{
+		degree = 360.0f - degree;
+	}
+
+	int index = (degree + 22.5f) / 45.0f;
+	if (index > 7)
+		index = 0;
+
+	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	{
+		if (OnUnEquipSoulShield.IsBound())
+		{
+			OnUnEquipSoulShield.Execute(index);
+		}
+
+		return FReply::Unhandled();
+	}
+
+	return FReply::Unhandled();
+}
+
+void USoulShieldSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+}
+
+bool USoulShieldSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+
+	return false;
+}
+
 void USoulShieldSlot::SetTexture(UImage* image, const class UItem* data)
 {
 	if (data == nullptr)

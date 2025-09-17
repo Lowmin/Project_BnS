@@ -447,6 +447,45 @@ void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, USoulShieldItem* s
 
 void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targetInventoryIdx)
 {
+	if (targetInventoryIdx < 0)
+	{
+		targetInventoryIdx = FindItemSlotIndex(-1);
+	}
+
+	if (targetInventoryIdx < 0)
+		return;
+	if (soulShieldSlotIdx < 0)
+		return;
+
+	if (soulShieldSlotIdx >= SoulShieldList.Num())
+		return;
+	if (targetInventoryIdx >= ItemList.Num())
+		return;
+
+	if (ItemList[targetInventoryIdx] != nullptr)
+		return;
+	if (SoulShieldList[soulShieldSlotIdx] == nullptr)
+		return;
+
+	if (StatComponent != nullptr)
+	{
+		StatComponent->AddExtraMaxHp(-(SoulShieldList[soulShieldSlotIdx]->MaxHp));
+		StatComponent->AddExtraAtk(-(SoulShieldList[soulShieldSlotIdx]->Atk));
+		StatComponent->AddExtraDef(-(SoulShieldList[soulShieldSlotIdx]->Def));
+	}
+
+	ItemList[targetInventoryIdx] = SoulShieldList[soulShieldSlotIdx];
+	SoulShieldList[soulShieldSlotIdx] = nullptr;
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(targetInventoryIdx, ItemList[targetInventoryIdx], HighlightCategory);
+	}
+
+	if (OnSoulShieldSlotChanged.IsBound())
+	{
+		OnSoulShieldSlotChanged.Execute(soulShieldSlotIdx, nullptr);
+	}
 }
 
 void UInventoryComponent::OnInventoryOpen()

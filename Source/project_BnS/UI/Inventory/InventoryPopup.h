@@ -49,6 +49,7 @@ public:
 	void SetSoulShieldSlot(int32 idx, const class UItem* data) const;
 	TArray<class UEquipSlot*> GetEquipList() const;
 	class UItemList* GetItemList() const;
+	class USoulShieldSlot* GetSoulShieldSlot() const;
 	UFUNCTION()
 	void InventorySort();
 };

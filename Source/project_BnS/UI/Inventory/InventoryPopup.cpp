@@ -78,6 +78,11 @@ UItemList* UInventoryPopup::GetItemList() const
 	return ItemList;
 }
 
+USoulShieldSlot* UInventoryPopup::GetSoulShieldSlot() const
+{
+	return SoulShieldSlot;
+}
+
 void UInventoryPopup::InventorySort()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, "sort inv");
