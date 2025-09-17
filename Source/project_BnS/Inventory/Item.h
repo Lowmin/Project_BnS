@@ -21,7 +21,8 @@ public:
 	EItemRarity Rarity = EItemRarity::Common;
 	bool IsStackAble = false;
 	int32 Count = 0;
-	UTexture2D* Icon = nullptr;
+	UPROPERTY()
+	TObjectPtr<UTexture2D> Icon = nullptr;
 	bool UpdatedItem = false;
 	FString Description = "";
 

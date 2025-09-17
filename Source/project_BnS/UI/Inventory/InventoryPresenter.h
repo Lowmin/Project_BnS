@@ -27,6 +27,7 @@ public:
 public:
 	void OnInventoryChanged(int32 idx, const class UItem* data, const EItemCategory& highlightCategory) const;
 	void OnEquipChanged(int32 idx, const class UItem* data) const;
+	void OnSoulShieldChanged(int32 idx, const class UItem* data) const;
 
 	// View to Model
 public:

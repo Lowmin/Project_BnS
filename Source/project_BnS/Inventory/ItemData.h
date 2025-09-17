@@ -54,17 +54,17 @@ struct FItemData : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	int32 Id;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	EItemCategory Category;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	EItemRarity Rarity;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	bool IsStackAble;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UTexture2D* Icon;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	FString Description;
 
 	FItemData()
@@ -84,13 +84,13 @@ struct FEquipData : public FItemData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	EEquipDetailCategory DetailCategory;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float MaxHp;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float Atk;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float Def;
 
 	FEquipData() : FItemData()
@@ -110,14 +110,14 @@ struct FSoulShieldData : public FItemData
 	UPROPERTY(VisibleAnywhere)
 	ESoulShieldDetailCategory DetailCategory;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float MaxHp;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float Atk;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	float Def;
 	UPROPERTY(VisibleAnywhere)
-	int SetIndex;
+	int32 SetIndex;
 
 	UPROPERTY(VisibleAnywhere)
 	UTexture2D* SoulShieldTexture;

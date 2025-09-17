@@ -17,6 +17,7 @@ void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 
 	Player->GetInventoryComponent()->OnItemSlotChanged.BindUObject(this, &UInventoryPresenter::OnInventoryChanged);
 	Player->GetInventoryComponent()->OnEquipSlotChanged.BindUObject(this, &UInventoryPresenter::OnEquipChanged);
+	Player->GetInventoryComponent()->OnSoulShieldSlotChanged.BindUObject(this, &UInventoryPresenter::OnSoulShieldChanged);
 }
 
 void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
@@ -66,6 +67,14 @@ void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data) const
 		return;
 
 	InventoryPopup->SetEquipSlot(idx, data);
+}
+
+void UInventoryPresenter::OnSoulShieldChanged(int32 idx, const UItem* data) const
+{
+	if (InventoryPopup == nullptr)
+		return;
+
+	InventoryPopup->SetSoulShieldSlot(idx, data);
 }
 
 void UInventoryPresenter::OnInventoryOpen()

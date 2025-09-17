@@ -35,6 +35,9 @@ protected:
 	TArray<class UEquipSlot*> EquipSlots;
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class USoulShieldSlot> SoulShieldSlot = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> BtnSort = nullptr;
 
 public:
@@ -43,6 +46,7 @@ public:
 
 	void SetItemSlot(int32 idx, const class UItem* data, bool isHighlight) const;
 	void SetEquipSlot(int32 idx, const class UItem* data) const;
+	void SetSoulShieldSlot(int32 idx, const class UItem* data) const;
 	TArray<class UEquipSlot*> GetEquipList() const;
 	class UItemList* GetItemList() const;
 	UFUNCTION()

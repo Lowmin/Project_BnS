@@ -4,6 +4,7 @@
 #include "InventoryPopup.h"
 
 #include "EquipSlot.h"
+#include "SoulShieldSlot.h"
 #include "ItemList.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
@@ -60,6 +61,11 @@ void UInventoryPopup::SetEquipSlot(int32 idx, const UItem* data) const
 		return;
 
 	EquipSlots[idx]->SetInfo(data);
+}
+
+void UInventoryPopup::SetSoulShieldSlot(int32 idx, const UItem* data) const
+{
+	SoulShieldSlot->SetInfo(idx, data);
 }
 
 TArray<UEquipSlot*> UInventoryPopup::GetEquipList() const

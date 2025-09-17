@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "EquipItem.h"
+#include "SoulShieldItem.h"
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
 
@@ -14,10 +15,16 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> itemData(TEXT("/Game/DT_EquipData.DT_EquipData"));
-	if (itemData.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UDataTable> equipData(TEXT("/Game/DT_EquipData.DT_EquipData"));
+	if (equipData.Succeeded())
 	{
-		EquipDataTable = itemData.Object;
+		EquipDataTable = equipData.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> soulShieldData(TEXT("/Game/DT_SoulShieldData.DT_SoulShieldData"));
+	if (soulShieldData.Succeeded())
+	{
+		SoulShieldDataTable = soulShieldData.Object;
 	}
 }
 
@@ -33,13 +40,25 @@ void UInventoryComponent::BeginPlay()
 	}
 
 	// ...
-	ParsingData();
+	ParsingEquipData();
+	ParsingSoulShieldData();
+
 	EquipList.SetNum((int)EEquipDetailCategory::Count);
+	SoulShieldList.SetNum(8);
 	SetInventorySlotCount(40);
 
 	AddItem(1, 1);
 	AddItem(2, 1);
 	AddItem(3, 1);
+
+	AddItem(1001, 1);
+	AddItem(1002, 1);
+	AddItem(1003, 1);
+	AddItem(1004, 1);
+	AddItem(1005, 1);
+	AddItem(1006, 1);
+	AddItem(1007, 1);
+	AddItem(1008, 1);
 }
 
 
@@ -51,7 +70,7 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void UInventoryComponent::ParsingData()
+void UInventoryComponent::ParsingEquipData()
 {
 	if (!EquipDataTable)
 		return;
@@ -66,6 +85,20 @@ void UInventoryComponent::ParsingData()
 	for (FEquipData* data : arr)
 	{
 		EquipDataMap.Add(data->Id, data);
+	}
+}
+
+void UInventoryComponent::ParsingSoulShieldData()
+{
+	if (!SoulShieldDataTable)
+		return;
+
+	TArray<FSoulShieldData*> arr;
+	SoulShieldDataTable->GetAllRows<FSoulShieldData>("soulShieldData", arr);
+
+	for (FSoulShieldData* data : arr)
+	{
+		SoulShieldDataMap.Add(data->Id, data);
 	}
 }
 
@@ -93,13 +126,25 @@ int32 UInventoryComponent::FindItemSlotIndex(int32 itemId) const
 
 UItem* UInventoryComponent::CreateItem(int32 itemId) const
 {
-	if (!EquipDataMap.Contains(itemId))
+	if(itemId < EQUIP_ID_LIMIT)
+	{
+
+		if (!EquipDataMap.Contains(itemId))
+			return nullptr;
+
+		UEquipItem* equipItem = NewObject<UEquipItem>(GetOwner());
+		equipItem->SetData(EquipDataMap[itemId]);
+
+		return equipItem;
+	}
+
+	if (!SoulShieldDataMap.Contains(itemId))
 		return nullptr;
 
-	UEquipItem* equipItem = NewObject<UEquipItem>(GetOwner());
-	equipItem->SetData(EquipDataMap[itemId]);
+	USoulShieldItem* soulShieldItem = NewObject<USoulShieldItem>(GetOwner());
+	soulShieldItem->SetData(SoulShieldDataMap[itemId]);
 
-	return equipItem;
+	return soulShieldItem;
 
 }
 
@@ -208,6 +253,9 @@ void UInventoryComponent::UseItem(int32 inventoryIdx)
 	{
 	case EItemCategory::Equip:
 		Equip(inventoryIdx, Cast<UEquipItem>(item));
+		break;
+	case EItemCategory::SoulShield:
+		EquipSoulShield(inventoryIdx, Cast<USoulShieldItem>(item));
 		break;
 	default:
 		break;
@@ -326,7 +374,78 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 	}
 }
 
-void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx)
+bool UInventoryComponent::IsEquipAbleSoulShieldSlot(int32 equipIdx) const
+{
+	if (equipIdx < 0)
+		return false;
+
+	if (equipIdx >= SoulShieldList.Num())
+		return false;
+
+	return SoulShieldList[equipIdx] == nullptr;
+}
+
+void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, int32 soulShieldIdx)
+{
+	// 장착 할 슬롯 아이템이 없는경우 불가 
+	if (inventoryIdx >= ItemList.Num())
+		return;
+	UItem* item = ItemList[inventoryIdx];
+	if (item == nullptr)
+		return;
+
+	// 아이템이 보패가 아닌경우 장착 불가 
+	USoulShieldItem* soulShieldItem = Cast<USoulShieldItem>(item);
+	if (soulShieldItem == nullptr)
+		return;
+
+	// 보패 슬롯이 다른경우 장착 불가 
+	if ((int)soulShieldItem->DetailCategory != soulShieldIdx)
+		return;
+
+	// 장착
+	EquipSoulShield(inventoryIdx, soulShieldItem);
+
+}
+
+void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, USoulShieldItem* soulShieldItem)
+{
+	if (soulShieldItem == nullptr)
+		return;
+
+	TObjectPtr<USoulShieldItem> temp = soulShieldItem;
+	RemoveItem(inventoryIdx);
+
+	int32 soulShieldIndex = (int32)soulShieldItem->DetailCategory;
+	if (SoulShieldList[soulShieldIndex] != nullptr)
+	{
+		UnEquipSoulShield(soulShieldIndex, inventoryIdx);
+	}
+
+	if (IsEquipAbleSoulShieldSlot(soulShieldIndex))
+	{
+		SoulShieldList[soulShieldIndex] = temp;
+
+		if (StatComponent != nullptr)
+		{
+			StatComponent->AddExtraMaxHp(SoulShieldList[soulShieldIndex]->MaxHp);
+			StatComponent->AddExtraAtk(SoulShieldList[soulShieldIndex]->Atk);
+			StatComponent->AddExtraDef(SoulShieldList[soulShieldIndex]->Def);
+		}
+
+		if (OnSoulShieldSlotChanged.IsBound())
+		{
+			OnSoulShieldSlotChanged.Execute(soulShieldIndex, temp);
+		}
+	}
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx], HighlightCategory);
+	}
+}
+
+void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targetInventoryIdx)
 {
 }
 

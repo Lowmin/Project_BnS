@@ -9,6 +9,7 @@
 
 DECLARE_DELEGATE_ThreeParams(FDele_ItemSlotChange, int32, const class UItem*, const EItemCategory&);
 DECLARE_DELEGATE_TwoParams(FDele_EquipSlotChange, int32, const class UItem*);
+DECLARE_DELEGATE_TwoParams(FDele_SoulShieldSlotChange, int32, const class UItem*);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -38,13 +39,25 @@ private:
 	TArray<TObjectPtr<class UItem>> ItemList;
 	UPROPERTY()
 	TArray<TObjectPtr<class UEquipItem>> EquipList;
-	// TArray<class USoulShieldItem> SoulShieldList;
+	UPROPERTY()
+	TArray<TObjectPtr<class USoulShieldItem>> SoulShieldList;
 
-	UPROPERTY(EditAnywhere)
+	/// <summary>
+	/// 장비아이템 ID 한계 
+	/// </summary>
+	const int32 EQUIP_ID_LIMIT = 1000;
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDataTable> EquipDataTable;
 
 	TMap<int32, const FEquipData*> EquipDataMap;
-	void ParsingData();
+	void ParsingEquipData();
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDataTable> SoulShieldDataTable;
+
+	TMap<int32, const FSoulShieldData*> SoulShieldDataMap;
+	void ParsingSoulShieldData();
+
 
 private:
 	/// <summary>
@@ -71,10 +84,14 @@ public:
 	 */
 	void Equip(int32 inventoryIdx, UEquipItem* equipItem);
 	void UnEquip(int32 equipIdx, int32 targetInventoryIdx = -1);
-	void UnEquipSoulShield(int32 soulShieldSlotIdx);
+	bool IsEquipAbleSoulShieldSlot(int32 equipIdx) const;
+	void EquipSoulShield(int32 inventoryIdx, int32 soulShieldIdx);
+	void EquipSoulShield(int32 inventoryIdx, USoulShieldItem* soulShieldItem);
+	void UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targetInventoryIdx = -1);
 	void OnInventoryOpen();
 	void SetHighlightItem(EItemCategory highlightCategory);
 		
 	FDele_ItemSlotChange OnItemSlotChanged;
 	FDele_EquipSlotChange OnEquipSlotChanged;
+	FDele_SoulShieldSlotChange OnSoulShieldSlotChanged;
 };
