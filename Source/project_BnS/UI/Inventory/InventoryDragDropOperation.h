@@ -11,6 +11,7 @@ enum EDragSource : uint8
 {
 	ItemSlot,
 	EquipSlot,
+	SoulShieldSlot
 };
 
 /**

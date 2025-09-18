@@ -12,7 +12,6 @@ UInventorySlot::UInventorySlot(const FObjectInitializer& ObjectInitializer) : Su
 	{
 		DragIconClass = dragIcon.Class;
 	}
-
 }
 
 FReply UInventorySlot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -37,11 +36,15 @@ void UInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPo
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
-	UInventoryDragDropOperation* dragDropOperation = CreateDragOperation();
+	UInventoryDragDropOperation* dragDropOperation = CreateDragOperation(InGeometry, InMouseEvent);
 	if (dragDropOperation == nullptr)
 		return;
-
-	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(Texture);
+	
+	if (IconTexture == nullptr)
+		return;
+	
+	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(IconTexture);
+	dragDropOperation->Pivot = EDragPivot::CenterCenter;
 
 	OutOperation = dragDropOperation;
 }
@@ -74,7 +77,7 @@ void UInventorySlot::OnMouseRightClick(const FGeometry& InGeometry, const FPoint
 
 }
 
-UInventoryDragDropOperation* UInventorySlot::CreateDragOperation()
+UInventoryDragDropOperation* UInventorySlot::CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	return nullptr;
 }
@@ -83,7 +86,7 @@ void UInventorySlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 {
 }
 
-void UInventorySlot::SetTexture(UTexture2D* texture)
+void UInventorySlot::SetIconTexture(UTexture2D* texture)
 {
-	Texture = texture;
+	IconTexture = texture;
 }

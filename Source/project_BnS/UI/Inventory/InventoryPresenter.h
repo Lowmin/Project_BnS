@@ -39,5 +39,7 @@ public:
 	void OnUnEquip(int32 index);
 	void OnEquip(int32 inventoryIdx, int32 equipIdx);
 	void OnUnEquipSoulShield(int32 index);
+	void OnUnEquipSoulShieldToSlot(int32 soulShieldIndex, int32 inventoryIndex);
+	void OnEquipSoulShield(int32 inventoryIdx);
 	void OnHighlightItem(const EItemCategory highlightCategory);
 };

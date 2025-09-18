@@ -41,7 +41,7 @@ void UItemSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEve
 	}
 }
 
-UInventoryDragDropOperation* UItemSlot::CreateDragOperation()
+UInventoryDragDropOperation* UItemSlot::CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if (dragDropOperation != nullptr)
@@ -56,19 +56,27 @@ void UItemSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 {
 	Super::OnDrop(dragDropOperation);
 
-	if (dragDropOperation->Source == EDragSource::ItemSlot)
+	switch (dragDropOperation->Source)
 	{
+	case EDragSource::ItemSlot:
 		if (OnSwapItemSlot.IsBound())
 		{
 			OnSwapItemSlot.Execute(dragDropOperation->Index, Index);
 		}
-	}
-	else
-	{
+		break;
+	case EDragSource::EquipSlot:
 		if (OnUnEquipToSlot.IsBound())
 		{
 			OnUnEquipToSlot.Execute(dragDropOperation->Index, Index);
 		}
+		break;
+	case EDragSource::SoulShieldSlot:
+		if (OnUnEquipSoulShieldToSlot.IsBound())
+		{
+			OnUnEquipSoulShieldToSlot.Execute(dragDropOperation->Index, Index);
+		}
+		break;
+
 	}
 }
 
@@ -86,7 +94,7 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 {
 	if (data == nullptr)
 	{
-		SetTexture(nullptr);
+		SetIconTexture(nullptr);
 		ImgIcon->SetBrushFromTexture(nullptr);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
 		TextCount->SetVisibility(ESlateVisibility::Hidden);
@@ -95,7 +103,7 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 		return;
 	}
 
-	SetTexture(data->Icon);
+	SetIconTexture(data->Icon);
 
 	ImgIcon->SetBrushFromTexture(data->Icon);
 	ImgIcon->SetColorAndOpacity(data->Count> 0 ? FColor::White : FColor(0, 0, 0, 255));

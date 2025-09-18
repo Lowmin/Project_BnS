@@ -27,11 +27,11 @@ public:
 
 private:
 	TSubclassOf<UUserWidget> DragIconClass;
-	TObjectPtr<UTexture2D> Texture = nullptr;
+	TObjectPtr<UTexture2D> IconTexture = nullptr;
 
 protected:
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
-	virtual class UInventoryDragDropOperation* CreateDragOperation();
+	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
-	void SetTexture(UTexture2D* texture);
+	void SetIconTexture(UTexture2D* texture);
 };

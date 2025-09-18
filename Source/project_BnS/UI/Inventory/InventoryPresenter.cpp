@@ -34,6 +34,7 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	if (soulShieldSlot)
 	{
 		soulShieldSlot->OnUnEquipSoulShield.BindUObject(this, &UInventoryPresenter::OnUnEquipSoulShield);
+		soulShieldSlot->OnEquipSoulShield.BindUObject(this, &UInventoryPresenter::OnEquipSoulShield);
 	}
 
 	// 인벤토리 아이템 리스트 바인드 
@@ -46,6 +47,7 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 	{
 		itemSlot->OnItemUse.BindUObject(this, &UInventoryPresenter::OnItemUse);
 		itemSlot->OnUnEquipToSlot.BindUObject(this, &UInventoryPresenter::OnUnEquipToSlot);
+		itemSlot->OnUnEquipSoulShieldToSlot.BindUObject(this, &UInventoryPresenter::OnUnEquipSoulShieldToSlot);
 		itemSlot->OnSwapItemSlot.BindUObject(this, &UInventoryPresenter::OnSwapItemSlot);
 	}
 	for(UEquipSlot* equipSlot : InventoryPopup->GetEquipList())
@@ -123,6 +125,16 @@ void UInventoryPresenter::OnEquip(int32 inventoryIdx, int32 equipIdx)
 void UInventoryPresenter::OnUnEquipSoulShield(int32 index)
 {
 	Player->GetInventoryComponent()->UnEquipSoulShield(index);
+}
+
+void UInventoryPresenter::OnUnEquipSoulShieldToSlot(int32 soulShieldIndex, int32 inventoryIndex)
+{
+	Player->GetInventoryComponent()->UnEquipSoulShield(soulShieldIndex, inventoryIndex);
+}
+
+void UInventoryPresenter::OnEquipSoulShield(int32 inventoryIdx)
+{
+	Player->GetInventoryComponent()->EquipSoulShield(inventoryIdx);
 }
 
 void UInventoryPresenter::OnHighlightItem(const EItemCategory highlightCategory)

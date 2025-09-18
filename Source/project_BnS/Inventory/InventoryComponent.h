@@ -85,7 +85,7 @@ public:
 	void Equip(int32 inventoryIdx, UEquipItem* equipItem);
 	void UnEquip(int32 equipIdx, int32 targetInventoryIdx = -1);
 	bool IsEquipAbleSoulShieldSlot(int32 equipIdx) const;
-	void EquipSoulShield(int32 inventoryIdx, int32 soulShieldIdx);
+	void EquipSoulShield(int32 inventoryIdx);
 	void EquipSoulShield(int32 inventoryIdx, USoulShieldItem* soulShieldItem);
 	void UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targetInventoryIdx = -1);
 	void OnInventoryOpen();

@@ -385,7 +385,7 @@ bool UInventoryComponent::IsEquipAbleSoulShieldSlot(int32 equipIdx) const
 	return SoulShieldList[equipIdx] == nullptr;
 }
 
-void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, int32 soulShieldIdx)
+void UInventoryComponent::EquipSoulShield(int32 inventoryIdx)
 {
 	// 장착 할 슬롯 아이템이 없는경우 불가 
 	if (inventoryIdx >= ItemList.Num())
@@ -397,10 +397,6 @@ void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, int32 soulShieldId
 	// 아이템이 보패가 아닌경우 장착 불가 
 	USoulShieldItem* soulShieldItem = Cast<USoulShieldItem>(item);
 	if (soulShieldItem == nullptr)
-		return;
-
-	// 보패 슬롯이 다른경우 장착 불가 
-	if ((int)soulShieldItem->DetailCategory != soulShieldIdx)
 		return;
 
 	// 장착

@@ -18,7 +18,7 @@ void UEquipSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEv
 	}
 }
 
-UInventoryDragDropOperation* UEquipSlot::CreateDragOperation()
+UInventoryDragDropOperation* UEquipSlot::CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if(dragDropOperation != nullptr)
@@ -39,10 +39,6 @@ void UEquipSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 			OnEquip.Execute(dragDropOperation->Index, Index);
 		}
 	}
-	else
-	{
-
-	}
 }
 
 void UEquipSlot::SetIndex(int32 index)
@@ -54,13 +50,13 @@ void UEquipSlot::SetInfo(const class UItem* data)
 {
 	if(data == nullptr)
 	{
-		SetTexture(nullptr);
+		SetIconTexture(nullptr);
 		ImgIcon->SetBrushFromTexture(nullptr);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
 		return;
 	}
 	
-	SetTexture(data->Icon);
+	SetIconTexture(data->Icon);
 	ImgIcon->SetBrushFromTexture(data->Icon);
 	ImgIcon->SetColorAndOpacity(FColor::White);
 }

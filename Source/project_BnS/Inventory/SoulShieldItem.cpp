@@ -11,4 +11,6 @@ void USoulShieldItem::SetData(const FSoulShieldData* data)
 	MaxHp = data->MaxHp;
 	Atk = data->Atk;
 	Def = data->Def;
+	SetIndex = data->SetIndex;
+	SoulShieldTexture = data->SoulShieldTexture;
 }
