@@ -13,6 +13,10 @@ UCLASS()
 class PROJECT_BNS_API UEquipItem : public UItem
 {
 	GENERATED_BODY()
+
+public:
+	virtual FString GetItemTypeText() const override;
+	virtual FString GetItemOptionText() const override;
 	
 public:
 	EEquipDetailCategory DetailCategory = EEquipDetailCategory::Weapon;

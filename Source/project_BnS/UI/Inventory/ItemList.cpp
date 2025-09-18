@@ -100,12 +100,16 @@ bool UItemList::Initialize()
 	for(int i=0; i<5; ++i)
 	{
 		UUserWidget* widget = CreateWidget(this, InventoryRowClass);
+		if (widget == nullptr)
+			continue;
 		Root->AddChild(widget);
 
 		UHorizontalBox* box = Cast<UHorizontalBox>(widget->GetRootWidget());
 		for (int j = 0; j < box->GetChildrenCount(); ++j)
 		{
 			UItemSlot* itemSlot = Cast<UItemSlot>(box->GetChildAt(j));
+			if (itemSlot == nullptr)
+				continue;
 			itemSlot->SetIndex(ItemSlots.Num());
 			ItemSlots.Add(itemSlot);
 		}
@@ -228,4 +232,12 @@ void UItemList::SetItemSlot(int32 idx, const UItem* data, bool isHighlight)
 TArray<class UItemSlot*> UItemList::GetItemSlotList() const
 {
 	return ItemSlots;
+}
+
+void UItemList::SetInventoryPopup(class UInventoryPopup* popup)
+{
+	for (UItemSlot* slot : ItemSlots)
+	{
+		slot->SetInventoryPopup(popup);
+	}
 }

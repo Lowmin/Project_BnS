@@ -4,6 +4,8 @@
 #include "InventorySlot.h"
 #include "InventoryDragDropOperation.h"
 #include "InventoryDragIcon.h"
+#include "InventoryPopup.h"
+#include "../../Inventory/Item.h"
 
 UInventorySlot::UInventorySlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,10 +42,12 @@ void UInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPo
 	if (dragDropOperation == nullptr)
 		return;
 	
-	if (IconTexture == nullptr)
+	if (ItemData == nullptr)
+		return;
+	if (ItemData->Icon == nullptr)
 		return;
 	
-	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(IconTexture);
+	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(ItemData->Icon);
 	dragDropOperation->Pivot = EDragPivot::CenterCenter;
 
 	OutOperation = dragDropOperation;
@@ -65,6 +69,11 @@ bool UInventorySlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEv
 void UInventorySlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (InventoryPopup != nullptr)
+	{
+		InventoryPopup->ShowItemInfo(ItemData);
+	}
 }
 
 void UInventorySlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
@@ -86,7 +95,12 @@ void UInventorySlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 {
 }
 
-void UInventorySlot::SetIconTexture(UTexture2D* texture)
+void UInventorySlot::SetItemData(const UItem* data)
 {
-	IconTexture = texture;
+	ItemData = data;
+}
+
+void UInventorySlot::SetInventoryPopup(UInventoryPopup* popup)
+{
+	InventoryPopup = popup;
 }

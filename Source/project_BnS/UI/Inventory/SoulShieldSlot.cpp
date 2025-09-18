@@ -12,7 +12,7 @@ void USoulShieldSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	SoulShieldTexture.SetNum(8);
+	SoulShieldData.SetNum(8);
 }
 
 void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -39,7 +39,7 @@ class UInventoryDragDropOperation* USoulShieldSlot::CreateDragOperation(const FG
 
 		dragDropOperation->Source = EDragSource::SoulShieldSlot;
 		dragDropOperation->Index = index;
-		SetIconTexture(SoulShieldTexture[index]);
+		SetItemData(SoulShieldData[index]);
 	}
 
 	return dragDropOperation;
@@ -84,15 +84,15 @@ void USoulShieldSlot::SetSoulShieldTexture(int index, UImage* soulShieldImage, c
 {
 	const USoulShieldItem* soulShield = Cast<USoulShieldItem>(data);
 
+	SoulShieldData[index] = data;
+
 	if (soulShield == nullptr)
 	{
-		SoulShieldTexture[index] = nullptr;
 		soulShieldImage->SetBrushFromTexture(nullptr);
 		soulShieldImage->SetColorAndOpacity(FColor(0, 0, 0, 0));
 		return;
 	}
 
-	SoulShieldTexture[index] = soulShield->SoulShieldTexture;
 	soulShieldImage->SetBrushFromTexture(soulShield->SoulShieldTexture);
 	soulShieldImage->SetColorAndOpacity(FColor::White);
 }

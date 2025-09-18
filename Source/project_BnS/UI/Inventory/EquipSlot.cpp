@@ -48,15 +48,15 @@ void UEquipSlot::SetIndex(int32 index)
 
 void UEquipSlot::SetInfo(const class UItem* data)
 {
+	SetItemData(data);
+
 	if(data == nullptr)
 	{
-		SetIconTexture(nullptr);
 		ImgIcon->SetBrushFromTexture(nullptr);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
 		return;
 	}
 	
-	SetIconTexture(data->Icon);
 	ImgIcon->SetBrushFromTexture(data->Icon);
 	ImgIcon->SetColorAndOpacity(FColor::White);
 }

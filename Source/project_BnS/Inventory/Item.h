@@ -17,6 +17,7 @@ class PROJECT_BNS_API UItem : public UObject
 
 public:
 	int32 Id = 0;
+	FString ItemName = "";
 	EItemCategory Category = EItemCategory::Etc;
 	EItemRarity Rarity = EItemRarity::Common;
 	bool IsStackAble = false;
@@ -25,7 +26,12 @@ public:
 	TObjectPtr<UTexture2D> Icon = nullptr;
 	bool UpdatedItem = false;
 	FString Description = "";
+	int32 Price = 0;
 
 	void SetData(const FItemData* data);
 	bool IsHighlight(EItemCategory category) const;
+
+	FString GetItemName() const;
+	virtual FString GetItemTypeText() const;
+	virtual FString GetItemOptionText() const;
 };

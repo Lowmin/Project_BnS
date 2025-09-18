@@ -30,7 +30,7 @@ enum class EEquipDetailCategory : uint8
 {
 	Weapon,
 	Ring,
-	EarRing,
+	Earring,
 	Neckless,
 	Bracelit,
 	Count
@@ -57,6 +57,8 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(VisibleAnywhere)
 	int32 Id;
 	UPROPERTY(VisibleAnywhere)
+	FString ItemName;
+	UPROPERTY(VisibleAnywhere)
 	EItemCategory Category;
 	UPROPERTY(VisibleAnywhere)
 	EItemRarity Rarity;
@@ -66,15 +68,19 @@ struct FItemData : public FTableRowBase
 	UTexture2D* Icon;
 	UPROPERTY(VisibleAnywhere)
 	FString Description;
+	UPROPERTY(VisibleAnywhere)
+	int32 Price;
 
 	FItemData()
 	{
 		Id = 0;
+		ItemName = "";
 		Category = EItemCategory::Etc;
 		Rarity = EItemRarity::Common;
 		IsStackAble = false;
 		Icon = nullptr;
 		Description = "";
+		Price = 0;
 	};
 };
 

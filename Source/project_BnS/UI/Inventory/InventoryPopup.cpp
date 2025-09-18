@@ -6,6 +6,7 @@
 #include "EquipSlot.h"
 #include "SoulShieldSlot.h"
 #include "ItemList.h"
+#include "ItemInfo.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
 
@@ -19,6 +20,7 @@ void UInventoryPopup::NativeConstruct()
 	// 무기슬롯 등록
 	EquipSlots.Add(WeaponSlot);
 	WeaponSlot->SetIndex(0);
+	WeaponSlot->SetInventoryPopup(this);
 	// 장비슬롯 등록 
 	TArray<UWidget*> childs = EquipRoot->GetAllChildren();
 	for(int i=0; i<childs.Num(); ++i)
@@ -29,7 +31,9 @@ void UInventoryPopup::NativeConstruct()
 
 		EquipSlots.Add(equip);
 		equip->SetIndex(i+1);
+		equip->SetInventoryPopup(this);
 	}
+	ItemList->SetInventoryPopup(this);
 }
 
 void UInventoryPopup::SetVisiblePopup(bool isVisible)
@@ -47,6 +51,8 @@ void UInventoryPopup::SetVisiblePopup(bool isVisible)
 	{
 		OnInventoryOpen.Execute();
 	}
+
+	ItemInfo->HideInfo();
 
 }
 
@@ -90,4 +96,9 @@ void UInventoryPopup::InventorySort()
 	{
 		OnInventorySort.Execute();
 	}
+}
+
+void UInventoryPopup::ShowItemInfo(const UItem* data)
+{
+	ItemInfo->ShowInfo(data);
 }

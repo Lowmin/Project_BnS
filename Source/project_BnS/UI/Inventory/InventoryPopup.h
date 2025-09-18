@@ -24,6 +24,9 @@ public:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UItemInfo> ItemInfo = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UItemList> ItemList = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
@@ -52,4 +55,5 @@ public:
 	class USoulShieldSlot* GetSoulShieldSlot() const;
 	UFUNCTION()
 	void InventorySort();
+	void ShowItemInfo(const class UItem* data);
 };

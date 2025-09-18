@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> SoulShield7 = nullptr;
 
-	TArray<TObjectPtr<UTexture2D>> SoulShieldTexture;
+	TArray<TObjectPtr<const class UItem>> SoulShieldData;
 
 private:
 	int GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const;

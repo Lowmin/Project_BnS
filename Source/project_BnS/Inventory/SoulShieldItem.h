@@ -15,6 +15,9 @@ class PROJECT_BNS_API USoulShieldItem : public UItem
 	GENERATED_BODY()
 
 public:
+	virtual FString GetItemOptionText() const override;
+
+public:
 	ESoulShieldDetailCategory DetailCategory = ESoulShieldDetailCategory::SoulShield_0;
 	float MaxHp = 0;
 	float Atk = 0;

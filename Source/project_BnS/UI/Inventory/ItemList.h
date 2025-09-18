@@ -85,4 +85,5 @@ public:
 	void SetItemSlot(int32 idx, const class UItem* data, bool isHighlight);
 
 	TArray<class UItemSlot*> GetItemSlotList() const;
+	void SetInventoryPopup(class UInventoryPopup* popup);
 };

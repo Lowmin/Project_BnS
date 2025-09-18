@@ -92,9 +92,10 @@ void UItemSlot::SetIndex(int32 index)
 
 void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 {
+	SetItemData(data);
+
 	if (data == nullptr)
 	{
-		SetIconTexture(nullptr);
 		ImgIcon->SetBrushFromTexture(nullptr);
 		ImgIcon->SetColorAndOpacity(FColor::Red);
 		TextCount->SetVisibility(ESlateVisibility::Hidden);
@@ -102,8 +103,6 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 		SetGrayscale(false);
 		return;
 	}
-
-	SetIconTexture(data->Icon);
 
 	ImgIcon->SetBrushFromTexture(data->Icon);
 	ImgIcon->SetColorAndOpacity(data->Count> 0 ? FColor::White : FColor(0, 0, 0, 255));
