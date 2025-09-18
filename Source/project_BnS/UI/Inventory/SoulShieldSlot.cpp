@@ -14,6 +14,15 @@ void USoulShieldSlot::NativeConstruct()
 
 	SoulShieldData.SetNum(8);
 }
+FReply USoulShieldSlot::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	int32 index = GetSoulShieldIndex(InGeometry, InMouseEvent);
+	SetItemData(SoulShieldData[index]);
+	ShowItemInfo();
+
+	return Super::NativeOnMouseMove(InGeometry, InMouseEvent);
+}
+
 
 void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
@@ -22,7 +31,7 @@ void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPoin
 
 	if (OnUnEquipSoulShield.IsBound())
 	{
-		int index = GetSoulShieldIndex(InGeometry, InMouseEvent);
+		int32 index = GetSoulShieldIndex(InGeometry, InMouseEvent);
 		OnUnEquipSoulShield.Execute(index);
 	}
 }
@@ -35,7 +44,7 @@ class UInventoryDragDropOperation* USoulShieldSlot::CreateDragOperation(const FG
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if (dragDropOperation != nullptr)
 	{
-		int index = GetSoulShieldIndex(InGeometry, InMouseEvent);
+		int32 index = GetSoulShieldIndex(InGeometry, InMouseEvent);
 
 		dragDropOperation->Source = EDragSource::SoulShieldSlot;
 		dragDropOperation->Index = index;
@@ -58,7 +67,7 @@ void USoulShieldSlot::OnDrop(class UInventoryDragDropOperation* dragDropOperatio
 	}
 }
 
-int USoulShieldSlot::GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const
+int32 USoulShieldSlot::GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const
 {
 	FVector2D v2 = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	FVector2D center = FVector2D(50.f, 50.f);
@@ -73,7 +82,7 @@ int USoulShieldSlot::GetSoulShieldIndex(const FGeometry& InGeometry, const FPoin
 		degree = 360.0f - degree;
 	}
 
-	int index = (degree + 22.5f) / 45.0f;
+	int32 index = (degree + 22.5f) / 45.0f;
 	if (index > 7)
 		index = 0;
 	

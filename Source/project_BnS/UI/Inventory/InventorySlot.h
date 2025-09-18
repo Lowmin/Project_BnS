@@ -35,6 +35,8 @@ protected:
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
 	void SetItemData(const class UItem* data);
+	void ShowItemInfo();
+	void HideItemInfo();
 
 public:
 	void SetInventoryPopup(class UInventoryPopup* popup);

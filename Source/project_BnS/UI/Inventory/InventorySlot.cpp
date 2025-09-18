@@ -70,15 +70,14 @@ void UInventorySlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPoin
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
 
-	if (InventoryPopup != nullptr)
-	{
-		InventoryPopup->ShowItemInfo(ItemData);
-	}
+	ShowItemInfo();
 }
 
 void UInventorySlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
+
+	HideItemInfo();
 }
 
 void UInventorySlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -98,6 +97,22 @@ void UInventorySlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 void UInventorySlot::SetItemData(const UItem* data)
 {
 	ItemData = data;
+}
+
+void UInventorySlot::ShowItemInfo()
+{
+	if (InventoryPopup != nullptr)
+	{
+		InventoryPopup->ShowItemInfo(ItemData);
+	}
+}
+
+void UInventorySlot::HideItemInfo()
+{
+	if (InventoryPopup != nullptr)
+	{
+		InventoryPopup->ShowItemInfo(nullptr);
+	}
 }
 
 void UInventorySlot::SetInventoryPopup(UInventoryPopup* popup)

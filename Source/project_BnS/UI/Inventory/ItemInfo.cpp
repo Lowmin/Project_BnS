@@ -17,6 +17,25 @@ void UItemInfo::ShowInfo(const UItem* data)
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	TextItemName->SetText(FText::FromString(data->GetItemName()));
+	switch (data->Rarity)
+	{
+	case EItemRarity::Common:
+		TextItemName->SetColorAndOpacity(FColor::White);
+		break;
+	case EItemRarity::UnCommon:
+		TextItemName->SetColorAndOpacity(FColor(30, 255, 0));
+		break;
+	case EItemRarity::Rare:
+		TextItemName->SetColorAndOpacity(FColor(0, 112, 221));
+		break;
+	case EItemRarity::Epic:
+		TextItemName->SetColorAndOpacity(FColor(163, 53, 238));
+		break;
+	case EItemRarity::Legendary:
+		TextItemName->SetColorAndOpacity(FColor(255, 128, 0));
+		break;
+	}
+
 	ImgIcon->SetBrushFromTexture(data->Icon);
 	TextType->SetText(FText::FromString(data->GetItemTypeText()));
 	TextOption->SetText(FText::FromString(data->GetItemOptionText()));
@@ -28,5 +47,6 @@ void UItemInfo::ShowInfo(const UItem* data)
 
 void UItemInfo::HideInfo()
 {
-	SetVisibility(ESlateVisibility::Collapsed);
+	SetVisibility(ESlateVisibility::Hidden);
+	//SetVisibility(ESlateVisibility::Collapsed);
 }

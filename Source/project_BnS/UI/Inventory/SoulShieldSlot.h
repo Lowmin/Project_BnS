@@ -19,6 +19,7 @@ class PROJECT_BNS_API USoulShieldSlot : public UInventorySlot
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
@@ -45,7 +46,7 @@ protected:
 	TArray<TObjectPtr<const class UItem>> SoulShieldData;
 
 private:
-	int GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const;
+	int32 GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const;
 	void SetSoulShieldTexture(int index, class UImage* soulShieldImage, const class UItem* data);
 
 public:

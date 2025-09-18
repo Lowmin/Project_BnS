@@ -33,6 +33,7 @@ void UInventoryPopup::NativeConstruct()
 		equip->SetIndex(i+1);
 		equip->SetInventoryPopup(this);
 	}
+	SoulShieldSlot->SetInventoryPopup(this);
 	ItemList->SetInventoryPopup(this);
 }
 
