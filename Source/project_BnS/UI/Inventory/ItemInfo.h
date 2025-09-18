@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> TextDescript= nullptr;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UUserWidget> GoldDisplay = nullptr;
+	TObjectPtr<class UGoldDisplay> GoldDisplay = nullptr;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> TextCount = nullptr;
 	UPROPERTY(meta = (BindWidget))

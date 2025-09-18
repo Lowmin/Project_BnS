@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "../../Inventory/Item.h"
+#include "../GoldDisplay.h"
 
 void UItemInfo::ShowInfo(const UItem* data)
 {
@@ -40,7 +41,7 @@ void UItemInfo::ShowInfo(const UItem* data)
 	TextType->SetText(FText::FromString(data->GetItemTypeText()));
 	TextOption->SetText(FText::FromString(data->GetItemOptionText()));
 	TextDescript->SetText(FText::FromString(data->Description));
-	//GoldDisplay;
+	GoldDisplay->SetGold(data->Price, false);
 	TextCount->SetText(FText::FromString(FString::Printf(TEXT("Count : %d"), data->Count)));
 	TextDiff->SetVisibility(ESlateVisibility::Collapsed);
 }

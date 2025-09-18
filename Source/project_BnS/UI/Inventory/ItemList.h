@@ -55,7 +55,7 @@ public:
 
 private:
 	void SetCategoryImage(enum EItemCategory category);
-	void SetButtonImage(UButton* btn, UTexture2D* texture);
+	void SetButtonImage(class UButton* btn, UTexture2D* texture);
 
 protected:
 	UPROPERTY()
