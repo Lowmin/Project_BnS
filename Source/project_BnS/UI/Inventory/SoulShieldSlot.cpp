@@ -4,34 +4,62 @@
 #include "SoulShieldSlot.h"
 
 #include "Components/Image.h"
+#include "InventoryDragDropOperation.h"
 #include "../../Inventory/Item.h"
+#include "../../Inventory/SoulShieldItem.h"
 
-USoulShieldSlot::USoulShieldSlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+void USoulShieldSlot::NativeConstruct()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> dragIcon(TEXT("/Game/UI/Inventory/WBP_InventoryDragIcon.WBP_InventoryDragIcon_C"));
-	if (dragIcon.Succeeded())
-	{
-		DragIconClass = dragIcon.Class;
-	}
-}
+	Super::NativeConstruct();
 
-void USoulShieldSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
-{
-	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-
-}
-
-bool USoulShieldSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
-
-	return false;
+	SoulShieldTexture.SetNum(8);
 }
 
 void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::OnMouseRightClick(InGeometry, InMouseEvent);
 
+
+	if (OnUnEquipSoulShield.IsBound())
+	{
+		int index = GetSoulShieldIndex(InGeometry, InMouseEvent);
+		OnUnEquipSoulShield.Execute(index);
+	}
+}
+
+class UInventoryDragDropOperation* USoulShieldSlot::CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::CreateDragOperation(InGeometry, InMouseEvent);
+
+
+	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
+	if (dragDropOperation != nullptr)
+	{
+		int index = GetSoulShieldIndex(InGeometry, InMouseEvent);
+
+		dragDropOperation->Source = EDragSource::SoulShieldSlot;
+		dragDropOperation->Index = index;
+		SetIconTexture(SoulShieldTexture[index]);
+	}
+
+	return dragDropOperation;
+}
+void USoulShieldSlot::OnDrop(class UInventoryDragDropOperation* dragDropOperation)
+{ 
+	Super::OnDrop(dragDropOperation);
+
+	if (dragDropOperation->Source == EDragSource::ItemSlot)
+	{
+		// equip ss
+		if (OnEquipSoulShield.IsBound())
+		{
+			OnEquipSoulShield.Execute(dragDropOperation->Index);
+		}
+	}
+}
+
+int USoulShieldSlot::GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const
+{
 	FVector2D v2 = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	FVector2D center = FVector2D(50.f, 50.f);
 
@@ -48,26 +76,25 @@ void USoulShieldSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPoin
 	int index = (degree + 22.5f) / 45.0f;
 	if (index > 7)
 		index = 0;
-
-	if (OnUnEquipSoulShield.IsBound())
-	{
-		OnUnEquipSoulShield.Execute(index);
-	}
-
+	
+	return index;
 }
 
-void USoulShieldSlot::SetTexture(UImage* image, const class UItem* data)
+void USoulShieldSlot::SetSoulShieldTexture(int index, UImage* soulShieldImage, const class UItem* data)
 {
-	if (data == nullptr)
+	const USoulShieldItem* soulShield = Cast<USoulShieldItem>(data);
+
+	if (soulShield == nullptr)
 	{
-		image->SetBrushFromTexture(nullptr);
-		image->SetColorAndOpacity(FColor(0, 0, 0, 0));
+		SoulShieldTexture[index] = nullptr;
+		soulShieldImage->SetBrushFromTexture(nullptr);
+		soulShieldImage->SetColorAndOpacity(FColor(0, 0, 0, 0));
 		return;
 	}
 
-	Texture = data->Icon;
-	image->SetBrushFromTexture(Texture);
-	image->SetColorAndOpacity(FColor::White);
+	SoulShieldTexture[index] = soulShield->SoulShieldTexture;
+	soulShieldImage->SetBrushFromTexture(soulShield->SoulShieldTexture);
+	soulShieldImage->SetColorAndOpacity(FColor::White);
 }
 
 void USoulShieldSlot::SetInfo(int32 idx, const UItem* data)
@@ -75,28 +102,28 @@ void USoulShieldSlot::SetInfo(int32 idx, const UItem* data)
 	switch (idx)
 	{
 	case 0:
-		SetTexture(SoulShield0, data);
+		SetSoulShieldTexture(idx, SoulShield0, data);
 		break;
 	case 1:
-		SetTexture(SoulShield1, data);
+		SetSoulShieldTexture(idx, SoulShield1, data);
 		break;
 	case 2:
-		SetTexture(SoulShield2, data);
+		SetSoulShieldTexture(idx, SoulShield2, data);
 		break;
 	case 3:
-		SetTexture(SoulShield3, data);
+		SetSoulShieldTexture(idx, SoulShield3, data);
 		break;
 	case 4:
-		SetTexture(SoulShield4, data);
+		SetSoulShieldTexture(idx, SoulShield4, data);
 		break;
 	case 5:
-		SetTexture(SoulShield5, data);
+		SetSoulShieldTexture(idx, SoulShield5, data);
 		break;
 	case 6:
-		SetTexture(SoulShield6, data);
+		SetSoulShieldTexture(idx, SoulShield6, data);
 		break;
 	case 7:
-		SetTexture(SoulShield7, data);
+		SetSoulShieldTexture(idx, SoulShield7, data);
 		break;
 	default:
 		break;

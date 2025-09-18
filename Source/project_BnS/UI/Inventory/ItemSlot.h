@@ -8,6 +8,7 @@
 
 DECLARE_DELEGATE_OneParam(FDele_ItemUse, int32);
 DECLARE_DELEGATE_TwoParams(FDele_UnEquipToSlot, int32, int32);
+DECLARE_DELEGATE_TwoParams(FDele_UnEquipSoulShieldToSlot, int32, int32);
 DECLARE_DELEGATE_TwoParams(FDele_SwapItemSlot, int32, int32);
 
 /**
@@ -26,7 +27,7 @@ protected:
 
 protected:
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual class UInventoryDragDropOperation* CreateDragOperation() override;
+	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
 
 private:
@@ -56,6 +57,7 @@ protected:
 public:
 	FDele_ItemUse OnItemUse;
 	FDele_UnEquipToSlot OnUnEquipToSlot;
+	FDele_UnEquipSoulShieldToSlot OnUnEquipSoulShieldToSlot;
 	FDele_SwapItemSlot OnSwapItemSlot;
 
 	void SetIndex(int32 index);

@@ -7,7 +7,7 @@
 #include "SoulShieldSlot.generated.h"
 
 DECLARE_DELEGATE_OneParam(FDele_UnEquipSoulShield, int32);
-DECLARE_DELEGATE_TwoParams(FDele_EquipSoulShield, int32, int32);
+DECLARE_DELEGATE_OneParam(FDele_EquipSoulShield, int32);
 
 /**
  * 
@@ -17,21 +17,12 @@ class PROJECT_BNS_API USoulShieldSlot : public UInventorySlot
 {
 	GENERATED_BODY()
 
-public:
-	USoulShieldSlot(const FObjectInitializer& ObjectInitializer);
-
-	// Input
-private:
-	TSubclassOf<UUserWidget> DragIconClass;
-	UPROPERTY()
-	TObjectPtr<UTexture2D> Texture = nullptr;
-
 protected:
-	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
-	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeConstruct() override;
 
-protected:
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
+	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -51,8 +42,11 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> SoulShield7 = nullptr;
 
+	TArray<TObjectPtr<UTexture2D>> SoulShieldTexture;
+
 private:
-	void SetTexture(class UImage* image, const class UItem* data);
+	int GetSoulShieldIndex(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) const;
+	void SetSoulShieldTexture(int index, class UImage* soulShieldImage, const class UItem* data);
 
 public:
 	FDele_EquipSoulShield OnEquipSoulShield;
