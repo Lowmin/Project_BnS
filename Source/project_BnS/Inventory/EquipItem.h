@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item.h"
+#include "StatItem.h"
 #include "EquipItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API UEquipItem : public UItem
+class PROJECT_BNS_API UEquipItem : public UStatItem
 {
 	GENERATED_BODY()
 
@@ -20,9 +20,6 @@ public:
 	
 public:
 	EEquipDetailCategory DetailCategory = EEquipDetailCategory::Weapon;
-	float MaxHp = 0;
-	float Atk = 0;
-	float Def = 0;
 
 public:
 	void SetData(const FEquipData* data);

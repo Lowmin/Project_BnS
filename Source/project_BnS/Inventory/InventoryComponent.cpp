@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "EquipItem.h"
+#include "WeaponItem.h"
 #include "SoulShieldItem.h"
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
@@ -49,16 +50,16 @@ void UInventoryComponent::BeginPlay()
 
 	AddItem(1, 1);
 	AddItem(2, 1);
-	AddItem(3, 1);
+	AddItem(10000001, 1);
 
-	AddItem(1001, 1);
-	AddItem(1002, 1);
-	AddItem(1003, 1);
-	AddItem(1004, 1);
-	AddItem(1005, 1);
-	AddItem(1006, 1);
-	AddItem(1007, 1);
-	AddItem(1008, 1);
+	AddItem(100000001, 1);
+	AddItem(100000002, 1);
+	AddItem(100000003, 1);
+	AddItem(100000004, 1);
+	AddItem(100000005, 1);
+	AddItem(100000006, 1);
+	AddItem(100000007, 1);
+	AddItem(100000008, 1);
 }
 
 
@@ -126,7 +127,17 @@ int32 UInventoryComponent::FindItemSlotIndex(int32 itemId) const
 
 UItem* UInventoryComponent::CreateItem(int32 itemId) const
 {
-	if(itemId < EQUIP_ID_LIMIT)
+	if (itemId < WEAPON_ID_LIMIT)
+	{
+		if (!EquipDataMap.Contains(itemId))
+			return nullptr;
+
+		UWeaponItem* weaponItem = NewObject<UWeaponItem>(GetOwner());
+		weaponItem->SetData(EquipDataMap[itemId]);
+
+		return weaponItem;
+	}
+	else if(itemId < EQUIP_ID_LIMIT)
 	{
 
 		if (!EquipDataMap.Contains(itemId))

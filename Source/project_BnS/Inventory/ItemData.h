@@ -85,14 +85,11 @@ struct FItemData : public FTableRowBase
 	};
 };
 
-
 USTRUCT(BlueprintType)
-struct FEquipData : public FItemData 
+struct FStatItemData : public FItemData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
-	EEquipDetailCategory DetailCategory;
 	UPROPERTY(VisibleAnywhere)
 	float MaxHp;
 	UPROPERTY(VisibleAnywhere)
@@ -100,17 +97,31 @@ struct FEquipData : public FItemData
 	UPROPERTY(VisibleAnywhere)
 	float Def;
 
-	FEquipData() : FItemData()
+	FStatItemData() : Super()
 	{
-		DetailCategory = EEquipDetailCategory::Weapon;
 		MaxHp = 0.f;
 		Atk = 0.f;
 		Def = 0.f;
+	}
+};
+
+
+USTRUCT(BlueprintType)
+struct FEquipData : public FStatItemData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	EEquipDetailCategory DetailCategory;
+
+	FEquipData() : Super()
+	{
+		DetailCategory = EEquipDetailCategory::Weapon;
 	};
 };
 
 USTRUCT(BlueprintType)
-struct FSoulShieldData : public FItemData 
+struct FSoulShieldData : public FStatItemData
 {
 	GENERATED_BODY()
 
@@ -118,23 +129,14 @@ struct FSoulShieldData : public FItemData
 	ESoulShieldDetailCategory DetailCategory;
 
 	UPROPERTY(VisibleAnywhere)
-	float MaxHp;
-	UPROPERTY(VisibleAnywhere)
-	float Atk;
-	UPROPERTY(VisibleAnywhere)
-	float Def;
-	UPROPERTY(VisibleAnywhere)
 	int32 SetIndex;
 
 	UPROPERTY(VisibleAnywhere)
 	UTexture2D* SoulShieldTexture;
 
-	FSoulShieldData() : FItemData()
+	FSoulShieldData() : Super()
 	{
 		DetailCategory = ESoulShieldDetailCategory::SoulShield_0;
-		MaxHp = 0.f;
-		Atk = 0.f;
-		Def = 0.f;
 		SetIndex = 0;
 		SoulShieldTexture = nullptr;
 	}

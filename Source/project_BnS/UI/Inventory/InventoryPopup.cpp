@@ -7,6 +7,7 @@
 #include "SoulShieldSlot.h"
 #include "ItemList.h"
 #include "ItemInfo.h"
+#include "WeaponSlot.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
 
@@ -20,6 +21,7 @@ void UInventoryPopup::NativeConstruct()
 	EquipSlots.Add(WeaponSlot);
 	WeaponSlot->SetIndex(0);
 	WeaponSlot->SetInventoryPopup(this);
+
 	// 장비슬롯 등록 
 	TArray<UWidget*> childs = EquipRoot->GetAllChildren();
 	for(int i=0; i<childs.Num(); ++i)

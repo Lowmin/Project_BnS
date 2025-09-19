@@ -1,4 +1,4 @@
 ﻿Raw,ID,ItemName,Category,Rarity,IsStackAble,Icon,Description,Price,DetailCategory,MaxHp,Atk,Def
-1,1,무기1,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/stoune_icon.stoune_icon,기본아이템,111,Weapon,0,10,0
+1,1,무기1,Equip,Common,FALSE,/Game/Image/Icon/icon1.icon1,기본아이템,111,Weapon,0,10,0
 2,2,무기2,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/weapon_icon.weapon_icon,기본아이템2,222,Weapon,20,2000,2000
-3,3,반지1,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/skill_icon_03_nobg.skill_icon_03_nobg,기본아이템3,333,Ring,0,0,0
+10000001,10000001,반지1,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/skill_icon_03_nobg.skill_icon_03_nobg,기본아이템3,333,Ring,0,0,0

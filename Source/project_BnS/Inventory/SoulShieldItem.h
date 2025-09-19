@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item.h"
+#include "StatItem.h"
 #include "SoulShieldItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECT_BNS_API USoulShieldItem : public UItem
+class PROJECT_BNS_API USoulShieldItem : public UStatItem
 {
 	GENERATED_BODY()
 
@@ -19,9 +19,6 @@ public:
 
 public:
 	ESoulShieldDetailCategory DetailCategory = ESoulShieldDetailCategory::SoulShield_0;
-	float MaxHp = 0;
-	float Atk = 0;
-	float Def = 0;
 	int32 SetIndex = 0;
 	UPROPERTY()
 	TObjectPtr<UTexture2D> SoulShieldTexture = nullptr;

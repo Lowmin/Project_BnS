@@ -43,9 +43,15 @@ private:
 	TArray<TObjectPtr<class USoulShieldItem>> SoulShieldList;
 
 	/// <summary>
+	/// 무기 아이템 ID 한계 
+	/// </summary>
+	const int32 WEAPON_ID_LIMIT = 10000000;
+
+	/// <summary>
 	/// 장비아이템 ID 한계 
 	/// </summary>
-	const int32 EQUIP_ID_LIMIT = 1000;
+	const int32 EQUIP_ID_LIMIT = 100000000;
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDataTable> EquipDataTable;
 

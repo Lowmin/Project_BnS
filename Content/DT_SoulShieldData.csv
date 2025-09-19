@@ -1,9 +1,9 @@
 ﻿Raw,ID,ItemName,Category,Rarity,IsStackAble,Icon,Description,Price,DetailCategory,MaxHp,Atk,Def,SetIndex,SoulShieldTexture
-1001,1001,기본보패1,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1001.icon1001,보패 1,11,SoulShield_0,10,0,0,1,/Game/Image/Item/SoulShield/SS01_0.SS01_0
-1002,1002,기본보패2,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1002.icon1002,보패 2,22,SoulShield_1,0,10,0,1,/Game/Image/Item/SoulShield/SS01_1.SS01_1
-1003,1003,기본보패3,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1003.icon1003,보패 3,33,SoulShield_2,0,0,10,1,/Game/Image/Item/SoulShield/SS01_2.SS01_2
-1004,1004,기본보패4,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1004.icon1004,보패 4,44,SoulShield_3,0,0,10,1,/Game/Image/Item/SoulShield/SS01_3.SS01_3
-1005,1005,기본보패5,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1005.icon1005,보패 5,55,SoulShield_4,0,10,0,1,/Game/Image/Item/SoulShield/SS01_4.SS01_4
-1006,1006,기본보패6,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1006.icon1006,보패 6,66,SoulShield_5,10,0,0,1,/Game/Image/Item/SoulShield/SS01_5.SS01_5
-1007,1007,기본보패7,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1007.icon1007,보패 7,77,SoulShield_6,0,10,0,1,/Game/Image/Item/SoulShield/SS01_6.SS01_6
-1008,1008,기본보패8,SoulShield,Rare,FALSE,/Game/Image/Icon/icon1008.icon1008,보패 8,88,SoulShield_7,0,0,10,1,/Game/Image/Item/SoulShield/SS01_7.SS01_7
+100000001,100000001,기본보패1,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000001.icon100000001,보패 1,11,SoulShield_0,10,0,0,1,/Game/Image/Item/SoulShield/SS01_0.SS01_0
+100000002,100000002,기본보패2,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000002.icon100000002,보패 2,22,SoulShield_1,0,10,0,1,/Game/Image/Item/SoulShield/SS01_1.SS01_1
+100000003,100000003,기본보패3,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000003.icon100000003,보패 3,33,SoulShield_2,0,0,10,1,/Game/Image/Item/SoulShield/SS01_2.SS01_2
+100000004,100000004,기본보패4,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000004.icon100000004,보패 4,44,SoulShield_3,0,0,10,1,/Game/Image/Item/SoulShield/SS01_3.SS01_3
+100000005,100000005,기본보패5,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000005.icon100000005,보패 5,55,SoulShield_4,0,10,0,1,/Game/Image/Item/SoulShield/SS01_4.SS01_4
+100000006,100000006,기본보패6,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000006.icon100000006,보패 6,66,SoulShield_5,10,0,0,1,/Game/Image/Item/SoulShield/SS01_5.SS01_5
+100000007,100000007,기본보패7,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000007.icon100000007,보패 7,77,SoulShield_6,0,10,0,1,/Game/Image/Item/SoulShield/SS01_6.SS01_6
+100000008,100000008,기본보패8,SoulShield,Rare,FALSE,/Game/Image/Icon/icon100000008.icon100000008,보패 8,88,SoulShield_7,0,0,10,1,/Game/Image/Item/SoulShield/SS01_7.SS01_7

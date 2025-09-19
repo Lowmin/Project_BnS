@@ -31,7 +31,7 @@ protected:
 	TObjectPtr<class UItemList> ItemList = nullptr;
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<class UEquipSlot> WeaponSlot = nullptr;
+	TObjectPtr<class UWeaponSlot> WeaponSlot = nullptr;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UGridPanel> EquipRoot = nullptr;
 	

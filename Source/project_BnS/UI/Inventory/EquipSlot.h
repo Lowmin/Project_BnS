@@ -34,5 +34,5 @@ public:
 	FDele_Equip OnEquip;
 	FDele_UnEquip OnUnEquip;
 	void SetIndex(int32 index);
-	void SetInfo(const class UItem* data);
+	virtual void SetInfo(const class UItem* data);
 };
