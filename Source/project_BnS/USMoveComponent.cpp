@@ -27,6 +27,101 @@ void USMoveComponent::BeginPlay()
 	}
 }
 
+void USMoveComponent::UpdateWaterStates()
+{
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation();
+	FVector DownEnd = Start - FVector(0.f, 0.f, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+	Params.bReturnPhysicalMaterial = true;
+
+	bool bIsOverWater = false;
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, DownEnd, ECC_Visibility, Params))
+	{
+		if (UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
+		{
+			bIsOverWater = true;
+		}
+	}
+
+	bool bIsSubmerged = bIsOverWater && (WaterHitResult.Location.Z > Start.Z);
+	bool bIsWaterState = CurrentMoveState == EMoveState::WaterRunning || CurrentMoveState == EMoveState::Swim;
+
+	if (bIsSubmerged)
+	{
+		if (CurrentMoveState != EMoveState::Swim)
+		{
+			SetMoveState(EMoveState::Swim);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		}
+		return;
+	}
+
+	if (bIsOverWater)
+	{
+		if (CurrentMoveState == EMoveState::WaterRunning)
+		{
+			return;
+		}
+
+		bool bCanStartWaterRun = CurrentMoveState == EMoveState::Running || CurrentMoveState == EMoveState::FastGliding;
+		if (bCanStartWaterRun)
+		{
+			SetMoveState(EMoveState::WaterRunning);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		}
+	}
+	else if (!bIsOverWater && bIsWaterState)
+	{
+		SetMoveState(EMoveState::Idle);
+		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
+}
+
+void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!MyPlayer) return;
+
+	UpdateWaterStates();
+
+	switch (CurrentMoveState)
+	{
+	case EMoveState::Running:
+		TickRunning();
+		break;
+	case EMoveState::Gliding:
+	case EMoveState::FastGliding:
+		Glide(DeltaTime);
+		break;
+	case EMoveState::Swim:
+		TickSwim();
+		break;
+	case EMoveState::WaterRunning:
+		TickWaterRun();
+		break;
+	case EMoveState::WallRunning:
+		TickWallRun();
+		break;
+	case EMoveState::Idle:
+	case EMoveState::ClimbingLedge:
+	default:
+		break;
+	}
+
+	TickMeshTilt(DeltaTime);
+
+	if (GEngine)
+	{
+		FString StateString = UEnum::GetValueAsString(CurrentMoveState);
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("MoveState: %s"), *StateString));
+	}
+
+	UsedStamina(DeltaTime);
+}
+
 void USMoveComponent::TickRunning()
 {
 	if (MyPlayer->GetVelocity().SizeSquared() < 1.0f)
@@ -42,67 +137,65 @@ void USMoveComponent::TickRunning()
 	}
 }
 
-void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void USMoveComponent::TickWaterRun()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (!MyPlayer) return;
-
-	if (CurrentMoveState != EMoveState::Swim &&
-		CurrentMoveState != EMoveState::WallRunning &&
-		CurrentMoveState != EMoveState::WaterRunning)
+	if (MyPlayer->GetCharacterMovement()->Velocity.Z > 0.f)
 	{
-		CheckInWater();
+		return;
 	}
 
-	if (MyPlayer->GetCharacterMovement()->IsFalling() &&
-		CurrentMoveState != EMoveState::WallRunning &&
-		CurrentMoveState != EMoveState::WaterRunning &&
-		CurrentMoveState != EMoveState::Swim)
+	const FVector CurrentAcceleration = MyPlayer->GetCharacterMovement()->GetCurrentAcceleration();
+	if (CurrentAcceleration.IsNearlyZero())
 	{
-		CheckWaterRun();
+		SetMoveState(EMoveState::Idle);
+		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		return;
+	}
+	else
+	{
+		const FVector ForwardVector = MyPlayer->GetActorForwardVector();
+		const FVector InputDirection = CurrentAcceleration.GetSafeNormal();
+
+		if (FVector::DotProduct(ForwardVector, InputDirection) < 0.1f)
+		{
+			SetMoveState(EMoveState::Idle);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+			return;
+		}
 	}
 
+	MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
 
-	switch (CurrentMoveState)
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+	Params.bReturnPhysicalMaterial = true;
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params))
 	{
-	case EMoveState::Running:
-		TickRunning();
-		break;
-
-	case EMoveState::Gliding:
-	case EMoveState::FastGliding:
-		Glide(DeltaTime);
-		break;
-
-	case EMoveState::Swim:
-		TickSwim();
-		break;
-
-	case EMoveState::WaterRunning:
-		TickWaterRun();
-		break;
-
-	case EMoveState::WallRunning:
-		TickWallRun();
-		break;
-
-	case EMoveState::Idle:
-	case EMoveState::ClimbingLedge:
-	default:
-		break;
+		FVector NewLocation = MyPlayer->GetActorLocation();
+		NewLocation.Z = WaterHitResult.Location.Z + MyPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+		MyPlayer->SetActorLocation(NewLocation);
 	}
-	
+}
 
-	TickMeshTilt(DeltaTime);
+void USMoveComponent::TickSwim()
+{
+	MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
 
-	if (GEngine)
+	FHitResult WaterHitResult;
+	FVector Start = MyPlayer->GetActorLocation() + FVector(0, 0, 100.f);
+	FVector End = MyPlayer->GetActorLocation() - FVector(0, 0, 200.f);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(MyPlayer);
+	Params.bReturnPhysicalMaterial = true;
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params))
 	{
-		FString StateString = UEnum::GetValueAsString(CurrentMoveState);
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("MoveState: %s"), *StateString));
+		FVector NewLocation = MyPlayer->GetActorLocation();
+		NewLocation.Z = WaterHitResult.Location.Z - 50.f;
+		MyPlayer->SetActorLocation(NewLocation);
 	}
-
-	UsedStamina(DeltaTime);
 }
 
 void USMoveComponent::SetMoveState(EMoveState NewState)
@@ -170,7 +263,6 @@ float USMoveComponent::GetStaminaUsageRate() const
 	}
 }
 
-
 void USMoveComponent::SMoveToggle()
 {
 	if (!MyPlayer) return;
@@ -180,22 +272,17 @@ void USMoveComponent::SMoveToggle()
 	case EMoveState::Idle:
 		if (MyPlayer->GetCharacterMovement()->IsFalling())
 			break;
-
 		StartSMove();
 		break;
-
 	case EMoveState::Running:
 		StopSMove();
 		break;
-
 	case EMoveState::Gliding:
 		SetMoveState(EMoveState::FastGliding);
 		break;
-
 	case EMoveState::FastGliding:
 		SetMoveState(EMoveState::Gliding);
 		break;
-
 	default:
 		break;
 	}
@@ -276,6 +363,12 @@ void USMoveComponent::FastGlideToggle()
 
 void USMoveComponent::SJump()
 {
+	if (CurrentMoveState == EMoveState::WaterRunning)
+	{
+		JumpOnWater();
+		return;
+	}
+
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement() || MyPlayer->GetCharacterMovement()->IsFalling())
 	{
 		return;
@@ -329,9 +422,7 @@ void USMoveComponent::UsedStamina(float DeltaTime)
 	}
 
 	float NewStamina = CurrentStamina - (StaminaRate * DeltaTime * 100.f);
-
 	NewStamina = FMath::Clamp(NewStamina, 0.f, MaxStamina);
-
 	MyPlayerOwner->SetCurStamina(NewStamina);
 }
 
@@ -376,23 +467,23 @@ void USMoveComponent::BeginWallRun(const FHitResult& WallHit)
 
 	const FRotator LookAtWallRotation = (-WallNormal).Rotation();
 	MyPlayer->SetActorRotation(FRotator(0.0f, LookAtWallRotation.Yaw, 0.0f));
-
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-
 	TargetMeshPitch = -60.0f;
 }
 
-void USMoveComponent::EndWallRun()
+void USMoveComponent::EndWallRun(bool bShouldJump)
 {
 	if (!MyPlayer || !MyPlayer->GetCharacterMovement()) return;
 
 	TargetMeshPitch = 0.0f;
-	SJump();
+	if (bShouldJump)
+	{
+		SJump();
+	}
 
 	MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	MyPlayer->GetCharacterMovement()->bOrientRotationToMovement = bOriginalOrientRotationToMovement;
 	MyPlayer->bUseControllerRotationYaw = bOriginalUseControllerRotationYaw;
-
 	SetMoveState(EMoveState::Running);
 }
 
@@ -413,34 +504,27 @@ void USMoveComponent::TickWallRun()
 		APlayerController* PlayerController = MyPlayer->GetController<APlayerController>();
 		if (PlayerController)
 		{
-			const FVector UpDirection = FVector::UpVector;
-
-			const FVector StrafeDirection = FVector::CrossProduct(WallNormal, UpDirection);
-
 			const bool bMoveUp = PlayerController->IsInputKeyDown(EKeys::W);
+			if (!bMoveUp)
+			{
+				EndWallRun(false);
+				return;
+			}
+
+			const FVector UpDirection = FVector::UpVector;
+			const FVector StrafeDirection = FVector::CrossProduct(WallNormal, UpDirection);
 			const bool bMoveLeft = PlayerController->IsInputKeyDown(EKeys::A);
 			const bool bMoveRight = PlayerController->IsInputKeyDown(EKeys::D);
-
 			FVector TargetDirection = FVector::ZeroVector;
 
-			if (bMoveUp)
-			{
-				TargetDirection += UpDirection;
-			}
-			if (bMoveLeft)
-			{
-				TargetDirection -= StrafeDirection;
-			}
-			if (bMoveRight)
-			{
-				TargetDirection += StrafeDirection;
-			}
+			if (bMoveUp) TargetDirection += UpDirection;
+			if (bMoveLeft) TargetDirection -= StrafeDirection;
+			if (bMoveRight) TargetDirection += StrafeDirection;
 
 			const FVector TargetVelocity = TargetDirection.IsNearlyZero() ? FVector::ZeroVector : TargetDirection.GetSafeNormal() * WallRunSpeed;
 			const FVector CurrentVelocity = MyPlayer->GetCharacterMovement()->Velocity;
 			const float InterpSpeed = 8.0f;
 			const FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, TargetVelocity, GetWorld()->GetDeltaSeconds(), InterpSpeed);
-
 			MyPlayer->GetCharacterMovement()->Velocity = NewVelocity;
 		}
 	}
@@ -472,10 +556,8 @@ bool USMoveComponent::CheckLedge(FHitResult& OutHit)
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), DownTraceStart, DownTraceStart - Up * LedgeTraceSettings.MaxReach * 2.0f,
 			LedgeTraceSettings.TraceRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, ActorsToIgnore,
 			EDrawDebugTrace::None, OutHit, true);
-
 		return OutHit.bBlockingHit;
 	}
-
 	return false;
 }
 
@@ -506,115 +588,10 @@ void USMoveComponent::TickMeshTilt(float DeltaTime)
 	if (!MyPlayer || !MyPlayer->GetMesh()) return;
 
 	FRotator CurrentRelativeRotation = MyPlayer->GetMesh()->GetRelativeRotation();
-
 	float NewRoll = FMath::FInterpTo(CurrentRelativeRotation.Roll, TargetMeshPitch, DeltaTime, TiltInterpSpeed);
 	MyPlayer->GetMesh()->SetRelativeRotation(FRotator(CurrentRelativeRotation.Pitch, CurrentRelativeRotation.Yaw, NewRoll));
 }
 
-void USMoveComponent::CheckWaterRun()
-{
-	if (CurrentMoveState != EMoveState::Running && CurrentMoveState != EMoveState::FastGliding)
-	{
-		return;
-	}
-
-	FHitResult WaterHitResult;
-	FVector Start = MyPlayer->GetActorLocation();
-	FVector End = Start - FVector(0.f, 0.f, 200.f);
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(MyPlayer);
-
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params))
-	{
-		if (UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
-		{
-			SetMoveState(EMoveState::WaterRunning);
-			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		}
-	}
-}
-
-void USMoveComponent::TickWaterRun()
-{
-	FHitResult WaterHitResult;
-	FVector Start = MyPlayer->GetActorLocation();
-	FVector End = Start - FVector(0.f, 0.f, 200.f);
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(MyPlayer);
-
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
-		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
-	{
-		if (MyPlayer->GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero())
-		{
-			DrawDebugLine(GetWorld(), Start, End, FColor::Yellow, false, 0.f, 0, 2.f);
-			SetMoveState(EMoveState::Idle);
-			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
-			return;
-		}
-
-		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
-		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
-
-		FVector NewLocation = MyPlayer->GetActorLocation();
-		NewLocation.Z = WaterHitResult.Location.Z + MyPlayer->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-		MyPlayer->SetActorLocation(NewLocation);
-	}
-	else
-	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0.f);
-		SetMoveState(EMoveState::Idle);
-		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
-	}
-}
-
-void USMoveComponent::CheckInWater()
-{
-	FHitResult WaterHitResult;
-	FVector Start = MyPlayer->GetActorLocation() + FVector(0, 0, 100.f);
-	FVector End = Start - FVector(0, 0, 200.f);
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(MyPlayer);
-
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
-		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
-	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
-		
-		const float WaterZ = WaterHitResult.Location.Z;
-		const float PlayerZ = MyPlayer->GetActorLocation().Z;
-
-		if (WaterZ > PlayerZ)
-		{
-			SetMoveState(EMoveState::Swim);
-			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		}
-	}
-}
-
-void USMoveComponent::TickSwim()
-{
-	FHitResult WaterHitResult;
-	FVector Start = MyPlayer->GetActorLocation() + FVector(0, 0, 100.f);
-	FVector End = MyPlayer->GetActorLocation() - FVector(0, 0, 200.f);
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(MyPlayer);
-
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
-		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
-	{
-		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
-
-		FVector NewLocation = MyPlayer->GetActorLocation();
-		NewLocation.Z = WaterHitResult.Location.Z - 50.f;
-		MyPlayer->SetActorLocation(NewLocation);
-	}
-	else
-	{
-		SetMoveState(EMoveState::Idle);
-		MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
-	}
-}
 void USMoveComponent::JumpOnWater()
 {
 	SetMoveState(EMoveState::Idle);

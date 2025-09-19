@@ -39,6 +39,15 @@ class PROJECT_BNS_API USMoveComponent : public UActorComponent
 
 public:
 	USMoveComponent();
+	void SetMoveState(EMoveState NewState);
+	EMoveState GetMoveState() const;
+
+	void SMoveToggle();
+	void GlideToggle();
+	void FastGlideToggle();
+	void SJump();
+	void WallJump();
+	void JumpOnWater();
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,57 +56,31 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
 	TEnumAsByte<EPhysicalSurface> WaterSurfaceType;
 
-public:
-	void SetMoveState(EMoveState NewState);
-	EMoveState GetMoveState() const;
-
-	// 움직임
-	void StartSMove();
-	void StopSMove();
-	void SMoveToggle();
-	void TickRunning();
-
-
-	// 글라이드
-	void StartGlide();
-	void StopGlide();
-	void GlideToggle();
-	void Glide(float DeltaTime);
-	void FastGlideToggle();
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|Glide")
-	float GroundDistance{};
-
-	// 점프
-	void SJump();
-	void WallJump();
-	void JumpOnWater();
-
 private:
-	void SetMovementSpeed(EMoveState NewState);
-	float CheckGroundDistance();
-	void UsedStamina(float DeltaTime);
-
-	// 벽 체크
-	bool CanWallRun(FHitResult& OutHit);
-	bool CheckWall(FHitResult& OutHit);
-	void BeginWallRun(const FHitResult& WallHit);
-	void EndWallRun();
+	void TickRunning();
+	void Glide(float DeltaTime);
 	void TickWallRun();
-	bool CheckLedge(FHitResult& OutHit);
-	void ClimbLedge(const FHitResult& LedgeHit);
-
-	UFUNCTION()
-	void OnClimbLedgeFinished();
-
-	void TickMeshTilt(float DeltaTime);
-
-	// 수상보
-	void CheckWaterRun();
+	void TickSwim();
 	void TickWaterRun();
 
-	// 수영
-	void CheckInWater();
-	void TickSwim();
+	void SetMovementSpeed(EMoveState NewState);
+	void UpdateWaterStates();
+
+	void StartSMove();
+	void StopSMove();
+	void StartGlide();
+	void StopGlide();
+	void BeginWallRun(const FHitResult& WallHit);
+	void EndWallRun(bool bShouldJump = true);
+	void ClimbLedge(const FHitResult& LedgeHit);
+	UFUNCTION() void OnClimbLedgeFinished();
+
+	float CheckGroundDistance();
+	void UsedStamina(float DeltaTime);
+	bool CanWallRun(FHitResult& OutHit);
+	bool CheckWall(FHitResult& OutHit);
+	bool CheckLedge(FHitResult& OutHit);
+	void TickMeshTilt(float DeltaTime);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|State", meta = (AllowPrivateAccess = "true"))
@@ -113,7 +96,7 @@ private:
 	float GlideSpeed = 600.f;
 	float GlideGravityScale = 0.1f;
 	float GlideMinHeight = 0.0f;
-	float GlideDescentSpeed = 100.f; 
+	float GlideDescentSpeed = 100.f;
 	float FastGlideSpeed = 1200.f;
 	float FastGlideDescentSpeed = 100.f;
 	float LineTraceStartOffset = -100.f;
@@ -122,16 +105,17 @@ private:
 	float WallRunSpeed = 600.0f;
 	float GetStaminaUsageRate() const;
 
-	FParkourTraceSettings WallTraceSettings;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SMove|Glide", meta = (AllowPrivateAccess = "true"))
+	float GroundDistance{};
 
+	FParkourTraceSettings WallTraceSettings;
 	FParkourTraceSettings LedgeTraceSettings;
 
 	FVector WallNormal;
-
 	bool bOriginalOrientRotationToMovement;
 	bool bOriginalUseControllerRotationYaw;
 
 	float TargetMeshPitch = 0.0f;
 	float TiltInterpSpeed = 3.0f;
-	float WallJumpForce = 500.0f;
+	float WallJumpForce = 500.f;
 };
