@@ -63,7 +63,7 @@ void UBossInfo::SetMaxCrowdControlCount(int32 activateCCCount)
 		ImgCCList[i]->SetVisibility(i < activateCCCount ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 	}
 
-	SetBossCCInfo(ECrowdControlType::None, 0);
+	SetBossCCInfo(ECrowdControlType::Immune, 0);
 }
 void UBossInfo::SetBossCCInfo(ECrowdControlType type, int32 count)
 {
