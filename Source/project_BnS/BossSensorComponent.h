@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
+#include "CrowdControlType.h"
 #include "BossSensorComponent.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FDele_Single_BossHpCHange, float, float);
-DECLARE_DELEGATE_TwoParams(FDele_Single_BossInfo, class UStatComponent*, float);
-DECLARE_DELEGATE_OneParam(FDele_Single_BossDistance, float);
+DECLARE_DELEGATE_TwoParams(FDele_Single_BossHpCHange, float current, float max);
+DECLARE_DELEGATE_ThreeParams(FDele_Single_BossInfo, class UStatComponent* status, int32 activateCCCount, float distance);
+DECLARE_DELEGATE_OneParam(FDele_Single_BossDistance, float distance);
+DECLARE_DELEGATE_TwoParams(FDele_Single_BossCCInfoChange, ECrowdControlType type, int32 count);
 
 /**
  * 
@@ -29,11 +31,13 @@ private:
 	void RemoveTargetBoss();
 	void SetTargetBoss();
 	void BossHpChange(float current, float max);
+	void BossCCInfoChange(ECrowdControlType type, int32 count);
 
 public:
 	FDele_Single_BossInfo OnBossInfoChange;
 	FDele_Single_BossHpCHange OnBossHpChange;
 	FDele_Single_BossDistance OnBossDistanceChange;
+	FDele_Single_BossCCInfoChange OnBossCCInfoChange;
 
 	UFUNCTION()
 	void OnBossOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

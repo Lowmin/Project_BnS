@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include "../CrowdControlType.h"
+
 #include "MainUIPresenter.generated.h"
 
 /**
@@ -76,7 +78,8 @@ public:
 
 
 	// BossInfo
-	void OnBossInfoChange(class UStatComponent* status, float distance);
+	void OnBossInfoChange(class UStatComponent* status, int32 activateCCCount, float distance);
 	void OnBossHpChange(float current, float max);
+	void OnBossCCInfoChange(ECrowdControlType type, int32 count);
 	void OnBossDistanceChange(float distance);
 };

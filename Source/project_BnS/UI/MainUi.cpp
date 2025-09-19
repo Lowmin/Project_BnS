@@ -130,7 +130,7 @@ void UMainUi::SetSkillCooldown(int index, float remain, float cooldown, bool isV
 	SkillIcons[index]->SetCooldown(remain, cooldown, isVisibleNum);
 }
 
-void UMainUi::SetBossInfo(const UStatComponent* status, float distance)
+void UMainUi::SetBossInfo(const UStatComponent* status, int32 activateCCCount, float distance)
 {
 	if (status == nullptr)
 	{
@@ -139,7 +139,7 @@ void UMainUi::SetBossInfo(const UStatComponent* status, float distance)
 	}
 
 	BossInfo->SetVisibility(ESlateVisibility::Visible);
-	BossInfo->SetInfo(status->GetCurHp(), status->GetMaxHp(), status->GetLevel(), status->GetCharacterName(), distance);
+	BossInfo->SetInfo(status->GetCurHp(), status->GetMaxHp(), status->GetLevel(), status->GetCharacterName(), activateCCCount, distance);
 }
 
 void UMainUi::SetBossHp(float current, float max)
@@ -149,6 +149,11 @@ void UMainUi::SetBossHp(float current, float max)
 
 void UMainUi::SetBossCrowdControlCount(int current, int max)
 {
+}
+
+void UMainUi::SetBossCCInfo(ECrowdControlType type, int32 count)
+{
+	BossInfo->SetBossCCInfo(type, count);
 }
 
 void UMainUi::SetBossDistance(float distance)

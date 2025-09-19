@@ -23,11 +23,12 @@ UBossSensorComponent::UBossSensorComponent()
 void UBossSensorComponent::RemoveTargetBoss()
 {
 	Target->GetStatusComponent()->OnHpChange.RemoveAll(this);
+	Target->GetCrowdControlComponent()->OnCCInfoChange.Unbind();
 	Target = nullptr;
 
 	if (OnBossInfoChange.IsBound())
 	{
-		OnBossInfoChange.Execute(nullptr, 0.0f);
+		OnBossInfoChange.Execute(nullptr, 0, 0.0f);
 	}
 
 	SetTargetBoss();
@@ -46,14 +47,17 @@ void UBossSensorComponent::SetTargetBoss()
 
 	if(Target != nullptr)
 	{
+		int activateCrowdControlCount = 0;
 		Target->GetStatusComponent()->OnHpChange.AddUObject(this, &UBossSensorComponent::BossHpChange);
+		Target->GetCrowdControlComponent()->OnCCInfoChange.BindUObject(this, &UBossSensorComponent::BossCCInfoChange);
+		activateCrowdControlCount = Target->GetCrowdControlComponent()->GetActivateStackCount();
 
 		if (OnBossInfoChange.IsBound())
 		{
 			FVector pos = GetOwner()->GetActorLocation();
 			FVector target = Target->GetActorLocation();
 
-			OnBossInfoChange.Execute(Target->GetStatusComponent(), FVector::Distance(pos, target) * 0.01f);
+			OnBossInfoChange.Execute(Target->GetStatusComponent(), activateCrowdControlCount, FVector::Distance(pos, target) * 0.01f);
 		}
 	}
 }
@@ -63,6 +67,14 @@ void UBossSensorComponent::BossHpChange(float current, float max)
 	if (OnBossHpChange.IsBound())
 	{
 		OnBossHpChange.Execute(current, max);
+	}
+}
+
+void UBossSensorComponent::BossCCInfoChange(ECrowdControlType type, int32 count)
+{
+	if (OnBossCCInfoChange.IsBound())
+	{
+		OnBossCCInfoChange.Execute(type, count);
 	}
 }
 

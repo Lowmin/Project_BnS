@@ -41,6 +41,7 @@ void AMainUIPresenter::BindUI()
 	{
 		BossSensor->OnBossInfoChange.BindUObject(this, &AMainUIPresenter::OnBossInfoChange);
 		BossSensor->OnBossHpChange.BindUObject(this, &AMainUIPresenter::OnBossHpChange);
+		BossSensor->OnBossCCInfoChange.BindUObject(this, &AMainUIPresenter::OnBossCCInfoChange);
 		BossSensor->OnBossDistanceChange.BindUObject(this, &AMainUIPresenter::OnBossDistanceChange);
 	}
 
@@ -154,12 +155,12 @@ void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown,
 	MainUI->SetSkillCooldown(index, remain, cooldown, isVisibleNum);
 }
 
-void AMainUIPresenter::OnBossInfoChange(UStatComponent* status, float distance)
+void AMainUIPresenter::OnBossInfoChange(UStatComponent* status, int32 activateCCCount, float distance)
 {
 	if (MainUI == nullptr)
 		return;
 
-	MainUI->SetBossInfo(status, distance);
+	MainUI->SetBossInfo(status, activateCCCount, distance);
 }
 
 void AMainUIPresenter::OnBossHpChange(float current, float max)
@@ -168,6 +169,13 @@ void AMainUIPresenter::OnBossHpChange(float current, float max)
 		return;
 
 	MainUI->SetBossHp(current, max);
+}
+
+void AMainUIPresenter::OnBossCCInfoChange(ECrowdControlType type, int32 count)
+{
+	if (MainUI == nullptr)
+		return;
+	MainUI->SetBossCCInfo(type, count);
 }
 
 void AMainUIPresenter::OnBossDistanceChange(float distance)

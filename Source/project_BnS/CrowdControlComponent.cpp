@@ -80,6 +80,11 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 			return;
 		}
 
+		if (OnCCInfoChange.IsBound())
+		{
+			OnCCInfoChange.Execute(CurrentType, Stack);
+		}
+
 		if (Stack >= ActivateStackCount)
 		{
 			Stack = 0;
@@ -105,6 +110,11 @@ void UCrowdControlComponent::RemoveCrowdControl()
 	// √ ±‚»≠
 	CurrentType = ECrowdControlType::None;
 
+	if (OnCCInfoChange.IsBound())
+	{
+		OnCCInfoChange.Execute(CurrentType, Stack);
+	}
+
 	if (OnRemovedCrowdControl.IsBound())
 	{
 		OnRemovedCrowdControl.Broadcast();
@@ -113,7 +123,7 @@ void UCrowdControlComponent::RemoveCrowdControl()
 
 int32 UCrowdControlComponent::GetActivateStackCount() const
 {
-	return ActivateStackCount;
+	return 4;// ActivateStackCount;
 }
 
 int32 UCrowdControlComponent::GetCurrentStack() const
