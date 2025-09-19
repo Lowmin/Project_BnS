@@ -59,7 +59,7 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 {
 	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwner());
 
-	if (OwnerBoss && OwnerBoss->IsCCImmune())
+	if (OwnerBoss && OwnerBoss->GetCCImmune())
 	{
 		return;
 	}
@@ -82,6 +82,7 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 
 		if (Stack >= ActivateStackCount)
 		{
+			Stack = 0;
 			Duration = duration;
 
 			OnAppliedCrowdControl.Broadcast();
@@ -103,7 +104,6 @@ void UCrowdControlComponent::RemoveCrowdControl()
 {
 	// √ ±‚»≠
 	CurrentType = ECrowdControlType::None;
-	Stack = 0;
 
 	if (OnRemovedCrowdControl.IsBound())
 	{

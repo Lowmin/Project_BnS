@@ -11,39 +11,48 @@ void ABossEnemy::SetCurrentSkill(ASkillBase* Skill)
 	CurrentSkill = Skill;
 }
 
-bool ABossEnemy::IsCCImmune() const
+bool ABossEnemy::GetCCImmune() const
 {
 	return bIsCCImmune;
 }
 
+ABossEnemy::ABossEnemy()
+{
+	if (CrowdControl)
+	{
+		CrowdControl->SetActivateStackCount(2);
+	}
+}
+
 void ABossEnemy::SetCCImmune(bool bImmune)
 {
+	if (bIsCCImmune == bImmune)
+	{
+		return;
+	}
+
 	bIsCCImmune = bImmune;
+
+	if (bIsCCImmune)
+	{
+		OnImmuneStateBegan.Broadcast();
+	}
+	else
+	{
+		OnImmuneStateEnded.Broadcast();
+	}
 }
 
 void ABossEnemy::CCApplied()
 {
-	if (bIsCCImmune) return;
+	Super::CCApplied();
 
-	if (CrowdControl && CrowdControl->GetActivateStackCount() > 0)
+	if (CurrentSkill)
 	{
-		Super::CCApplied();
-
-		if (CurrentSkill)
-		{
-			CurrentSkill->CancelSkill();
-		}
-		SetCCImmune(true);
-		if (CrowdControl)
-		{
-			CrowdControl->SetActivateStackCount(0);
-		}
+		CurrentSkill->CancelSkill();
 		SetCurrentSkill(nullptr);
 	}
-	else
-	{
-		Super::CCApplied();
-	}
+	SetCCImmune(true);
 }
 
 void ABossEnemy::CCRemoved()

@@ -50,12 +50,6 @@ void AGruxBoss_Rush::ExecuteSkill_Implementation()
 	if (OwnerBoss)
 	{
 		OwnerBoss->SetCCImmune(false);
-
-		UCrowdControlComponent* CC_Comp = OwnerBoss->GetCrowdControlComponent();
-		if (CC_Comp)
-		{
-			CC_Comp->SetActivateStackCount(2);
-		}
 	}
 
 	if (MyMontage)
@@ -130,12 +124,17 @@ void AGruxBoss_Rush::OnDashOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 
 void AGruxBoss_Rush::CancelSkill()
 {
-
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
 	if (SpawndIndicator)
 	{
 		SpawndIndicator->Destroy();
+	}
+
+	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwnerCharacter());
+	if (OwnerBoss)
+	{
+		OwnerBoss->SetCCImmune(true);
 	}
 
 	Destroy();
@@ -149,13 +148,7 @@ void AGruxBoss_Rush::EndDash()
 	if (OwnerBoss)
 	{
 		OwnerBoss->SetCCImmune(true);
-		UCrowdControlComponent* CC_Comp = OwnerBoss->GetCrowdControlComponent();
-		if (CC_Comp)
-		{
-			CC_Comp->SetActivateStackCount(0);
-		}
 		OwnerBoss->StopAnimMontage();
 	}
-
 	Destroy();
 }

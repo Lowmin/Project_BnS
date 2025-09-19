@@ -10,16 +10,26 @@ class ASkillBase;
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnImmuneChange);
+
 UCLASS()
 class PROJECT_BNS_API ABossEnemy : public AEnemy
 {
 	GENERATED_BODY()
 	
 public:
+	ABossEnemy();
 	void SetCCImmune(bool bImmune);
 	void SetCurrentSkill(ASkillBase* Skill); 
 	UFUNCTION(BlueprintPure, Category = "Boss")
-	bool IsCCImmune() const;
+	bool GetCCImmune() const;
+
+	UPROPERTY(BlueprintAssignable, Category = "Boss")
+	FOnImmuneChange OnImmuneStateBegan;
+
+	UPROPERTY(BlueprintAssignable, Category = "Boss")
+	FOnImmuneChange OnImmuneStateEnded;
 
 protected:
 	virtual void CCApplied() override;
