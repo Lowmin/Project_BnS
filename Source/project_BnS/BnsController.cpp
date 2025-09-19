@@ -69,7 +69,6 @@ void ABnsController::BeginPlay()
 void ABnsController::OnPossess(APawn* pawn)
 {
 	Super::OnPossess(pawn);
-
 	AMyPlayer* MyPlayer = GetPawn<AMyPlayer>();
 
 	// UI 생성 
@@ -95,6 +94,7 @@ void ABnsController::OnPossess(APawn* pawn)
 	PopupManager->Initialize(this);
 
 	MyPlayer->OnMovementInput.BindUObject(this, &ABnsController::OnMovementInputReceived);
+	MyPlayer->IsUIVisibleDelegate.BindUObject(this, &ABnsController::IsPopupVisible);
 
 	if (InventoryPopupClass && IA_Inventory)
 	{
@@ -172,6 +172,15 @@ void ABnsController::OnMovementInputReceived()
 	{
 		PopupManager->ClosePopup();
 	}
+}
+
+bool ABnsController::IsPopupVisible()
+{
+	if (PopupManager)
+	{
+		return PopupManager->IsPopupVisible();
+	}
+	return false;
 }
 
 void ABnsController::ToggleInventory()

@@ -51,6 +51,11 @@ void UPopupManager::TogglePopup(EPopupType PopupType)
 	SetInputMode();
 }
 
+bool UPopupManager::IsPopupVisible()
+{
+	return VisiblePopupStack.Num() > 0;
+}
+
 void UPopupManager::ClosePopup()
 {
 	if (VisiblePopupStack.Num() == 0) return;

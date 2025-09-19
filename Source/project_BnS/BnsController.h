@@ -62,6 +62,8 @@ public:
 
 	void OnMovementInputReceived();
 
+	bool IsPopupVisible();
+
 	// Input
 private:
 	UPROPERTY(EditAnywhere, Category = Input)

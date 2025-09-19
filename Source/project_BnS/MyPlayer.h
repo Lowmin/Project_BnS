@@ -11,6 +11,7 @@
 #include "MyPlayer.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
+DECLARE_DELEGATE_RetVal(bool, FIsUIVisible);
 DECLARE_DELEGATE(FOnMovementInput);
 
 UCLASS()
@@ -119,6 +120,7 @@ public:
     FDele_Single_FF OnStaminaChange = nullptr;
     FDele_Single_FF OnExpChange = nullptr;
     FOnMovementInput OnMovementInput = nullptr;
+    FIsUIVisible IsUIVisibleDelegate;
     
     void SetCurStamina(float stamina);
     float GetCurStamina() const;

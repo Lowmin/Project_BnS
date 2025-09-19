@@ -26,7 +26,7 @@ public:
 	void Initialize(APlayerController* InController);
 	UPopup* RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> PopupClass);
 	void TogglePopup(EPopupType PopupType);
-
+	bool IsPopupVisible();
 	void ClosePopup();
 
 private:

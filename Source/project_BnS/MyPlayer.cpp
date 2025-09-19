@@ -184,6 +184,10 @@ void AMyPlayer::SGlidingToggle()
 
 void AMyPlayer::HandleSkillInput(int32 SkillIndex)
 {
+    if (IsUIVisibleDelegate.IsBound() && IsUIVisibleDelegate.Execute())
+    {
+        return;
+    }
     USkillSystemComponent* SkillSys = GetSkillSystemComponent();
     if (!SkillSys) return;
 
