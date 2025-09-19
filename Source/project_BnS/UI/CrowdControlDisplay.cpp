@@ -34,7 +34,7 @@ void UCrowdControlDisplay::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	CurrentType = ECrowdControlType::None;
+	CurrentType = ECrowdControlType::Immune;
 }
 
 void UCrowdControlDisplay::SetType(ECrowdControlType type)

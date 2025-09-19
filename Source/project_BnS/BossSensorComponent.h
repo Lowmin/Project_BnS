@@ -32,6 +32,10 @@ private:
 	void SetTargetBoss();
 	void BossHpChange(float current, float max);
 	void BossCCInfoChange(ECrowdControlType type, int32 count);
+	UFUNCTION()
+	void BossImmuneBegan();
+	UFUNCTION()
+	void BossImmuneEnded();
 
 public:
 	FDele_Single_BossInfo OnBossInfoChange;

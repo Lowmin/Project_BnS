@@ -112,7 +112,17 @@ void UCrowdControlComponent::RemoveCrowdControl()
 
 	if (OnCCInfoChange.IsBound())
 	{
-		OnCCInfoChange.Execute(CurrentType, Stack);
+
+		ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwner());
+
+		if (OwnerBoss && OwnerBoss->GetCCImmune())
+		{
+			OnCCInfoChange.Execute(ECrowdControlType::Immune, 0);
+		}
+		else
+		{
+			OnCCInfoChange.Execute(CurrentType, Stack);
+		}
 	}
 
 	if (OnRemovedCrowdControl.IsBound())
@@ -123,7 +133,7 @@ void UCrowdControlComponent::RemoveCrowdControl()
 
 int32 UCrowdControlComponent::GetActivateStackCount() const
 {
-	return 4;// ActivateStackCount;
+	return ActivateStackCount;
 }
 
 int32 UCrowdControlComponent::GetCurrentStack() const

@@ -24,6 +24,8 @@ void UBossSensorComponent::RemoveTargetBoss()
 {
 	Target->GetStatusComponent()->OnHpChange.RemoveAll(this);
 	Target->GetCrowdControlComponent()->OnCCInfoChange.Unbind();
+	Target->OnImmuneStateBegan.Clear();
+	Target->OnImmuneStateEnded.Clear();
 	Target = nullptr;
 
 	if (OnBossInfoChange.IsBound())
@@ -50,6 +52,8 @@ void UBossSensorComponent::SetTargetBoss()
 		int activateCrowdControlCount = 0;
 		Target->GetStatusComponent()->OnHpChange.AddUObject(this, &UBossSensorComponent::BossHpChange);
 		Target->GetCrowdControlComponent()->OnCCInfoChange.BindUObject(this, &UBossSensorComponent::BossCCInfoChange);
+		Target->OnImmuneStateBegan.AddDynamic(this, &UBossSensorComponent::BossImmuneBegan);
+		Target->OnImmuneStateEnded.AddDynamic(this, &UBossSensorComponent::BossImmuneEnded);
 		activateCrowdControlCount = Target->GetCrowdControlComponent()->GetActivateStackCount();
 
 		if (OnBossInfoChange.IsBound())
@@ -75,6 +79,22 @@ void UBossSensorComponent::BossCCInfoChange(ECrowdControlType type, int32 count)
 	if (OnBossCCInfoChange.IsBound())
 	{
 		OnBossCCInfoChange.Execute(type, count);
+	}
+}
+
+void UBossSensorComponent::BossImmuneBegan()
+{
+	if (OnBossCCInfoChange.IsBound())
+	{
+		OnBossCCInfoChange.Execute(ECrowdControlType::Immune, 0);
+	}
+}
+
+void UBossSensorComponent::BossImmuneEnded()
+{
+	if (OnBossCCInfoChange.IsBound())
+	{
+		OnBossCCInfoChange.Execute(ECrowdControlType::None, 0);
 	}
 }
 
