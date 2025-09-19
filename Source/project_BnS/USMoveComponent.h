@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "USMoveComponent.generated.h"
 
 class AMyPlayer;
@@ -42,6 +43,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
+	TEnumAsByte<EPhysicalSurface> WaterSurfaceType;
 
 public:
 	void SetMoveState(EMoveState NewState);

@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "LatentActions.h"
 
 USMoveComponent::USMoveComponent()
@@ -54,7 +55,10 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		CheckInWater();
 	}
 
-	if (MyPlayer->GetCharacterMovement()->IsFalling() && CurrentMoveState != EMoveState::WallRunning)
+	if (MyPlayer->GetCharacterMovement()->IsFalling() &&
+		CurrentMoveState != EMoveState::WallRunning &&
+		CurrentMoveState != EMoveState::WaterRunning &&
+		CurrentMoveState != EMoveState::Swim)
 	{
 		CheckWaterRun();
 	}
@@ -88,7 +92,7 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	default:
 		break;
 	}
-
+	
 
 	TickMeshTilt(DeltaTime);
 
@@ -522,7 +526,7 @@ void USMoveComponent::CheckWaterRun()
 
 	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params))
 	{
-		if (WaterHitResult.GetActor() && WaterHitResult.GetActor()->ActorHasTag("Water"))
+		if (UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
 		{
 			SetMoveState(EMoveState::WaterRunning);
 			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
@@ -538,8 +542,17 @@ void USMoveComponent::TickWaterRun()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(MyPlayer);
 
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) && WaterHitResult.GetActor()->ActorHasTag("Water"))
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
+		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
 	{
+		if (MyPlayer->GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero())
+		{
+			DrawDebugLine(GetWorld(), Start, End, FColor::Yellow, false, 0.f, 0, 2.f);
+			SetMoveState(EMoveState::Idle);
+			MyPlayer->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+			return;
+		}
+
 		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
 		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
 
@@ -563,7 +576,8 @@ void USMoveComponent::CheckInWater()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(MyPlayer);
 
-	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) && WaterHitResult.GetActor()->ActorHasTag("Water"))
+	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
+		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
 	{
 		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 0.1f);
 		
@@ -587,7 +601,7 @@ void USMoveComponent::TickSwim()
 	Params.AddIgnoredActor(MyPlayer);
 
 	if (GetWorld()->LineTraceSingleByChannel(WaterHitResult, Start, End, ECC_Visibility, Params) &&
-		WaterHitResult.GetActor() && WaterHitResult.GetActor()->ActorHasTag("Water"))
+		UPhysicalMaterial::DetermineSurfaceType(WaterHitResult.PhysMaterial.Get()) == WaterSurfaceType)
 	{
 		MyPlayer->GetCharacterMovement()->Velocity.Z = 0.f;
 
