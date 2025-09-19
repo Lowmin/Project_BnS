@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../CrowdControlType.h"
 #include "MainUi.generated.h"
 
 
@@ -130,9 +131,10 @@ public:
 	void SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum);
 
 	// Boss Info
-	void SetBossInfo(const class UStatComponent* status, float distance);
+	void SetBossInfo(const class UStatComponent* status, int32 activateCCCount, float distance);
 	void SetBossHp(float current, float max);
 	void SetBossCrowdControlCount(int current, int max);
+	void SetBossCCInfo(ECrowdControlType type, int32 count);
 	void SetBossDistance(float distance);
 
 	// Minimap

@@ -5,12 +5,31 @@
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/HorizontalBox.h"
+#include "Components/Image.h"
+#include "CrowdControlDisplay.h"
+#include "../CrowdControlComponent.h"
 
-void UBossInfo::SetInfo(float curHp, float maxHp, int32 level, FString name, float distance)
+void UBossInfo::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	for (UWidget* child : CrowdControlRoot->GetAllChildren())
+	{
+		UCrowdControlDisplay* img = Cast<UCrowdControlDisplay>(child);
+		if (img == nullptr)
+			continue;
+
+		ImgCCList.Add(img);
+	}
+}
+
+void UBossInfo::SetInfo(float curHp, float maxHp, int32 level, FString name, int32 activateCCCount, float distance)
 {
 	OnChangeHp(curHp, maxHp);
 	SetLevel(level);
 	SetName(name);
+	SetMaxCrowdControlCount(activateCCCount);
 	SetDistance(distance);
 }
 
@@ -37,6 +56,34 @@ void UBossInfo::SetName(FString name)
 {
 	NameText->SetText(FText::FromString(name));
 }
+void UBossInfo::SetMaxCrowdControlCount(int32 activateCCCount)
+{
+	for (int i = 0; i < ImgCCList.Num(); ++i)
+	{
+		ImgCCList[i]->SetVisibility(i < activateCCCount ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+	}
+
+	SetBossCCInfo(ECrowdControlType::None, 0);
+}
+void UBossInfo::SetBossCCInfo(ECrowdControlType type, int32 count)
+{
+	for (int i = 0; i < ImgCCList.Num(); ++i)
+	{
+		if (type == ECrowdControlType::Immune)
+		{
+			ImgCCList[i]->SetType(ECrowdControlType::Immune);
+		}
+		else if(i < count)
+		{
+			ImgCCList[i]->SetType(type);
+		}
+		else
+		{
+			ImgCCList[i]->SetType(ECrowdControlType::None);
+		}
+	}
+}
+
 void UBossInfo::SetDistance(float distance)
 {
 	int32 dist = FMath::CeilToInt32(distance);

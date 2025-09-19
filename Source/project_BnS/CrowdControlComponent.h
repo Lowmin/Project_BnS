@@ -4,17 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CrowdControlType.h"
 #include "CrowdControlComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDele_Multi);
+DECLARE_DELEGATE_TwoParams(FDele_Single_CC_Change, ECrowdControlType type, int32 count)
 
-UENUM(BlueprintType)
-enum class ECrowdControlType : uint8
-{
-	None,
-	Down,
-	Stun
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_BNS_API UCrowdControlComponent : public UActorComponent
@@ -49,8 +44,9 @@ public:
 	void RemoveCrowdControl();
 	FDele_Multi OnAppliedCrowdControl;
 	FDele_Multi OnRemovedCrowdControl;
-	UFUNCTION(BlueprintPure, Category = "CrowdControl")
 
+	FDele_Single_CC_Change OnCCInfoChange;
+	UFUNCTION(BlueprintPure, Category = "CrowdControl")
 	int32 GetActivateStackCount() const;
 	UFUNCTION(BlueprintPure, Category = "CrowdControl")
 	int32 GetCurrentStack() const;
