@@ -109,7 +109,11 @@ void ATargetingSystem::SetTargetBox()
 
 void ATargetingSystem::RemoveCurrentTarget()
 {
-	ITargetAble::Execute_OnTargeted(Target, false);
+	if(Target != nullptr)
+	{
+		ITargetAble::Execute_OnTargeted(Target, false);
+	}
+
 	Target = nullptr;
 
 	if (OnTargetBoxChange.IsBound())
