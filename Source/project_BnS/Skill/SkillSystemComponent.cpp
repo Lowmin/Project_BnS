@@ -45,6 +45,8 @@ void USkillSystemComponent::BeginPlay()
 	LastCheckedTarget = nullptr;
 	LastCheckedCCType = ECrowdControlType::None;
 	bLastTargetValid = false;
+
+	CheckCC = nullptr;
 }
 
 void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -56,12 +58,14 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	AActor* CurrentTarget = OwnerAsTargetingSystem->GetTarget();
 	const bool bIsTargetValidNow = IsValid(CurrentTarget);
+	UCrowdControlComponent* TargetCC = nullptr;
 	ECrowdControlType CurrentCCType = ECrowdControlType::None;
 	int32 CurrentStackCount = 0;
 
 	if (bIsTargetValidNow)
 	{
-		if (const UCrowdControlComponent* TargetCC = CurrentTarget->FindComponentByClass<UCrowdControlComponent>())
+		TargetCC = CurrentTarget->FindComponentByClass<UCrowdControlComponent>();
+		if (TargetCC)
 		{
 			CurrentCCType = TargetCC->GetCrowdControlType();
 			CurrentStackCount = TargetCC->GetCurrentStack();
@@ -70,6 +74,23 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	if (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get() || CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount)
 	{
+		if (TargetCC != CheckCC.Get())
+		{
+			if (CheckCC.IsValid())
+			{
+				CheckCC->OnAppliedCrowdControl.RemoveDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
+				CheckCC->OnRemovedCrowdControl.RemoveDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
+			}
+
+			if (TargetCC)
+			{
+				TargetCC->OnAppliedCrowdControl.AddDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
+				TargetCC->OnRemovedCrowdControl.AddDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
+			}
+
+			CheckCC = TargetCC;
+		}
+
 		UpdateAllSkillDisplays(CurrentTarget);
 
 		LastCheckedTarget = CurrentTarget;
@@ -460,6 +481,8 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 		return;
 	}
 
+	SlotPanel->StopCooldownShow(Slot);
+
 	if (Slot == ESkillSlot::Slot0)
 	{
 		const int32 BaseID = GetBaseID(Slot);
@@ -621,6 +644,14 @@ void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain
 	}
 
 	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total, isVisibleNum);
+}
+
+void USkillSystemComponent::OnTargetCCStateChange()
+{
+	if (CheckCC.IsValid())
+	{
+		UpdateAllSkillDisplays(CheckCC->GetOwner());
+	}
 }
 
 ASkillBase* USkillSystemComponent::UseSkillbyID(int32 SkillID, AActor* Target)

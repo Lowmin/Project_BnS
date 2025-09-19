@@ -140,6 +140,10 @@ private:
 	UFUNCTION()
 	void HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total, ECooldownUIType Type);
 
+	// ==== 타겟 상태변화 ====
+	UFUNCTION()
+	void OnTargetCCStateChange();
+
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<USkillSlotController> SlotPanel = nullptr;	// UI
@@ -176,4 +180,6 @@ private:
 	ECrowdControlType LastCheckedCCType = ECrowdControlType::None;
 	bool bLastTargetValid = false;
 	int32 LastCheckedStackCount = 0;
+
+	TWeakObjectPtr<UCrowdControlComponent> CheckCC;
 };
