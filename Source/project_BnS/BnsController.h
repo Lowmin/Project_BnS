@@ -8,7 +8,7 @@
 
 
 /**
- * 
+ *
  */
 UCLASS()
 class PROJECT_BNS_API ABnsController : public APlayerController
@@ -31,8 +31,13 @@ private:
 
 	UPROPERTY()
 	TSubclassOf<class UUserWidget> InventoryClass = nullptr;
+
 	UPROPERTY()
-	TObjectPtr<class UInventoryPopup> Inventory = nullptr;
+	TSubclassOf<class UInventoryPopup> InventoryPopupClass = nullptr;
+
+	// 월드맵
+	UPROPERTY()
+	TSubclassOf<class UWorldMapPopup> WorldMapPopupClass;
 
 	// 미니맵
 	UPROPERTY()
@@ -46,17 +51,34 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UInventoryPresenter> InventoryPresenter = nullptr;
 
+	// 팝업
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<class UPopupManager> PopupManager = nullptr;
+
 	// 빙의 시 호출 
 	virtual void OnPossess(APawn* pawn) override;
 
 	virtual void SetupInputComponent() override;
+
+	void OnMovementInputReceived();
 
 	// Input
 private:
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_Inventory = nullptr;
 
-	void ShowInventory();
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_CloseAllPopups = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_WorldMap = nullptr;
+
+	void ToggleInventory();
+	void ToggleWorldMap();
+	void OnMovementStopped();
+	void CloseAllPopup();
+
+	bool bPopupDuringMovement = false;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;

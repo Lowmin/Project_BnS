@@ -101,6 +101,7 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMyPlayer::Move(const FInputActionValue& Value)
 {
+    OnMovementInput.ExecuteIfBound();
     if (MovementSystem && MovementSystem->GetMoveState() == EMoveState::WallRunning)
     {
         return;
@@ -139,6 +140,7 @@ void AMyPlayer::Look(const FInputActionValue& Value)
 
 void AMyPlayer::Jump()
 {
+    OnMovementInput.ExecuteIfBound();
     if (MovementSystem)
     {
         if (GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())

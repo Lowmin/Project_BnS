@@ -11,6 +11,7 @@
 #include "MyPlayer.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
+DECLARE_DELEGATE(FOnMovementInput);
 
 UCLASS()
 class PROJECT_BNS_API AMyPlayer : public ATargetingSystem
@@ -117,6 +118,7 @@ private:
 public:
     FDele_Single_FF OnStaminaChange = nullptr;
     FDele_Single_FF OnExpChange = nullptr;
+    FOnMovementInput OnMovementInput = nullptr;
     
     void SetCurStamina(float stamina);
     float GetCurStamina() const;

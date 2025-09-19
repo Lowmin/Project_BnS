@@ -6,92 +6,27 @@
 #include "Components/Button.h"
 #include "GameFramework/PlayerController.h"
 
-int UPopup::PopupCount = 0;
-
-
-FReply UPopup::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
-{
-	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-
-	FKey Key = InKeyEvent.GetKey();
-
-	if (Key == EKeys::W)
-	{
-		ClosePopup();
-	}else if (Key == EKeys::A)
-	{
-		ClosePopup();
-	}
-	else if (Key == EKeys::S)
-	{
-		ClosePopup();
-	}
-	else if (Key == EKeys::D)
-	{
-		ClosePopup();
-	}
-	else if (Key == EKeys::SpaceBar)
-	{
-		ClosePopup();
-	}
-	else if (Key == EKeys::Escape)
-	{
-		ClosePopup();
-	}
-
-	return res;
-}
-
-FReply UPopup::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
-{
-	auto  res = Super::NativeOnKeyDown(InGeometry, InKeyEvent);
-
-	if (InKeyEvent.GetKey() == SelfShortCut)
-		ClosePopup();
-
-	return res;
-}
-
 void UPopup::NativeConstruct()
 {
-	BtnClose->OnClicked.AddDynamic(this, &UPopup::ClosePopup);
+    Super::NativeConstruct();
+    BtnClose->OnClicked.AddDynamic(this, &UPopup::ClosePopup);
 
-	bIsFocusable = true;
+    bIsFocusable = true;
 }
 
 void UPopup::ClosePopup()
 {
-	SetVisiblePopup(false);
+    SetVisiblePopup(false);
 }
 
 void UPopup::SetVisiblePopup(bool isVisible)
 {
-	if (isVisible)
-	{
-		SetKeyboardFocus();
-		SetVisibility(ESlateVisibility::Visible);
-		++PopupCount;
-	}
-	else
-	{
-		SetVisibility(ESlateVisibility::Hidden);
-		--PopupCount;
-	}
-
-	APlayerController* playerCon = GetWorld()->GetFirstPlayerController();
-	if (playerCon == nullptr)
-		return;
-
-	// 인풋 모드 설정 
-	if (UPopup::PopupCount > 0)
-	{
-		playerCon->SetInputMode(FInputModeUIOnly());
-	}
-	else
-	{
-		playerCon->SetInputMode(FInputModeGameOnly());
-	}
-
-	// 마우스 커서 제어 
-	playerCon->SetShowMouseCursor(UPopup::PopupCount > 0);
+    if (isVisible)
+    {
+        SetVisibility(ESlateVisibility::Visible);
+    }
+    else
+    {
+        SetVisibility(ESlateVisibility::Hidden);
+    }
 }

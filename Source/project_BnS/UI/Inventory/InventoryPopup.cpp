@@ -14,7 +14,6 @@ void UInventoryPopup::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	SelfShortCut = EKeys::I;
 	BtnSort->OnClicked.AddDynamic(this, &UInventoryPopup::InventorySort);
 
 	// 무기슬롯 등록
