@@ -20,6 +20,7 @@ class PROJECT_BNS_API UInventoryPopup : public UPopup
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void SetVisiblePopup(bool isVisible) override;
 
 protected:

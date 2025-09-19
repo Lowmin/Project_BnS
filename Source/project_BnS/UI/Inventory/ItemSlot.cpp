@@ -24,10 +24,13 @@ void UItemSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	MatGrayscale = UMaterialInstanceDynamic::Create(MatGrayscaleBase, this);
-	if (MatGrayscale != nullptr)
+	if(MatGrayscale == nullptr)
 	{
-		Retainer->SetEffectMaterial(MatGrayscale);
+		MatGrayscale = UMaterialInstanceDynamic::Create(MatGrayscaleBase, this);
+		if (MatGrayscale != nullptr)
+		{
+			Retainer->SetEffectMaterial(MatGrayscale);
+		}
 	}
 }
 

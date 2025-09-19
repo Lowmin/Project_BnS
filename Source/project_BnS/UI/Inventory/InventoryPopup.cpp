@@ -36,6 +36,13 @@ void UInventoryPopup::NativeConstruct()
 	ItemList->SetInventoryPopup(this);
 }
 
+void UInventoryPopup::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	BtnSort->OnClicked.RemoveAll(this);
+}
+
 void UInventoryPopup::SetVisiblePopup(bool isVisible)
 {
 

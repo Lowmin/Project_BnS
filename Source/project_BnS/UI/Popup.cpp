@@ -14,6 +14,13 @@ void UPopup::NativeConstruct()
     bIsFocusable = true;
 }
 
+void UPopup::NativeDestruct()
+{
+    Super::NativeDestruct();
+
+    BtnClose->OnClicked.RemoveAll(this);
+}
+
 void UPopup::ClosePopup()
 {
     SetVisiblePopup(false);

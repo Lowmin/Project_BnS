@@ -136,6 +136,18 @@ void UItemList::NativeConstruct()
 	BtnEtc->OnClicked.AddDynamic(this, &UItemList::HighlightEtc);
 }
 
+void UItemList::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	BtnAll->OnClicked.RemoveAll(this);
+	BtnEquip->OnClicked.RemoveAll(this);
+	BtnSoulShield->OnClicked.RemoveAll(this);
+	BtnUsable->OnClicked.RemoveAll(this);
+	BtnMaterial->OnClicked.RemoveAll(this);
+	BtnEtc->OnClicked.RemoveAll(this);
+}
+
 void UItemList::HighlightAll()
 {
 	SetCategoryImage(EItemCategory::All);

@@ -22,6 +22,7 @@ public:
 	UItemList(const FObjectInitializer& ObjectInitializer);
 	virtual bool Initialize() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	TArray<class UItemSlot*> ItemSlots;
