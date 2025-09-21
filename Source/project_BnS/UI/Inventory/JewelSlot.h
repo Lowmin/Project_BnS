@@ -17,9 +17,8 @@ class PROJECT_BNS_API UJewelSlot : public UEquipSlot
 	GENERATED_BODY()
 
 protected:
-	// virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnInitialized() override;
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	// virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation) override;
 	
 public:
 	virtual void SetInfo(const class UItem* data) override;

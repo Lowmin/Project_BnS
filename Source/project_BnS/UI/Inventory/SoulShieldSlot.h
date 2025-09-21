@@ -18,7 +18,7 @@ class PROJECT_BNS_API USoulShieldSlot : public UInventorySlot
 	GENERATED_BODY()
 
 protected:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -53,4 +53,5 @@ public:
 	FDele_EquipSoulShield OnEquipSoulShield;
 	FDele_UnEquipSoulShield OnUnEquipSoulShield;
 	void SetInfo(int32 idx, const class UItem* data);
+	const class UItem* GetSoulShieldData(const int32 soulShieldIndex) const;
 };

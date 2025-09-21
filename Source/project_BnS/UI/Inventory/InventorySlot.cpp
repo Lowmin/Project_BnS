@@ -105,7 +105,7 @@ void UInventorySlot::ShowItemInfo()
 {
 	if (InventoryPopup != nullptr)
 	{
-		InventoryPopup->ShowItemInfo(ItemData);
+		InventoryPopup->ShowItemInfo(SlotType, ItemData);
 	}
 }
 
@@ -113,11 +113,16 @@ void UInventorySlot::HideItemInfo()
 {
 	if (InventoryPopup != nullptr)
 	{
-		InventoryPopup->ShowItemInfo(nullptr);
+		InventoryPopup->ShowItemInfo(SlotType, nullptr);
 	}
 }
 
 void UInventorySlot::SetInventoryPopup(UInventoryPopup* popup)
 {
 	InventoryPopup = popup;
+}
+
+const UItem* UInventorySlot::GetItemData() const
+{
+	return ItemData;
 }

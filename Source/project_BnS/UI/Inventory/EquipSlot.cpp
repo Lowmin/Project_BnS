@@ -8,6 +8,13 @@
 #include "Components/Image.h"
 #include "project_BnS/Inventory/Item.h"
 
+void UEquipSlot::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	SlotType = EInventorySlotType::EquipSlot;
+}
+
 void UEquipSlot::OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::OnMouseRightClick(InGeometry, InMouseEvent);
@@ -23,7 +30,7 @@ UInventoryDragDropOperation* UEquipSlot::CreateDragOperation(const FGeometry& In
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if(dragDropOperation != nullptr)
 	{
-		dragDropOperation->Source = EDragSource::EquipSlot;
+		dragDropOperation->Source = EInventorySlotType::EquipSlot;
 		dragDropOperation->Index = Index;
 	}
 
@@ -32,7 +39,7 @@ UInventoryDragDropOperation* UEquipSlot::CreateDragOperation(const FGeometry& In
 
 void UEquipSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 {
-	if (dragDropOperation->Source == EDragSource::ItemSlot)
+	if (dragDropOperation->Source == EInventorySlotType::ItemSlot)
 	{
 		if (OnEquip.IsBound())
 		{

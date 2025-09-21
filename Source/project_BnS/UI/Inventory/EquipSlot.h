@@ -18,6 +18,7 @@ class PROJECT_BNS_API UEquipSlot : public UInventorySlot
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation) override;

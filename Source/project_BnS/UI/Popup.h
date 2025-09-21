@@ -19,8 +19,7 @@ protected:
 	TObjectPtr<class UButton> BtnClose = nullptr;
 
 public:
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
+	virtual void NativeOnInitialized() override;
 
 	UFUNCTION()
 	void ClosePopup();

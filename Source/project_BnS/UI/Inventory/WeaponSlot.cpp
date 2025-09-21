@@ -6,6 +6,13 @@
 #include "JewelSlot.h"
 #include "../../Inventory/JewelItem.h"
 
+void UWeaponSlot::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	SlotType = EInventorySlotType::EquipSlot;
+}
+
 void UWeaponSlot::AddJewelSlot(UJewelSlot* slot)
 {
 	EquipJewelList.Add(slot);

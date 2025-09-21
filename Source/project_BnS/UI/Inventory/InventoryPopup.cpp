@@ -11,6 +11,10 @@
 #include "WeaponSlot.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
+#include "project_BnS/Inventory/EquipItem.h"
+#include "project_BnS/Inventory/Item.h"
+#include "project_BnS/Inventory/SoulShieldItem.h"
+#include "project_BnS/Inventory/WeaponItem.h"
 
 void UInventoryPopup::NativeOnInitialized()
 {
@@ -131,7 +135,65 @@ void UInventoryPopup::InventorySort()
 	}
 }
 
-void UInventoryPopup::ShowItemInfo(const UItem* data)
+void UInventoryPopup::ShowItemInfo(EInventorySlotType fromSlot, const UItem* data)
 {
-	ItemInfo->ShowInfo(data);
+	if(fromSlot == EInventorySlotType::ItemSlot)
+	{
+		FString strDiff = "";
+		if(data)
+		{
+			if(data->Category == EItemCategory::Equip)
+			{
+				if(const UEquipItem* equipItem = Cast<UEquipItem>(data))
+				{
+					if(equipItem->DetailCategory == EEquipDetailCategory::Weapon)
+					{
+						if(const UWeaponItem* weaponItem = Cast<UWeaponItem>(equipItem))
+						{
+							if(const UWeaponItem* diffWeaponItem = Cast<UWeaponItem>(GetEquipItemData(equipItem->DetailCategory)))
+							{
+								strDiff = weaponItem->GetDiffData(diffWeaponItem).ToString(); 
+							}
+						}
+					}
+					else
+					{
+						if(const UStatItem* diffItem = GetEquipItemData(equipItem->DetailCategory))
+						{
+							strDiff = equipItem->GetDiffData(diffItem).ToString();
+						}
+					}
+				}
+			}
+			else if(data->Category == EItemCategory::SoulShield)
+			{
+				const USoulShieldItem* soulShieldItem = Cast<USoulShieldItem>(data);
+				if(soulShieldItem)
+				{
+					const UStatItem* diffItem = Cast<UStatItem>(SoulShieldSlot->GetSoulShieldData((int32)soulShieldItem->DetailCategory));
+					if(diffItem)
+					{
+						strDiff = soulShieldItem->GetDiffData(diffItem).ToString();
+					}
+				}
+			}
+		}
+		ItemInfo->ShowInfo(data, strDiff);
+	}
+	else
+	{
+		ItemInfo->ShowInfo(data, TEXT(""));
+	}
 }
+
+const UStatItem* UInventoryPopup::GetEquipItemData(EEquipDetailCategory category)
+{
+	int32 equipIdx = (int32)category;
+	if(equipIdx >= (int32)EEquipDetailCategory::EquipSlotCount)
+		return nullptr;
+	if(equipIdx >= EquipSlots.Num())
+		return nullptr;
+
+	return Cast<UStatItem>(EquipSlots[equipIdx]->GetItemData());
+}
+

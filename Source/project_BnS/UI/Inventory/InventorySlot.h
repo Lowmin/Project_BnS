@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InventorySlotType.h"
 #include "Blueprint/UserWidget.h"
 #include "InventorySlot.generated.h"
 
@@ -13,6 +14,7 @@ UCLASS()
 class PROJECT_BNS_API UInventorySlot : public UUserWidget
 {
 	GENERATED_BODY()
+	
 public:
 	UInventorySlot(const FObjectInitializer& ObjectInitializer);
 
@@ -31,6 +33,9 @@ private:
 	TObjectPtr<const class UItem> ItemData = nullptr;
 
 protected:
+	EInventorySlotType SlotType = EInventorySlotType::ItemSlot;
+	
+protected:
 	virtual void OnMouseRightClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation);
@@ -40,4 +45,5 @@ protected:
 
 public:
 	void SetInventoryPopup(class UInventoryPopup* popup);
+	const class UItem* GetItemData() const;
 };

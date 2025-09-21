@@ -5,6 +5,35 @@
 
 #include "JewelItem.h"
 
+FStatItemDiffData UWeaponItem::GetDiffData(const UWeaponItem* diffItem) const
+{
+	FStatItemDiffData diffData = Super::GetDiffData(diffItem);
+
+	if(diffItem == nullptr)
+		return diffData;
+
+	int32  curJewelCnt = GetJewelSlotCount();
+	int32 diffJewelCnt = diffItem->GetJewelSlotCount();
+	int32  jewelCnt = FMath::Max(curJewelCnt, diffJewelCnt);
+
+	for(int i=0; i<jewelCnt; ++i)
+	{
+		UJewelItem* curJewel = GetJewelData(i);
+		if(curJewel)
+		{
+			diffData += curJewel;
+		}
+		
+		UJewelItem* diffJewel = diffItem->GetJewelData(i);
+		if(diffJewel)
+		{
+			diffData -= diffJewel;
+		}
+	}
+
+	return diffData;
+}
+
 void UWeaponItem::SetData(const FWeaponData* data)
 {
 	Super::SetData(data);
@@ -49,7 +78,7 @@ UJewelItem* UWeaponItem::UnEquipJewel(const int32 jewelSlotIndex)
 	return temp; 
 }
 
-UJewelItem* UWeaponItem::GetJewelData(const int32 jewelSlotIndex)
+UJewelItem* UWeaponItem::GetJewelData(const int32 jewelSlotIndex) const
 {
 	if(jewelSlotIndex < 0)
 		return nullptr;

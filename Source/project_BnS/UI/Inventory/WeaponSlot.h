@@ -13,6 +13,9 @@ UCLASS()
 class PROJECT_BNS_API UWeaponSlot : public UEquipSlot
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void NativeOnInitialized() override;
 	
 protected:
 	TArray<TObjectPtr<class UJewelSlot>> EquipJewelList;

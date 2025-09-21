@@ -49,7 +49,7 @@ UInventoryDragDropOperation* UItemSlot::CreateDragOperation(const FGeometry& InG
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if (dragDropOperation != nullptr)
 	{
-		dragDropOperation->Source = EDragSource::ItemSlot;
+		dragDropOperation->Source = EInventorySlotType::ItemSlot;
 		dragDropOperation->Index = Index;
 	}
 	
@@ -61,25 +61,25 @@ void UItemSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 
 	switch (dragDropOperation->Source)
 	{
-	case EDragSource::ItemSlot:
+	case EInventorySlotType::ItemSlot:
 		if (OnSwapItemSlot.IsBound())
 		{
 			OnSwapItemSlot.Execute(dragDropOperation->Index, Index);
 		}
 		break;
-	case EDragSource::EquipSlot:
+	case EInventorySlotType::EquipSlot:
 		if (OnUnEquipToSlot.IsBound())
 		{
 			OnUnEquipToSlot.Execute(dragDropOperation->Index, Index);
 		}
 		break;
-	case EDragSource::SoulShieldSlot:
+	case EInventorySlotType::SoulShieldSlot:
 		if (OnUnEquipSoulShieldToSlot.IsBound())
 		{
 			OnUnEquipSoulShieldToSlot.Execute(dragDropOperation->Index, Index);
 		}
 		break;
-	case EDragSource::JewelSlot:
+	case EInventorySlotType::JewelSlot:
 		if(OnUnEquipJewelToSlot.IsBound())
 		{
 			OnUnEquipJewelToSlot.Execute(dragDropOperation->Index, Index);

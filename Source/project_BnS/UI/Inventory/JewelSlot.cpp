@@ -6,13 +6,20 @@
 #include "InventoryDragDropOperation.h"
 #include "../../Inventory/JewelItem.h"
 
+void UJewelSlot::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	SlotType = EInventorySlotType::JewelSlot;
+}
+
 UInventoryDragDropOperation* UJewelSlot::CreateDragOperation(const FGeometry& InGeometry,
-	const FPointerEvent& InMouseEvent)
+                                                             const FPointerEvent& InMouseEvent)
 {
 	UInventoryDragDropOperation* dragDropOperation = NewObject<UInventoryDragDropOperation>();
 	if(dragDropOperation != nullptr)
 	{
-		dragDropOperation->Source = EDragSource::JewelSlot;
+		dragDropOperation->Source = EInventorySlotType::JewelSlot;
 		dragDropOperation->Index = Index;
 	}
 

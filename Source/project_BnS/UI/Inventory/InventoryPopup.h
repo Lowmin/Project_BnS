@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InventorySlotType.h"
 #include "../Popup.h"
+#include "project_BnS/Inventory/itemData.h"
+#include "project_BnS/Inventory/StatItem.h"
 #include "InventoryPopup.generated.h"
 
 DECLARE_DELEGATE(FDele_InventoryOpen);
@@ -75,5 +78,6 @@ public:
 	class USoulShieldSlot* GetSoulShieldSlot() const;
 	UFUNCTION()
 	void InventorySort();
-	void ShowItemInfo(const class UItem* data);
+	void ShowItemInfo(EInventorySlotType fromSlot, const class UItem* data);
+	const class UStatItem* GetEquipItemData(EEquipDetailCategory category);
 };

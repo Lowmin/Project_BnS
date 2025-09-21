@@ -8,12 +8,15 @@
 #include "../../Inventory/Item.h"
 #include "../../Inventory/SoulShieldItem.h"
 
-void USoulShieldSlot::NativeConstruct()
+void USoulShieldSlot::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 
+	SlotType = EInventorySlotType::SoulShieldSlot;
+	
 	SoulShieldData.SetNum(8);
 }
+
 FReply USoulShieldSlot::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	int32 index = GetSoulShieldIndex(InGeometry, InMouseEvent);
@@ -46,7 +49,7 @@ class UInventoryDragDropOperation* USoulShieldSlot::CreateDragOperation(const FG
 	{
 		int32 index = GetSoulShieldIndex(InGeometry, InMouseEvent);
 
-		dragDropOperation->Source = EDragSource::SoulShieldSlot;
+		dragDropOperation->Source = EInventorySlotType::SoulShieldSlot;
 		dragDropOperation->Index = index;
 		SetItemData(SoulShieldData[index]);
 	}
@@ -57,7 +60,7 @@ void USoulShieldSlot::OnDrop(class UInventoryDragDropOperation* dragDropOperatio
 { 
 	Super::OnDrop(dragDropOperation);
 
-	if (dragDropOperation->Source == EDragSource::ItemSlot)
+	if (dragDropOperation->Source == EInventorySlotType::ItemSlot)
 	{
 		// equip ss
 		if (OnEquipSoulShield.IsBound())
@@ -137,4 +140,14 @@ void USoulShieldSlot::SetInfo(int32 idx, const UItem* data)
 	default:
 		break;
 	}
+}
+
+const UItem* USoulShieldSlot::GetSoulShieldData(const int32 soulShieldIndex) const
+{
+	if(soulShieldIndex < 0)
+		return nullptr;
+	if(soulShieldIndex >= SoulShieldData.Num())
+		return nullptr;
+	
+	return SoulShieldData[soulShieldIndex];
 }
