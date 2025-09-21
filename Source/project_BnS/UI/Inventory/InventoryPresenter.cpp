@@ -10,7 +10,9 @@
 #include "InventoryPopup.h"
 #include "ItemList.h"
 #include "ItemSlot.h"
+#include "JewelSlot.h"
 #include "SoulShieldSlot.h"
+#include "WeaponSlot.h"
 
 void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 {
@@ -19,16 +21,35 @@ void UInventoryPresenter::SetPlayer(AMyPlayer* player)
 	Player->GetInventoryComponent()->OnItemSlotChanged.BindUObject(this, &UInventoryPresenter::OnInventoryChanged);
 	Player->GetInventoryComponent()->OnEquipSlotChanged.BindUObject(this, &UInventoryPresenter::OnEquipChanged);
 	Player->GetInventoryComponent()->OnSoulShieldSlotChanged.BindUObject(this, &UInventoryPresenter::OnSoulShieldChanged);
+	Player->GetInventoryComponent()->OnJewelSlotChange.BindUObject(this, &UInventoryPresenter::OnJewelSlotChanged);
 }
 
 void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 {
 	InventoryPopup = popup;
 
-	// 인벤토리 바인드 
+	// 인벤토리 팝업 바인드 
 	InventoryPopup->OnInventoryOpen.BindUObject(this, &UInventoryPresenter::OnInventoryOpen);
 	InventoryPopup->OnInventorySort.BindUObject(this, &UInventoryPresenter::OnInventorySort);
 
+	// 보석슬롯 바인드
+	UWeaponSlot* weaponSlot = InventoryPopup->GetWeaponSlot();
+	if(weaponSlot != nullptr)
+	{
+		for(UJewelSlot* jewelSlot : weaponSlot->GetJewelSlotList())
+		{
+			jewelSlot->OnEquip.BindUObject(this, &UInventoryPresenter::OnEquipJewel);
+			jewelSlot->OnUnEquip.BindUObject(this, &UInventoryPresenter::OnUnEquipJewel);
+		}
+	}
+
+	// 장비슬롯 바인드 
+	for(UEquipSlot* equipSlot : InventoryPopup->GetEquipList())
+	{
+		equipSlot->OnUnEquip.BindUObject(this, &UInventoryPresenter::OnUnEquip);
+		equipSlot->OnEquip.BindUObject(this, &UInventoryPresenter::OnEquip);
+	}
+	
 	// 보패 바인드
 	USoulShieldSlot* soulShieldSlot = InventoryPopup->GetSoulShieldSlot();
 	if (soulShieldSlot)
@@ -36,28 +57,23 @@ void UInventoryPresenter::SetInventoryPopup(UInventoryPopup* popup)
 		soulShieldSlot->OnUnEquipSoulShield.BindUObject(this, &UInventoryPresenter::OnUnEquipSoulShield);
 		soulShieldSlot->OnEquipSoulShield.BindUObject(this, &UInventoryPresenter::OnEquipSoulShield);
 	}
-
+	
 	// 인벤토리 아이템 리스트 바인드 
 	UItemList* itemList = InventoryPopup->GetItemList();
 	itemList->OnHighlightItem.BindUObject(this, &UInventoryPresenter::OnHighlightItem);
-
-
+	
 	// 인벤토리 아이템 슬롯 바인드 
 	for (UItemSlot* itemSlot : itemList->GetItemSlotList())
 	{
 		itemSlot->OnItemUse.BindUObject(this, &UInventoryPresenter::OnItemUse);
+		itemSlot->OnUnEquipJewelToSlot.BindUObject(this, &UInventoryPresenter::OnUnEquipJewelToSlot);
 		itemSlot->OnUnEquipToSlot.BindUObject(this, &UInventoryPresenter::OnUnEquipToSlot);
 		itemSlot->OnUnEquipSoulShieldToSlot.BindUObject(this, &UInventoryPresenter::OnUnEquipSoulShieldToSlot);
 		itemSlot->OnSwapItemSlot.BindUObject(this, &UInventoryPresenter::OnSwapItemSlot);
 	}
-	for(UEquipSlot* equipSlot : InventoryPopup->GetEquipList())
-	{
-		equipSlot->OnUnEquip.BindUObject(this, &UInventoryPresenter::OnUnEquip);
-		equipSlot->OnEquip.BindUObject(this, &UInventoryPresenter::OnEquip);
-	}
 }
 
-void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data, const EItemCategory& highlightCategory) const
+void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data, const EItemCategory& highlightCategory)
 {
 	if (InventoryPopup == nullptr)
 		return;
@@ -71,7 +87,7 @@ void UInventoryPresenter::OnInventoryChanged(int32 idx, const UItem* data, const
 	InventoryPopup->SetItemSlot(idx, data, isHighlight);
 }
 
-void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data) const
+void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data)
 {
 	if (InventoryPopup == nullptr)
 		return;
@@ -79,12 +95,20 @@ void UInventoryPresenter::OnEquipChanged(int32 idx, const UItem* data) const
 	InventoryPopup->SetEquipSlot(idx, data);
 }
 
-void UInventoryPresenter::OnSoulShieldChanged(int32 idx, const UItem* data) const
+void UInventoryPresenter::OnSoulShieldChanged(int32 idx, const UItem* data)
 {
 	if (InventoryPopup == nullptr)
 		return;
 
 	InventoryPopup->SetSoulShieldSlot(idx, data);
+}
+
+void UInventoryPresenter::OnJewelSlotChanged(int32 jewelSlotIndex, const UJewelItem* data)
+{
+	if(InventoryPopup == nullptr)
+		return;
+
+	InventoryPopup->SetJewelSlot(jewelSlotIndex, data);
 }
 
 void UInventoryPresenter::OnInventoryOpen()
@@ -130,6 +154,21 @@ void UInventoryPresenter::OnUnEquipSoulShield(int32 index)
 void UInventoryPresenter::OnUnEquipSoulShieldToSlot(int32 soulShieldIndex, int32 inventoryIndex)
 {
 	Player->GetInventoryComponent()->UnEquipSoulShield(soulShieldIndex, inventoryIndex);
+}
+
+void UInventoryPresenter::OnEquipJewel(int32 inventotyIdx, int32 jewelSlotIdx)
+{
+	Player->GetInventoryComponent()->EquipJewel(inventotyIdx, jewelSlotIdx);
+}
+
+void UInventoryPresenter::OnUnEquipJewel(int32 jewelSlotIndex)
+{
+	Player->GetInventoryComponent()->UnEquipJewel(jewelSlotIndex);
+}
+
+void UInventoryPresenter::OnUnEquipJewelToSlot(int32 jewelSlotIndex, int32 inventoryIndex)
+{
+	Player->GetInventoryComponent()->UnEquipJewel(jewelSlotIndex, inventoryIndex);
 }
 
 void UInventoryPresenter::OnEquipSoulShield(int32 inventoryIdx)

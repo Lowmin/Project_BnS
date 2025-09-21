@@ -25,6 +25,22 @@ protected:
 	TObjectPtr<class UTextBlock> TextOption = nullptr;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> TextDescript= nullptr;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UHorizontalBox> JewelRoot = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_0 = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_1 = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_2 = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_3 = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_4 = nullptr;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> JewelSlot_5 = nullptr;
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UGoldDisplay> GoldDisplay = nullptr;
 	UPROPERTY(meta = (BindWidget))
@@ -33,6 +49,7 @@ protected:
 	TObjectPtr<class UTextBlock> TextDiff= nullptr;
 
 public:
-	void ShowInfo(const class UItem* data);
+	void ShowInfo(const class UItem* data, const FString& diffText);
 	void HideInfo();
+	void SetJewelTexture(class UImage* image, class UJewelItem* jewelData);
 };

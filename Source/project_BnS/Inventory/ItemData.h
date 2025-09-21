@@ -34,7 +34,8 @@ enum class EEquipDetailCategory : uint8
 	Earring,
 	Neckless,
 	Bracelit,
-	Count
+	EquipSlotCount,
+	Jewel,
 };
 
 UENUM(BlueprintType)
@@ -118,6 +119,34 @@ struct FEquipData : public FStatItemData
 	{
 		DetailCategory = EEquipDetailCategory::Weapon;
 	};
+};
+
+USTRUCT(BlueprintType)
+struct FWeaponData : public FEquipData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	int32 JewelSlotCount;
+
+	FWeaponData() : Super()
+	{
+		JewelSlotCount = 6;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FJewelData : public FEquipData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	UTexture2D* JewelTexture;
+
+	FJewelData() : Super()
+	{
+		JewelTexture = nullptr;
+	}
 };
 
 USTRUCT(BlueprintType)

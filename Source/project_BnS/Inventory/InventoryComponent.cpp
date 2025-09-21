@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 #include "Item.h"
 #include "EquipItem.h"
+#include "JewelItem.h"
 #include "WeaponItem.h"
 #include "SoulShieldItem.h"
 #include "../CharacterBase.h"
@@ -16,6 +17,18 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
+	static ConstructorHelpers::FObjectFinder<UDataTable> weaponData(TEXT("/Game/DT_WeaponData.DT_WeaponData"));
+	if (weaponData.Succeeded())
+	{
+		WeaponDataTable = weaponData.Object;
+	}
+	
+	static ConstructorHelpers::FObjectFinder<UDataTable> jewelData(TEXT("/Game/DT_JewelData.DT_JewelData"));
+	if (jewelData.Succeeded())
+	{
+		JewelDataTable = jewelData.Object;
+	}
+	
 	static ConstructorHelpers::FObjectFinder<UDataTable> equipData(TEXT("/Game/DT_EquipData.DT_EquipData"));
 	if (equipData.Succeeded())
 	{
@@ -41,25 +54,28 @@ void UInventoryComponent::BeginPlay()
 	}
 
 	// ...
+	ParsingWeaponData();
+	ParsingJewelData();
 	ParsingEquipData();
 	ParsingSoulShieldData();
 
-	EquipList.SetNum((int)EEquipDetailCategory::Count);
+	EquipList.SetNum((int)EEquipDetailCategory::EquipSlotCount);
 	SoulShieldList.SetNum(8);
 	SetInventorySlotCount(40);
 
-	AddItem(1, 1);
-	AddItem(2, 1);
-	AddItem(10000001, 1);
+	AddItem(1);
+	AddItem(2);
+	AddItem(10000001);
+	AddItem(19000001);
 
-	AddItem(100000001, 1);
-	AddItem(100000002, 1);
-	AddItem(100000003, 1);
-	AddItem(100000004, 1);
-	AddItem(100000005, 1);
-	AddItem(100000006, 1);
-	AddItem(100000007, 1);
-	AddItem(100000008, 1);
+	AddItem(100000001);
+	AddItem(100000002);
+	AddItem(100000003);
+	AddItem(100000004);
+	AddItem(100000005);
+	AddItem(100000006);
+	AddItem(100000007);
+	AddItem(100000008);
 }
 
 
@@ -69,6 +85,42 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UInventoryComponent::ParsingWeaponData()
+{
+	if (!WeaponDataTable)
+		return;
+
+	// Load the UDataTable
+	TArray<FWeaponData*> arr;
+	WeaponDataTable->GetAllRows<FWeaponData>("weaponData", arr);
+
+	if (arr.Num() <= 0)
+		return;
+
+	for (FWeaponData* data : arr)
+	{
+		WeaponDataMap.Add(data->Id, data);
+	}
+}
+
+void UInventoryComponent::ParsingJewelData()
+{
+	if (!EquipDataTable)
+		return;
+
+	// Load the UDataTable
+	TArray<FJewelData*> arr;
+	JewelDataTable->GetAllRows<FJewelData>("jewelData", arr);
+
+	if (arr.Num() <= 0)
+		return;
+
+	for (FJewelData* data : arr)
+	{
+		JewelDataMap.Add(data->Id, data);
+	}
 }
 
 void UInventoryComponent::ParsingEquipData()
@@ -129,17 +181,27 @@ UItem* UInventoryComponent::CreateItem(int32 itemId) const
 {
 	if (itemId < WEAPON_ID_LIMIT)
 	{
-		if (!EquipDataMap.Contains(itemId))
+		if (!WeaponDataMap.Contains(itemId))
 			return nullptr;
 
 		UWeaponItem* weaponItem = NewObject<UWeaponItem>(GetOwner());
-		weaponItem->SetData(EquipDataMap[itemId]);
+		weaponItem->SetData(WeaponDataMap[itemId]);
 
 		return weaponItem;
 	}
 	else if(itemId < EQUIP_ID_LIMIT)
 	{
+		if(itemId > JEWEL_ID_START)
+		{
+			if (!JewelDataMap.Contains(itemId))
+				return nullptr;
+			
+			UJewelItem* jewelItem = NewObject<UJewelItem>(GetOwner());
+			jewelItem->SetData(JewelDataMap[itemId]);
 
+			return jewelItem;
+		}
+		
 		if (!EquipDataMap.Contains(itemId))
 			return nullptr;
 
@@ -307,12 +369,25 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 {
 	if (equipItem == nullptr)
 		return;
+	if(inventoryIdx >= ItemList.Num())
+		return;
 
 	TObjectPtr<UEquipItem> temp = equipItem;
-	RemoveItem(inventoryIdx);
-
+	
+	// 보석 장착 
+	if(equipItem->DetailCategory == EEquipDetailCategory::Jewel)
+	{
+		EquipJewel(inventoryIdx, -1, Cast<UJewelItem>(equipItem));
+		return;
+	}
+	
 	int32 equipIndex = (int32)equipItem->DetailCategory;
+	
+	if(equipIndex >= EquipList.Num())
+		return;
 
+	RemoveItem(inventoryIdx);
+	
 	if (EquipList[equipIndex] != nullptr)
 	{
 		UnEquip(equipIndex, inventoryIdx);
@@ -332,6 +407,29 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 		if(OnEquipSlotChanged.IsBound())
 		{
 			OnEquipSlotChanged.Execute(equipIndex, temp);
+		}
+
+		// 무기 장착 시 보석 정보 갱신 
+		if(equipIndex == (int32)EEquipDetailCategory::Weapon)
+		{
+			UWeaponItem* weapon = Cast<UWeaponItem>(equipItem);
+			if(weapon == nullptr)
+			{
+				for(int i=0; i<6; ++i)
+				{
+					if(OnJewelSlotChange.IsBound())
+					{
+						OnJewelSlotChange.Execute(i, nullptr);
+					}
+				}
+			}
+			else
+			{
+				for(int i=0; i<weapon->GetJewelSlotCount(); ++i)
+				{
+					OnJewelSlotChange.Execute(i, weapon->GetJewelData(i));	
+				}
+			}
 		}
 	}
 
@@ -382,6 +480,18 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 	if(OnEquipSlotChanged.IsBound())
 	{
 		OnEquipSlotChanged.Execute(equipIdx, nullptr);
+	}
+
+	// 무기 장착 해제 시 보석 정보 갱신 
+	if(equipIdx == (int32)EEquipDetailCategory::Weapon)
+	{
+		for(int i=0; i<6; ++i)
+		{
+			if(OnJewelSlotChange.IsBound())
+			{
+				OnJewelSlotChange.Execute(i, nullptr);
+			}
+		}
 	}
 }
 
@@ -494,6 +604,125 @@ void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targe
 		OnSoulShieldSlotChanged.Execute(soulShieldSlotIdx, nullptr);
 	}
 }
+
+void UInventoryComponent::EquipJewel(int32 inventoryIdx, int32 jewelSlotIdx)
+{
+	// 장착 할 슬롯 아이템이 없는경우 불가 
+	if(inventoryIdx >= ItemList.Num())
+		return;
+	UItem* item = ItemList[inventoryIdx];
+	if(item == nullptr)
+		return;
+	
+	// 아이템이 장비가 아닌경우 장착 불가 
+	UJewelItem* jewelItem = Cast<UJewelItem>(item);
+	if(jewelItem == nullptr)
+		return;
+
+	EquipJewel(inventoryIdx, jewelSlotIdx, jewelItem);
+}
+
+void UInventoryComponent::EquipJewel(int32 inventoryIdx, int32 jewelSlotIdx, UJewelItem* JewelItem)
+{
+	if(JewelItem == nullptr)
+		return;
+	if(inventoryIdx >= ItemList.Num())
+		return;
+
+	// 무기 장착하지 않은경우 보석 착용 불가 
+	UWeaponItem* weapon = Cast<UWeaponItem>(EquipList[0]);
+	if(weapon == nullptr)
+		return;
+
+	if(weapon->GetEmptyJewelSlotCount() == 0)
+		return;
+
+	// 빈 보석 슬롯 검색 
+	if(jewelSlotIdx < 0)
+	{
+		for(int i=0; weapon->GetJewelSlotCount(); ++i)
+		{
+			if(weapon->IsEmptyJewel(i))
+			{
+				jewelSlotIdx = i;
+				break;
+			}
+		}
+	}
+
+	if(jewelSlotIdx < 0)
+		return;
+
+	if(weapon->EquipJewel(jewelSlotIdx, JewelItem))
+	{
+		RemoveItem(inventoryIdx);
+
+		if (StatComponent != nullptr)
+		{
+			StatComponent->AddExtraMaxHp(JewelItem->MaxHp);
+			StatComponent->AddExtraAtk(JewelItem->Atk);
+			StatComponent->AddExtraDef(JewelItem->Def);
+		}
+	
+		if(OnJewelSlotChange.IsBound())
+		{
+			OnJewelSlotChange.Execute(jewelSlotIdx, JewelItem);
+		}
+	}
+
+}
+
+void UInventoryComponent::UnEquipJewel(int32 jewelSlotIndex, int32 targetInventoryIdx)
+{
+	if (targetInventoryIdx < 0)
+	{
+		targetInventoryIdx = FindItemSlotIndex(-1);
+	}
+
+	// 무기가 없는경우 장착 해제 불가
+	UWeaponItem* weapon = Cast<UWeaponItem>(EquipList[0]);
+	if(weapon == nullptr)
+		return;
+	
+	if (targetInventoryIdx < 0)
+		return;
+	if (jewelSlotIndex < 0)
+		return;
+	
+	if (targetInventoryIdx >= ItemList.Num())
+		return;
+	if (jewelSlotIndex >= weapon->GetJewelSlotCount())
+		return;
+
+	if (ItemList[targetInventoryIdx] != nullptr)
+		return;
+	if(weapon->IsEmptyJewel(jewelSlotIndex))
+		return;
+	
+	TObjectPtr<UJewelItem> temp = weapon->UnEquipJewel(jewelSlotIndex);
+	if(temp == nullptr)
+		return;
+
+	ItemList[targetInventoryIdx] = temp;
+	
+	if (StatComponent != nullptr)
+	{
+		StatComponent->AddExtraMaxHp(-(temp->MaxHp));
+		StatComponent->AddExtraAtk(-(temp->Atk));
+		StatComponent->AddExtraDef(-(temp->Def));
+	}
+	
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(targetInventoryIdx, ItemList[targetInventoryIdx], HighlightCategory);
+	}
+
+	if(OnJewelSlotChange.IsBound())
+	{
+		OnJewelSlotChange.Execute(jewelSlotIndex, nullptr);
+	}
+}
+
 
 void UInventoryComponent::OnInventoryOpen()
 {

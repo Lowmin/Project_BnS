@@ -4,15 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/DragDropOperation.h"
+#include "InventorySlotType.h"
 #include "InventoryDragDropOperation.generated.h"
-
-UENUM(BlueprintType)
-enum EDragSource : uint8
-{
-	ItemSlot,
-	EquipSlot,
-	SoulShieldSlot
-};
 
 /**
  * 
@@ -23,6 +16,6 @@ class PROJECT_BNS_API UInventoryDragDropOperation : public UDragDropOperation
 	GENERATED_BODY()
 	
 public:
-	EDragSource Source = EDragSource::ItemSlot;
+	EInventorySlotType Source = EInventorySlotType::ItemSlot;
 	int32 Index;
 };

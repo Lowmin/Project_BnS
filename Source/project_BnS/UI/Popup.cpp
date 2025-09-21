@@ -6,19 +6,11 @@
 #include "Components/Button.h"
 #include "GameFramework/PlayerController.h"
 
-void UPopup::NativeConstruct()
+void UPopup::NativeOnInitialized()
 {
-    Super::NativeConstruct();
+    Super::NativeOnInitialized();
+    
     BtnClose->OnClicked.AddDynamic(this, &UPopup::ClosePopup);
-
-    bIsFocusable = true;
-}
-
-void UPopup::NativeDestruct()
-{
-    Super::NativeDestruct();
-
-    BtnClose->OnClicked.RemoveAll(this);
 }
 
 void UPopup::ClosePopup()

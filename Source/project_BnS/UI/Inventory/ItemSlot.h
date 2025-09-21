@@ -8,7 +8,6 @@
 
 DECLARE_DELEGATE_OneParam(FDele_ItemUse, int32);
 DECLARE_DELEGATE_TwoParams(FDele_UnEquipToSlot, int32, int32);
-DECLARE_DELEGATE_TwoParams(FDele_UnEquipSoulShieldToSlot, int32, int32);
 DECLARE_DELEGATE_TwoParams(FDele_SwapItemSlot, int32, int32);
 
 /**
@@ -56,8 +55,9 @@ protected:
 
 public:
 	FDele_ItemUse OnItemUse;
+	FDele_UnEquipToSlot OnUnEquipJewelToSlot;
 	FDele_UnEquipToSlot OnUnEquipToSlot;
-	FDele_UnEquipSoulShieldToSlot OnUnEquipSoulShieldToSlot;
+	FDele_UnEquipToSlot OnUnEquipSoulShieldToSlot;
 	FDele_SwapItemSlot OnSwapItemSlot;
 
 	void SetIndex(int32 index);
