@@ -15,19 +15,11 @@ class PROJECT_BNS_API UWeaponSlot : public UEquipSlot
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_0 = nullptr;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_1 = nullptr;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_2 = nullptr;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_3 = nullptr;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_4 = nullptr;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UEquipSlot> EquipJewel_5 = nullptr;
-
+	TArray<TObjectPtr<class UJewelSlot>> EquipJewelList;
+	
 public:
+	void AddJewelSlot(class UJewelSlot* slot);
+	TArray<TObjectPtr<class UJewelSlot>> GetJewelSlotList() const;
 	virtual void SetInfo(const class UItem* data) override;
+	void SetJewelSlot(int32 jewelSlotIndex, const class UJewelItem* data);
 };

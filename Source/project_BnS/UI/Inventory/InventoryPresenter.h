@@ -25,9 +25,10 @@ public:
 
 	// Model to View
 public:
-	void OnInventoryChanged(int32 idx, const class UItem* data, const EItemCategory& highlightCategory) const;
-	void OnEquipChanged(int32 idx, const class UItem* data) const;
-	void OnSoulShieldChanged(int32 idx, const class UItem* data) const;
+	void OnInventoryChanged(int32 idx, const class UItem* data, const EItemCategory& highlightCategory);
+	void OnEquipChanged(int32 idx, const class UItem* data);
+	void OnSoulShieldChanged(int32 idx, const class UItem* data);
+	void OnJewelSlotChanged(int32 jewelSlotIndex,const class UJewelItem* data);
 
 	// View to Model
 public:
@@ -40,6 +41,9 @@ public:
 	void OnEquip(int32 inventoryIdx, int32 equipIdx);
 	void OnUnEquipSoulShield(int32 index);
 	void OnUnEquipSoulShieldToSlot(int32 soulShieldIndex, int32 inventoryIndex);
+	void OnEquipJewel(int32 inventotyIdx, int32 jewelSlotIdx);
+	void OnUnEquipJewel(int32 jewelSlotIndex);
+	void OnUnEquipJewelToSlot(int32 jewelSlotIndex, int32 inventoryIndex);
 	void OnEquipSoulShield(int32 inventoryIdx);
 	void OnHighlightItem(const EItemCategory highlightCategory);
 };

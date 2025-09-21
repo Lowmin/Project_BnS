@@ -79,7 +79,14 @@ void UItemSlot::OnDrop(UInventoryDragDropOperation* dragDropOperation)
 			OnUnEquipSoulShieldToSlot.Execute(dragDropOperation->Index, Index);
 		}
 		break;
-
+	case EDragSource::JewelSlot:
+		if(OnUnEquipJewelToSlot.IsBound())
+		{
+			OnUnEquipJewelToSlot.Execute(dragDropOperation->Index, Index);
+		}
+		break;
+	default:
+		break;
 	}
 }
 

@@ -7,20 +7,41 @@
 #include "SoulShieldSlot.h"
 #include "ItemList.h"
 #include "ItemInfo.h"
+#include "JewelSlot.h"
 #include "WeaponSlot.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
 
-void UInventoryPopup::NativeConstruct()
+void UInventoryPopup::NativeOnInitialized()
 {
-	Super::NativeConstruct();
-
+	Super::NativeOnInitialized();
+	
 	BtnSort->OnClicked.AddDynamic(this, &UInventoryPopup::InventorySort);
 
 	// 무기슬롯 등록
 	EquipSlots.Add(WeaponSlot);
 	WeaponSlot->SetIndex(0);
 	WeaponSlot->SetInventoryPopup(this);
+
+	// 보석슬롯 등록
+	EquipJewel_0->SetIndex(0);
+	EquipJewel_0->SetInventoryPopup(this);
+	EquipJewel_1->SetIndex(1);
+	EquipJewel_1->SetInventoryPopup(this);
+	EquipJewel_2->SetIndex(2);
+	EquipJewel_2->SetInventoryPopup(this);
+	EquipJewel_3->SetIndex(3);
+	EquipJewel_3->SetInventoryPopup(this);
+	EquipJewel_4->SetIndex(4);
+	EquipJewel_4->SetInventoryPopup(this);
+	EquipJewel_5->SetIndex(5);
+	EquipJewel_5->SetInventoryPopup(this);
+	WeaponSlot->AddJewelSlot(EquipJewel_0);
+	WeaponSlot->AddJewelSlot(EquipJewel_1);
+	WeaponSlot->AddJewelSlot(EquipJewel_2);
+	WeaponSlot->AddJewelSlot(EquipJewel_3);
+	WeaponSlot->AddJewelSlot(EquipJewel_4);
+	WeaponSlot->AddJewelSlot(EquipJewel_5);
 
 	// 장비슬롯 등록 
 	TArray<UWidget*> childs = EquipRoot->GetAllChildren();
@@ -36,13 +57,6 @@ void UInventoryPopup::NativeConstruct()
 	}
 	SoulShieldSlot->SetInventoryPopup(this);
 	ItemList->SetInventoryPopup(this);
-}
-
-void UInventoryPopup::NativeDestruct()
-{
-	Super::NativeDestruct();
-
-	BtnSort->OnClicked.RemoveAll(this);
 }
 
 void UInventoryPopup::SetVisiblePopup(bool isVisible)
@@ -65,12 +79,12 @@ void UInventoryPopup::SetVisiblePopup(bool isVisible)
 
 }
 
-void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data, bool isHighlight) const
+void UInventoryPopup::SetItemSlot(int32 idx, const UItem* data, bool isHighlight)
 {
 	ItemList->SetItemSlot(idx, data, isHighlight);
 }
 
-void UInventoryPopup::SetEquipSlot(int32 idx, const UItem* data) const
+void UInventoryPopup::SetEquipSlot(int32 idx, const UItem* data)
 {
 	if(idx >= EquipSlots.Num())
 		return;
@@ -78,9 +92,14 @@ void UInventoryPopup::SetEquipSlot(int32 idx, const UItem* data) const
 	EquipSlots[idx]->SetInfo(data);
 }
 
-void UInventoryPopup::SetSoulShieldSlot(int32 idx, const UItem* data) const
+void UInventoryPopup::SetSoulShieldSlot(int32 idx, const UItem* data)
 {
 	SoulShieldSlot->SetInfo(idx, data);
+}
+
+void UInventoryPopup::SetJewelSlot(int32 jewelSlotIndex, const UJewelItem* data)
+{
+	WeaponSlot->SetJewelSlot(jewelSlotIndex, data);
 }
 
 TArray<UEquipSlot*> UInventoryPopup::GetEquipList() const
@@ -91,6 +110,11 @@ TArray<UEquipSlot*> UInventoryPopup::GetEquipList() const
 UItemList* UInventoryPopup::GetItemList() const
 {
 	return ItemList;
+}
+
+UWeaponSlot* UInventoryPopup::GetWeaponSlot() const
+{
+	return WeaponSlot;
 }
 
 USoulShieldSlot* UInventoryPopup::GetSoulShieldSlot() const

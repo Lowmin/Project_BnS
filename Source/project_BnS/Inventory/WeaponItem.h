@@ -14,6 +14,9 @@ class PROJECT_BNS_API UWeaponItem : public UEquipItem
 {
 	GENERATED_BODY()
 
+public:
+	void SetData(const FWeaponData* data);
+	
 private:
 	int32 JewelSlotCount = 6;
 	
@@ -21,5 +24,10 @@ private:
 	TArray<TObjectPtr<class UJewelItem>> JewelList;
 
 public:
-	void SetJewel(int jewelIndex, class UJewelItem* data);
+	bool EquipJewel(const int jewelSlotIndex,class UJewelItem* data);
+	bool IsEmptyJewel(const int jewelSlotIndex);
+	class UJewelItem* UnEquipJewel(const int32 jewelSlotIndex);
+	class UJewelItem* GetJewelData(const int32 jewelSlotIndex);
+	int32 GetJewelSlotCount() const;
+	int32 GetEmptyJewelSlotCount() const;
 };

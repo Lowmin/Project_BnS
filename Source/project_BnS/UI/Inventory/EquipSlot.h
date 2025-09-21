@@ -23,10 +23,8 @@ protected:
 	virtual void OnDrop(class UInventoryDragDropOperation* dragDropOperation) override;
 
 	// Item
-private:
-	int32 Index = 0;
-	
 protected:
+	int32 Index = 0;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UImage> ImgIcon = nullptr;
 
