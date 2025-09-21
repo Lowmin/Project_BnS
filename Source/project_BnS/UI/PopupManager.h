@@ -14,7 +14,8 @@ enum class EPopupType : uint8
 {
 	None,
 	Inventory,
-	WorldMap
+	WorldMap,
+	CharacterInfo
 };
 
 UCLASS()

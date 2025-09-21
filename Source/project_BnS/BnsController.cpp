@@ -20,6 +20,7 @@
 
 #include "UI/PopupManager.h"
 #include "UI/WorldMapPopup.h"
+#include "UI/CharacterInfo/CharacterInfoPopup.h"
 
 
 ABnsController::ABnsController()
@@ -58,6 +59,18 @@ ABnsController::ABnsController()
 	if (iaWorldMap.Succeeded())
 	{
 		IA_WorldMap = iaWorldMap.Object;
+	}
+
+	static ConstructorHelpers::FClassFinder<UCharacterInfoPopup> characterInfo(TEXT("/Game/UI/CharacterInfo/WBP_CharacterInfoPopup.WBP_CharacterInfoPopup_C"));
+	if (characterInfo.Succeeded())
+	{
+		CharacterInfoPopupClass = characterInfo.Class;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> iaCharacterInfo(TEXT("/Game/Input/IA_CharacterInfo.IA_CharacterInfo"));
+	if (iaCharacterInfo.Succeeded())
+	{
+		IA_CharacterInfo = iaCharacterInfo.Object;
 	}
 }
 
@@ -136,6 +149,11 @@ void ABnsController::OnPossess(APawn* pawn)
 	{
 		PopupManager->RegisterPopup(EPopupType::WorldMap, WorldMapPopupClass);
 	}
+
+	if (CharacterInfoPopupClass)
+	{
+		PopupManager->RegisterPopup(EPopupType::CharacterInfo, CharacterInfoPopupClass);
+	}
 }
 
 void ABnsController::SetupInputComponent()
@@ -147,6 +165,7 @@ void ABnsController::SetupInputComponent()
 		// 인벤토리 토글 바인딩
 		EnhancedPlayerInputComponent->BindAction(IA_Inventory, ETriggerEvent::Completed, this, &ABnsController::ToggleInventory);
 		EnhancedPlayerInputComponent->BindAction(IA_WorldMap, ETriggerEvent::Completed, this, &ABnsController::ToggleWorldMap);
+		EnhancedPlayerInputComponent->BindAction(IA_CharacterInfo, ETriggerEvent::Completed, this, &ABnsController::ToggleCharacterInfo);
 
 		// ESC 바인딩
 		EnhancedPlayerInputComponent->BindAction(IA_CloseAllPopups, ETriggerEvent::Completed, this, &ABnsController::CloseAllPopup);
@@ -208,6 +227,20 @@ void ABnsController::ToggleWorldMap()
 	if (PopupManager)
 	{
 		PopupManager->TogglePopup(EPopupType::WorldMap);
+	}
+}
+
+void ABnsController::ToggleCharacterInfo()
+{
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn && ControlledPawn->GetVelocity().SizeSquared() > 0.f)
+	{
+		bPopupDuringMovement = true;
+	}
+
+	if (PopupManager)
+	{
+		PopupManager->TogglePopup(EPopupType::CharacterInfo);
 	}
 }
 

@@ -43,6 +43,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UMinimapPresenter> MinimapPresenter = nullptr;
 
+	UPROPERTY()
+	TSubclassOf<class UCharacterInfoPopup> CharacterInfoPopupClass;
+
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -75,8 +78,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_WorldMap = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_CharacterInfo = nullptr;
+
 	void ToggleInventory();
 	void ToggleWorldMap();
+	void ToggleCharacterInfo();
 	void OnMovementStopped();
 	void CloseAllPopup();
 
