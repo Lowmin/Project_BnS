@@ -104,7 +104,6 @@ void UBossSensorComponent::OnBossOverlapBegin(UPrimitiveComponent* OverlappedCom
 	if (boss != nullptr)
 	{
 		BossList.Add(boss);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "find boss");
 		
 		SetTargetBoss();
 	}
@@ -116,7 +115,6 @@ void UBossSensorComponent::OnBossOverlapEnd(UPrimitiveComponent* OverlappedComp,
 	if (boss != nullptr)
 	{
 		BossList.Remove(boss);
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "missing boss");
 
 		if (boss == Target)
 		{
@@ -130,7 +128,6 @@ void UBossSensorComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	SetSphereRadius(5000.0f);
-	SetHiddenInGame(false);
 	SetCollisionProfileName(TEXT("TargetingSensor"));
 }
 

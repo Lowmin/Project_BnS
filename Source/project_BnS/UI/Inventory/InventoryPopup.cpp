@@ -79,6 +79,7 @@ void UInventoryPopup::SetVisiblePopup(bool isVisible)
 		OnInventoryOpen.Execute();
 	}
 
+	DiffInfo->HideInfo();
 	ItemInfo->HideInfo();
 
 }
@@ -128,7 +129,6 @@ USoulShieldSlot* UInventoryPopup::GetSoulShieldSlot() const
 
 void UInventoryPopup::InventorySort()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, "sort inv");
 	if (OnInventorySort.IsBound())
 	{
 		OnInventorySort.Execute();
@@ -140,6 +140,7 @@ void UInventoryPopup::ShowItemInfo(EInventorySlotType fromSlot, const UItem* dat
 	if(fromSlot == EInventorySlotType::ItemSlot)
 	{
 		FString strDiff = "";
+		bool bIsDiff = false;
 		if(data)
 		{
 			if(data->Category == EItemCategory::Equip)
@@ -153,6 +154,8 @@ void UInventoryPopup::ShowItemInfo(EInventorySlotType fromSlot, const UItem* dat
 							if(const UWeaponItem* diffWeaponItem = Cast<UWeaponItem>(GetEquipItemData(equipItem->DetailCategory)))
 							{
 								strDiff = weaponItem->GetDiffData(diffWeaponItem).ToString(); 
+								bIsDiff = true;
+								DiffInfo->ShowInfo(diffWeaponItem, TEXT(""));
 							}
 						}
 					}
@@ -161,6 +164,8 @@ void UInventoryPopup::ShowItemInfo(EInventorySlotType fromSlot, const UItem* dat
 						if(const UStatItem* diffItem = GetEquipItemData(equipItem->DetailCategory))
 						{
 							strDiff = equipItem->GetDiffData(diffItem).ToString();
+							bIsDiff = true;
+							DiffInfo->ShowInfo(diffItem, TEXT(""));
 						}
 					}
 				}
@@ -174,11 +179,17 @@ void UInventoryPopup::ShowItemInfo(EInventorySlotType fromSlot, const UItem* dat
 					if(diffItem)
 					{
 						strDiff = soulShieldItem->GetDiffData(diffItem).ToString();
+						bIsDiff = true;
+						DiffInfo->ShowInfo(diffItem, TEXT(""));
 					}
 				}
 			}
 		}
 		ItemInfo->ShowInfo(data, strDiff);
+		if (!bIsDiff)
+		{
+			DiffInfo->HideInfo();
+		}
 	}
 	else
 	{
