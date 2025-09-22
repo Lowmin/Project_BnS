@@ -38,4 +38,8 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_DEF;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_TotalATK;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_TotalDEF;
 };

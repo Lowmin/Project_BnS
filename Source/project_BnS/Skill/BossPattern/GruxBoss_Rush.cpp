@@ -145,10 +145,13 @@ void AGruxBoss_Rush::EndDash()
 	SetActorTickEnabled(false);
 
 	ABossEnemy* OwnerBoss = Cast<ABossEnemy>(GetOwnerCharacter());
+	UCrowdControlComponent* CrowdControlComponent = OwnerBoss->GetCrowdControlComponent();
+
 	if (OwnerBoss)
 	{
 		OwnerBoss->SetCCImmune(true);
 		OwnerBoss->StopAnimMontage();
+		CrowdControlComponent->RemoveCrowdControl();
 	}
 	Destroy();
 }

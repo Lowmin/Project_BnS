@@ -9,6 +9,8 @@
 #include "EnemyData.h"
 #include "Enemy/EnemyAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyPlayer.h"
 
 #include "Components/CapsuleComponent.h"
 
@@ -120,6 +122,20 @@ void AEnemy::Die()
 	if (AIController)
 	{
 		AIController->GetBrainComponent()->StopLogic(TEXT("Enemy Died"));
+	}
+
+	AMyPlayer* Player = Cast<AMyPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	if (Player)
+	{
+		if (EnemyDataHandle.DataTable)
+		{
+			const FEnemyData* Data = EnemyDataHandle.DataTable->FindRow<FEnemyData>(EnemyDataHandle.RowName, TEXT(""));
+			if (Data && Data->D_ExpValue > 0)
+			{
+				Player->AddExp(Data->D_ExpValue);
+			}
+		}
 	}
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

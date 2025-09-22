@@ -30,13 +30,13 @@ void UCharacterInfoPopup::UpdateCharacterInfo()
 
 	if (Text_Level)
 	{
-		FString LevelString = FString::Printf(TEXT("Lv. %d"), StatComponent->GetLevel());
+		FString LevelString = FString::Printf(TEXT("%d"), StatComponent->GetLevel());
 		Text_Level->SetText(FText::FromString(LevelString));
 	}
 
 	if (Text_HP)
 	{
-		FString HPString = FString::Printf(TEXT("%.0f / %.0f"), StatComponent->GetCurHp(), StatComponent->GetMaxHp());
+		FString HPString = FString::Printf(TEXT("%.0f"), StatComponent->GetMaxHp());
 		Text_HP->SetText(FText::FromString(HPString));
 	}
 
@@ -50,5 +50,19 @@ void UCharacterInfoPopup::UpdateCharacterInfo()
 	{
 		FString DefenseString = FString::Printf(TEXT("%.0f"), StatComponent->GetDef());
 		Text_DEF->SetText(FText::FromString(DefenseString));
+	}
+
+	if (Text_TotalATK)
+	{
+		float TotalATK = StatComponent->GetAtk() * (1 + (10 * 100));
+		FString TotalATKString = FString::Printf(TEXT("%.0f"), TotalATK);
+		Text_TotalATK->SetText(FText::FromString(TotalATKString));
+	}
+
+	if (Text_TotalDEF)
+	{
+		float TotalDEF = StatComponent->GetMaxHp() + StatComponent->GetDef();
+		FString TotalDEFString = FString::Printf(TEXT("%.0f"), TotalDEF);
+		Text_TotalDEF->SetText(FText::FromString(TotalDEFString));
 	}
 }

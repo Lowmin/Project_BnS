@@ -221,12 +221,35 @@ float AMyPlayer::GetMaxStamina() const
 
 void AMyPlayer::AddExp(float exp)
 {
-    if(exp <= 0.f)
+    if (exp <= 0.f)
         return;
-    
+
     CurExp += exp;
 
+    while (CurExp >= MaxExp)
+    {
+        LevelUp();
+    }
+
     OnExpChange.ExecuteIfBound(CurExp, MaxExp);
+}
+
+void AMyPlayer::LevelUp()
+{
+    if (!Status) return;
+
+    CurExp -= MaxExp;
+
+    int32 NewLevel = Status->GetLevel() + 1;
+    Status->SetLevel(NewLevel);
+
+    MaxExp *= 1.5f;
+
+    Status->SetAtk(Status->GetAtk() + 10);
+    Status->SetMaxHp(Status->GetMaxHp() + 100);
+
+    Status->SetCurHp(Status->GetMaxHp());
+    Status->SetCurMp(Status->GetMaxMp());
 }
 
 float AMyPlayer::GetCurExp() const

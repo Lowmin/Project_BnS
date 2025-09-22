@@ -126,6 +126,7 @@ public:
     float GetCurStamina() const;
     float GetMaxStamina() const;
     void AddExp(float exp);
+    void LevelUp();
     float GetCurExp() const;
     float GetMaxExp() const;
 

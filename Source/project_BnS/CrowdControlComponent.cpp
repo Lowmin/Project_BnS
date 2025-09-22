@@ -109,6 +109,7 @@ void UCrowdControlComponent::RemoveCrowdControl()
 {
 	// √ ±‚»≠
 	CurrentType = ECrowdControlType::None;
+	Stack = 0;
 
 	if (OnCCInfoChange.IsBound())
 	{
