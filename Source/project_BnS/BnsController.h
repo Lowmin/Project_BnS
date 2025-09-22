@@ -67,6 +67,8 @@ public:
 
 	bool IsPopupVisible();
 
+	void EnterLevelUp();
+
 	// Input
 private:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -80,6 +82,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	class UInputAction* IA_CharacterInfo = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	class UInputAction* IA_LevelUp = nullptr;
 
 	void ToggleInventory();
 	void ToggleWorldMap();

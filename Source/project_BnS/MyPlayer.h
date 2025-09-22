@@ -10,6 +10,9 @@
 #include "Components/PostProcessComponent.h"
 #include "MyPlayer.generated.h"
 
+class UParticleSystem;
+class USoundBase;
+
 DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
 DECLARE_DELEGATE_RetVal(bool, FIsUIVisible);
 DECLARE_DELEGATE(FOnMovementInput);
@@ -87,6 +90,15 @@ protected:
 
     // Skill
     void HandleSkillInput(int32 SkillIndex);
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+    TObjectPtr<UParticleSystem> LevelUpVFX;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+    TObjectPtr<USoundBase> LevelUpSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+    TSubclassOf<class UUserWidget> LevelUpWidgetClass;
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

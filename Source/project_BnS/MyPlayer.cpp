@@ -9,6 +9,15 @@
 #include "Skill/SkillSystemComponent.h"
 #include "StatComponent.h"
 #include "BossSensorComponent.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundBase.h"
+
+#include "Blueprint/UserWidget.h"
+#include "Animation/WidgetAnimation.h"
+#include "UI/LevelUpWidget.h"
+
 #include "Inventory/InventoryComponent.h"
 
 AMyPlayer::AMyPlayer()
@@ -238,6 +247,15 @@ void AMyPlayer::LevelUp()
 {
     if (!Status) return;
 
+    if (LevelUpVFX)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LevelUpVFX, GetActorLocation());
+    }
+    if (LevelUpSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, LevelUpSound, GetActorLocation());
+    }
+
     CurExp -= MaxExp;
 
     int32 NewLevel = Status->GetLevel() + 1;
@@ -250,6 +268,27 @@ void AMyPlayer::LevelUp()
 
     Status->SetCurHp(Status->GetMaxHp());
     Status->SetCurMp(Status->GetMaxMp());
+
+    if (LevelUpWidgetClass)
+    {
+        ULevelUpWidget* LevelUpWidget = CreateWidget<ULevelUpWidget>(GetWorld(), LevelUpWidgetClass);
+        if (LevelUpWidget)
+        {
+            LevelUpWidget->SetLevelUpText(NewLevel);
+
+            LevelUpWidget->AddToViewport();
+
+            const float AnimDuration = 2.0f;
+            FTimerHandle TimerHandle;
+            GetWorld()->GetTimerManager().SetTimer(TimerHandle, [LevelUpWidget]()
+                {
+                    if (LevelUpWidget)
+                    {
+                        LevelUpWidget->RemoveFromParent();
+                    }
+                }, AnimDuration, false);
+        }
+    }
 }
 
 float AMyPlayer::GetCurExp() const

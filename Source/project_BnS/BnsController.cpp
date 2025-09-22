@@ -72,6 +72,12 @@ ABnsController::ABnsController()
 	{
 		IA_CharacterInfo = iaCharacterInfo.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> LevelUpAction(TEXT("/Game/Input/IA_LevelUp.IA_LevelUp"));
+	if (LevelUpAction.Succeeded())
+	{
+		IA_LevelUp = LevelUpAction.Object;
+	}
 }
 
 void ABnsController::BeginPlay()
@@ -176,6 +182,11 @@ void ABnsController::SetupInputComponent()
 			EnhancedPlayerInputComponent->BindAction(MyPlayer->IA_Jump, ETriggerEvent::Completed, this, &ABnsController::OnMovementStopped);
 
 		}
+
+		if (IA_LevelUp)
+		{
+			EnhancedPlayerInputComponent->BindAction(IA_LevelUp, ETriggerEvent::Started, this, &ABnsController::EnterLevelUp);
+		}
 	}
 }
 
@@ -200,6 +211,18 @@ bool ABnsController::IsPopupVisible()
 		return PopupManager->IsPopupVisible();
 	}
 	return false;
+}
+
+void ABnsController::EnterLevelUp()
+{
+	AMyPlayer* MyPlayer = GetPawn<AMyPlayer>();
+	if (MyPlayer)
+	{
+		const float ExpToLevelUp = (MyPlayer->GetMaxExp() - MyPlayer->GetCurExp()) + 1.f;
+		MyPlayer->AddExp(ExpToLevelUp);
+
+		UE_LOG(LogTemp, Warning, TEXT("Forced Level Up!"));
+	}
 }
 
 void ABnsController::ToggleInventory()
