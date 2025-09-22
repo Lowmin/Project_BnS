@@ -36,6 +36,7 @@ private:
 	/// <summary>
 	/// 현재 적용된 버프 리스트 
 	/// </summary>
+	UPROPERTY()
 	TArray<TObjectPtr<class UBuff>> BuffList;
 	/// <summary>
 	/// 매틱 실행되는 버프 리스트 

@@ -135,7 +135,7 @@ const TArray<class UBuff*> UBuffComponent::GetBuffList() const
 	return BuffList;
 }
 
-void UBuffComponent::AddBuff(class ACharacterBase* target, int32 buffIdx)
+void UBuffComponent::AddBuff(ACharacterBase* target, int32 buffIdx)
 {
 	UBuff* existingBuff = FindBuff(buffIdx);
 
