@@ -144,6 +144,9 @@ private:
 	UFUNCTION()
 	void OnTargetCCStateChange();
 
+	UFUNCTION()
+	void OnTargetImmuneStateChanged();
+
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<USkillSlotController> SlotPanel = nullptr;	// UI
@@ -182,4 +185,5 @@ private:
 	int32 LastCheckedStackCount = 0;
 
 	TWeakObjectPtr<UCrowdControlComponent> CheckCC;
+	TWeakObjectPtr<class ABossEnemy> LastCheckedBoss;
 };

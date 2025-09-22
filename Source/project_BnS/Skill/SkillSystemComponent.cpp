@@ -58,6 +58,13 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	AActor* CurrentTarget = OwnerAsTargetingSystem->GetTarget();
 	const bool bIsTargetValidNow = IsValid(CurrentTarget);
+
+	bool bNeedsUpdate = false;
+	if (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get())
+	{
+		bNeedsUpdate = true;
+	}
+
 	UCrowdControlComponent* TargetCC = nullptr;
 	ECrowdControlType CurrentCCType = ECrowdControlType::None;
 	int32 CurrentStackCount = 0;
@@ -69,11 +76,24 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		{
 			CurrentCCType = TargetCC->GetCrowdControlType();
 			CurrentStackCount = TargetCC->GetCurrentStack();
+			if (CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount)
+			{
+				bNeedsUpdate = true;
+			}
+		}
+	}
+	else
+	{
+		if (LastCheckedCCType != ECrowdControlType::None || LastCheckedStackCount != 0)
+		{
+			bNeedsUpdate = true;
 		}
 	}
 
-	if (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get() || CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount)
+
+	if (bNeedsUpdate)
 	{
+		// 1. 일반 CC 델리게이트 관리
 		if (TargetCC != CheckCC.Get())
 		{
 			if (CheckCC.IsValid())
@@ -91,6 +111,28 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 			CheckCC = TargetCC;
 		}
 
+		// 2. 보스 면역 델리게이트 관리
+		ABossEnemy* CurrentBoss = Cast<ABossEnemy>(CurrentTarget);
+		if (CurrentBoss != LastCheckedBoss.Get())
+		{
+			if (LastCheckedBoss.IsValid())
+			{
+				LastCheckedBoss->OnImmuneStateBegan.RemoveDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
+				LastCheckedBoss->OnImmuneStateEnded.RemoveDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
+			}
+
+			// 새로운 타겟이 보스일 때 델리게이트 연결
+			if (CurrentBoss)
+			{
+				CurrentBoss->OnImmuneStateBegan.AddDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
+				CurrentBoss->OnImmuneStateEnded.AddDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
+			}
+
+			LastCheckedBoss = CurrentBoss;
+		}
+
+
+		// 3. UI 업데이트 및 상태 캐시
 		UpdateAllSkillDisplays(CurrentTarget);
 
 		LastCheckedTarget = CurrentTarget;
@@ -301,15 +343,9 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 		if (!Target) return false;
 		if (ABossEnemy* BossTarget = Cast<ABossEnemy>(Target))
 		{
-			if (UCrowdControlComponent* TargetCC = BossTarget->GetCrowdControlComponent())
+			if (!BossTarget->GetCCImmune())
 			{
-				if (TargetCC->IsEffect())
-				{
-					if (Row.NeedTargetCC.Num() == 0 || Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType()))
-					{
-						return true;
-					}
-				}
+				return true;
 			}
 		}
 		return false;
@@ -650,7 +686,17 @@ void USkillSystemComponent::OnTargetCCStateChange()
 {
 	if (CheckCC.IsValid())
 	{
+		LastCheckedCCType = CheckCC->GetCrowdControlType();
+		LastCheckedStackCount = CheckCC->GetCurrentStack();
 		UpdateAllSkillDisplays(CheckCC->GetOwner());
+	}
+}
+
+void USkillSystemComponent::OnTargetImmuneStateChanged()
+{
+	if (LastCheckedBoss.IsValid())
+	{
+		UpdateAllSkillDisplays(LastCheckedBoss.Get());
 	}
 }
 

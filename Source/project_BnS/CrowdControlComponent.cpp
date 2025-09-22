@@ -87,7 +87,7 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 
 		if (Stack >= ActivateStackCount)
 		{
-			Stack = 0;
+			//Stack = 0;
 			Duration = duration;
 
 			OnAppliedCrowdControl.Broadcast();
@@ -107,9 +107,9 @@ void UCrowdControlComponent::ApplyCrowdControl(ECrowdControlType type, float dur
 
 void UCrowdControlComponent::RemoveCrowdControl()
 {
+	Stack = 0;
 	// √ ±‚»≠
 	CurrentType = ECrowdControlType::None;
-	Stack = 0;
 
 	if (OnCCInfoChange.IsBound())
 	{
