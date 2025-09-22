@@ -16,7 +16,6 @@ ATargetingSystem::ATargetingSystem()
 
 	TargetSensor = CreateDefaultSubobject<USphereComponent>(TEXT("TargetSensors"));
 	TargetSensor->SetSphereRadius(1000.0f);
-	TargetSensor->SetHiddenInGame(false);
 	TargetSensor->SetupAttachment(RootComponent);
 	TargetSensor->SetCollisionProfileName(TEXT("TargetingSensor"));
 

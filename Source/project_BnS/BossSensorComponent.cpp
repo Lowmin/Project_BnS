@@ -128,7 +128,6 @@ void UBossSensorComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	SetSphereRadius(5000.0f);
-	SetHiddenInGame(false);
 	SetCollisionProfileName(TEXT("TargetingSensor"));
 }
 
