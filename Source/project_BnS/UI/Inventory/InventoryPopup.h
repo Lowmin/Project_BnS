@@ -55,6 +55,8 @@ protected:
 
 	// Inventory
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UItemInfo> DiffInfo = nullptr;
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UItemInfo> ItemInfo = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
