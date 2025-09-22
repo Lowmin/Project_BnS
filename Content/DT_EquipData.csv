@@ -1,2 +1,9 @@
 ﻿Raw,ID,ItemName,Category,Rarity,IsStackAble,Icon,Description,Price,DetailCategory,MaxHp,Atk,Def
-10000001,10000001,반지1,Equip,Common,FALSE,/Game/GuiParts/RPGIcons/skill_icon_03_nobg.skill_icon_03_nobg,기본아이템3,333,Ring,0,0,0
+10000001,10000001,운명,Equip,Legendary,FALSE,/Game/Image/Icon/icon10000001.icon10000001,"잡념이 번뇌에 이르면, 너의 깨달음 또한 끝날 운명일지니.",333,Ring,0,8,0
+10000002,10000002,지옥반지,Equip,Epic,FALSE,/Game/Image/Icon/icon10000002.icon10000002,,333,Ring,0,7,0
+11000001,11000001,불멸,Equip,Legendary,FALSE,/Game/Image/Icon/icon11000001.icon11000001,넘치는 생명의 기운은 불멸의 상징이노라,333,Earring,0,13,0
+11000002,11000002,불지옥귀걸이,Equip,Epic,FALSE,/Game/Image/Icon/icon11000002.icon11000002,,333,Earring,0,7,0
+12000001,12000001,맹세,Equip,Legendary,FALSE,/Game/Image/Icon/icon12000001.icon12000001,그날의 맹세는 꺼지지 않는 이 불꽃과 같으니,333,Neckless,0,7,0
+12000002,12000002,지옥목걸이,Equip,Epic,FALSE,/Game/Image/Icon/icon12000002.icon12000002,,333,Neckless,0,5,0
+13000001,13000001,수라팔찌,Equip,Epic,FALSE,/Game/Image/Icon/icon13000001.icon13000001,,333,Bracelit,0,8,18
+13000002,13000002,폭마팔찌,Equip,Rare,FALSE,/Game/Image/Icon/icon13000002.icon13000002,,333,Bracelit,0,7,15

@@ -63,10 +63,33 @@ void UInventoryComponent::BeginPlay()
 	SoulShieldList.SetNum(8);
 	SetInventorySlotCount(40);
 
+	// Weapon
 	AddItem(1);
 	AddItem(2);
+
+	// Ring
 	AddItem(10000001);
+	AddItem(10000002);
+
+	// Earring
+	AddItem(11000001);
+	AddItem(11000002);
+
+	// Neckless
+	AddItem(12000001);
+	AddItem(12000002);
+
+	// Bracelit
+	AddItem(13000001);
+	AddItem(13000002);
+
+	// Jewel
 	AddItem(19000001);
+	AddItem(19000002);
+	AddItem(19000003);
+	AddItem(19000004);
+	AddItem(19000005);
+	AddItem(19000006);
 
 	AddItem(100000001);
 	AddItem(100000002);
