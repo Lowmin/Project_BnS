@@ -7,8 +7,10 @@
 #include "JewelItem.h"
 #include "WeaponItem.h"
 #include "SoulShieldItem.h"
+#include "UsableItem.h"
 #include "../CharacterBase.h"
 #include "../StatComponent.h"
+#include "../Buff/BuffComponent.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -40,6 +42,12 @@ UInventoryComponent::UInventoryComponent()
 	{
 		SoulShieldDataTable = soulShieldData.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> usableItemData(TEXT("/Game/DT_UsableData.DT_UsableData"));
+	if (usableItemData.Succeeded())
+	{
+		UsableItemDataTable = usableItemData.Object;
+	}
 }
 
 // Called when the game starts
@@ -47,10 +55,11 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ACharacterBase* characterBase = Cast<ACharacterBase>(GetOwner());
-	if(characterBase != nullptr)
+	SelfTarget = Cast<ACharacterBase>(GetOwner());
+	if(SelfTarget != nullptr && SelfTarget.IsValid())
 	{
-		StatComponent = characterBase->GetStatusComponent();
+		StatComponent = SelfTarget->GetStatusComponent();
+		BuffComponent = SelfTarget->GetBuffComponent();
 	}
 
 	// ...
@@ -58,6 +67,7 @@ void UInventoryComponent::BeginPlay()
 	ParsingJewelData();
 	ParsingEquipData();
 	ParsingSoulShieldData();
+	ParsingUsableItemData();
 
 	EquipList.SetNum((int)EEquipDetailCategory::EquipSlotCount);
 	SoulShieldList.SetNum(8);
@@ -91,6 +101,7 @@ void UInventoryComponent::BeginPlay()
 	AddItem(19000005);
 	AddItem(19000006);
 
+	// SoulShield
 	AddItem(100000001);
 	AddItem(100000002);
 	AddItem(100000003);
@@ -99,6 +110,9 @@ void UInventoryComponent::BeginPlay()
 	AddItem(100000006);
 	AddItem(100000007);
 	AddItem(100000008);
+
+	// Usable
+	AddItem(110000001, 35);
 }
 
 
@@ -178,6 +192,20 @@ void UInventoryComponent::ParsingSoulShieldData()
 	}
 }
 
+void UInventoryComponent::ParsingUsableItemData()
+{
+	if (!UsableItemDataTable)
+		return;
+
+	TArray<FUsableItemData*> arr;
+	UsableItemDataTable->GetAllRows<FUsableItemData>("usableItemData", arr);
+
+	for (FUsableItemData* data : arr)
+	{
+		UsableItemDataMap.Add(data->Id, data);
+	}
+}
+
 int32 UInventoryComponent::FindItemSlotIndex(int32 itemId) const
 {
 	int emptyIdx = -1;
@@ -233,14 +261,28 @@ UItem* UInventoryComponent::CreateItem(int32 itemId) const
 
 		return equipItem;
 	}
+	else if(itemId < SOUL_SHIELD_ID_LIMIT)
+	{
+		if (!SoulShieldDataMap.Contains(itemId))
+			return nullptr;
 
-	if (!SoulShieldDataMap.Contains(itemId))
-		return nullptr;
+		USoulShieldItem* soulShieldItem = NewObject<USoulShieldItem>(GetOwner());
+		soulShieldItem->SetData(SoulShieldDataMap[itemId]);
 
-	USoulShieldItem* soulShieldItem = NewObject<USoulShieldItem>(GetOwner());
-	soulShieldItem->SetData(SoulShieldDataMap[itemId]);
+		return soulShieldItem;
+	}
+	else if (itemId < USABLE_ITEM_ID_LIMIT)
+	{
+		if (!UsableItemDataMap.Contains(itemId))
+			return nullptr;
 
-	return soulShieldItem;
+		UUsableItem* usableItem = NewObject<UUsableItem>(GetOwner());
+		usableItem->SetData(UsableItemDataMap[itemId]);
+
+		return usableItem;
+	}
+
+	return nullptr;
 
 }
 
@@ -353,9 +395,35 @@ void UInventoryComponent::UseItem(int32 inventoryIdx)
 	case EItemCategory::SoulShield:
 		EquipSoulShield(inventoryIdx, Cast<USoulShieldItem>(item));
 		break;
+	case EItemCategory::Usable:
+		UseUsableItem(inventoryIdx, Cast<UUsableItem>(item));
+		break;
 	default:
 		break;
 	}
+}
+
+void UInventoryComponent::UseUsableItem(int32 inventoryIdx, UUsableItem* usableItem)
+{
+	if (usableItem == nullptr)
+		return;
+
+	if (inventoryIdx < 0)
+		return;
+	if (inventoryIdx >= ItemList.Num())
+		return;
+
+	if (BuffComponent == nullptr)
+		return;
+	if (!BuffComponent.IsValid())
+		return;
+
+	if (SelfTarget == nullptr)
+		return;
+	if (!SelfTarget.IsValid())
+		return;
+
+	BuffComponent->AddBuff(SelfTarget.Get(), usableItem->BuffID);
 }
 
 bool UInventoryComponent::IsEquipAbleSlot(int32 equipIdx) const
@@ -420,7 +488,7 @@ void UInventoryComponent::Equip(int32 inventoryIdx, UEquipItem* equipItem)
 	{
 		EquipList[equipIndex] = temp;
 
-		if (StatComponent != nullptr)
+		if (StatComponent != nullptr && StatComponent.IsValid())
 		{
 			StatComponent->AddExtraMaxHp(EquipList[equipIndex]->MaxHp);
 			StatComponent->AddExtraAtk(EquipList[equipIndex]->Atk);
@@ -485,7 +553,7 @@ void UInventoryComponent::UnEquip(int32 equipIdx, int32 targetInventoryIdx)
 	if (EquipList[equipIdx] == nullptr) 
 		return;
 
-	if(StatComponent != nullptr)
+	if(StatComponent != nullptr && StatComponent.IsValid())
 	{
 		StatComponent->AddExtraMaxHp(-(EquipList[equipIdx]->MaxHp));
 		StatComponent->AddExtraAtk(-(EquipList[equipIdx]->Atk));
@@ -566,7 +634,7 @@ void UInventoryComponent::EquipSoulShield(int32 inventoryIdx, USoulShieldItem* s
 	{
 		SoulShieldList[soulShieldIndex] = temp;
 
-		if (StatComponent != nullptr)
+		if (StatComponent != nullptr && StatComponent.IsValid())
 		{
 			StatComponent->AddExtraMaxHp(SoulShieldList[soulShieldIndex]->MaxHp);
 			StatComponent->AddExtraAtk(SoulShieldList[soulShieldIndex]->Atk);
@@ -607,7 +675,7 @@ void UInventoryComponent::UnEquipSoulShield(int32 soulShieldSlotIdx, int32 targe
 	if (SoulShieldList[soulShieldSlotIdx] == nullptr)
 		return;
 
-	if (StatComponent != nullptr)
+	if (StatComponent != nullptr && StatComponent.IsValid())
 	{
 		StatComponent->AddExtraMaxHp(-(SoulShieldList[soulShieldSlotIdx]->MaxHp));
 		StatComponent->AddExtraAtk(-(SoulShieldList[soulShieldSlotIdx]->Atk));
@@ -680,7 +748,7 @@ void UInventoryComponent::EquipJewel(int32 inventoryIdx, int32 jewelSlotIdx, UJe
 	{
 		RemoveItem(inventoryIdx);
 
-		if (StatComponent != nullptr)
+		if (StatComponent != nullptr && StatComponent.IsValid())
 		{
 			StatComponent->AddExtraMaxHp(JewelItem->MaxHp);
 			StatComponent->AddExtraAtk(JewelItem->Atk);
@@ -728,7 +796,7 @@ void UInventoryComponent::UnEquipJewel(int32 jewelSlotIndex, int32 targetInvento
 
 	ItemList[targetInventoryIdx] = temp;
 	
-	if (StatComponent != nullptr)
+	if (StatComponent != nullptr && StatComponent.IsValid())
 	{
 		StatComponent->AddExtraMaxHp(-(temp->MaxHp));
 		StatComponent->AddExtraAtk(-(temp->Atk));

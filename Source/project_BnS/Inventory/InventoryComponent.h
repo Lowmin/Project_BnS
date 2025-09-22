@@ -33,7 +33,9 @@ public:
 
 	// Inventory
 private:
+	TWeakObjectPtr<class ACharacterBase> SelfTarget = nullptr;
 	TWeakObjectPtr<class UStatComponent> StatComponent = nullptr;
+	TWeakObjectPtr<class UBuffComponent> BuffComponent = nullptr;
 
 	EItemCategory HighlightCategory = EItemCategory::All;
 	UPROPERTY()
@@ -55,6 +57,16 @@ private:
 	/// </summary>
 	const int32 EQUIP_ID_LIMIT = 100000000;
 
+	/// <summary>
+	/// 보패 아이템 ID 한계 
+	/// </summary>
+	const int32 SOUL_SHIELD_ID_LIMIT = 110000000;
+	
+	/// <summary>
+	/// 소모아이템 ID 한계 
+	/// </summary>
+	const int32 USABLE_ITEM_ID_LIMIT = 120000000;
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDataTable> WeaponDataTable;
 	TMap<int32, const FWeaponData*> WeaponDataMap;
@@ -75,6 +87,11 @@ private:
 	TMap<int32, const FSoulShieldData*> SoulShieldDataMap;
 	void ParsingSoulShieldData();
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDataTable> UsableItemDataTable;
+	TMap<int32, const FUsableItemData*> UsableItemDataMap;
+	void ParsingUsableItemData();
+
 
 private:
 	/// <summary>
@@ -92,6 +109,7 @@ public:
 	void AddItem(int32 id, int32 count = 1);
 	void RemoveItem(int32 inventoryIdx);
 	void UseItem(int32 inventoryIdx);
+	void UseUsableItem(int32 inventoryIdx, class UUsableItem* usableItem);
 	bool IsEquipAbleSlot(int32 equipIdx) const;
 	void Equip(int32 inventoryIdx, int32 equipIdx);
 	/**

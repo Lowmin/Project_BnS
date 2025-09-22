@@ -42,7 +42,7 @@ void UStatComponent::SetCurHp(float hp)
 	if(FMath::IsNearlyEqual(CurHp, hp))
 		return;
 	
-	CurHp = hp;
+	CurHp = FMath::Min(hp, GetMaxHp());
 
 	if(OnHpChange.IsBound())
 		OnHpChange.Broadcast(CurHp, MaxHp);

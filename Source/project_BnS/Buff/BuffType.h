@@ -8,5 +8,6 @@ UENUM(BlueprintType)
 enum class EBuffType : uint8
 {
 	Poison,
-	Ignite
+	Ignite,
+	PotionLow,
 };

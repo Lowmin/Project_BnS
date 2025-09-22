@@ -87,6 +87,20 @@ struct FItemData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
+struct FUsableItemData : public FItemData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	int32 BuffID;
+
+	FUsableItemData() : Super()
+	{
+		BuffID = 0;
+	}
+};
+
+USTRUCT(BlueprintType)
 struct FStatItemData : public FItemData
 {
 	GENERATED_BODY()
