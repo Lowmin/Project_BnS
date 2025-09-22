@@ -16,6 +16,13 @@ class PROJECT_BNS_API UJewelSlot : public UEquipSlot
 {
 	GENERATED_BODY()
 
+public:
+	UJewelSlot(const FObjectInitializer& ObjectInitializer);
+
+private:
+	UPROPERTY()
+	TObjectPtr<UTexture2D> TextureDefaultSlot = nullptr;
+
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual class UInventoryDragDropOperation* CreateDragOperation(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;

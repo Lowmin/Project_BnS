@@ -3,8 +3,18 @@
 
 #include "JewelSlot.h"
 
+#include "Components/Image.h"
 #include "InventoryDragDropOperation.h"
 #include "../../Inventory/JewelItem.h"
+
+UJewelSlot::UJewelSlot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	static ConstructorHelpers::FObjectFinder<UTexture2D> textureDefault(TEXT("/Game/Image/UI/Inventory/JewelSlot.JewelSlot"));
+	if (textureDefault.Succeeded())
+	{
+		TextureDefaultSlot = textureDefault.Object;
+	}
+}
 
 void UJewelSlot::NativeOnInitialized()
 {
@@ -34,11 +44,9 @@ void UJewelSlot::SetInfo(const UItem* data)
 
 	if(jewelItem == nullptr)
 	{
-		ImgIcon->SetBrushFromTexture(nullptr);
-		ImgIcon->SetColorAndOpacity(FColor::Red);
+		ImgIcon->SetBrushFromTexture(TextureDefaultSlot);
 		return;
 	}
 	
 	ImgIcon->SetBrushFromTexture(jewelItem->JewelTexture);
-	ImgIcon->SetColorAndOpacity(FColor::White);
 }

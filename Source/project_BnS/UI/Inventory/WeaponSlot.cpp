@@ -5,6 +5,7 @@
 
 #include "JewelSlot.h"
 #include "../../Inventory/JewelItem.h"
+#include "../../Inventory/WeaponItem.h"
 
 void UWeaponSlot::NativeOnInitialized()
 {
@@ -26,6 +27,22 @@ TArray<TObjectPtr<class UJewelSlot>> UWeaponSlot::GetJewelSlotList() const
 void UWeaponSlot::SetInfo(const UItem* data)
 {
 	Super::SetInfo(data);
+	
+	if (const UWeaponItem* weaponItem = Cast<UWeaponItem>(data))
+	{
+		int32 jewelSlotCount = weaponItem->GetJewelSlotCount();
+		for (int32 i = 0; i < EquipJewelList.Num(); ++i)
+		{
+			EquipJewelList[i]->SetVisibility(i < jewelSlotCount ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		}
+	}
+	else
+	{
+		for (int32 i = 0; i < EquipJewelList.Num(); ++i)
+		{
+			EquipJewelList[i]->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 void UWeaponSlot::SetJewelSlot(int32 jewelSlotIndex, const UJewelItem* data)

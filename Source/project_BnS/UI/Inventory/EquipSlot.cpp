@@ -60,7 +60,7 @@ void UEquipSlot::SetInfo(const class UItem* data)
 	if(data == nullptr)
 	{
 		ImgIcon->SetBrushFromTexture(nullptr);
-		ImgIcon->SetColorAndOpacity(FColor::Red);
+		ImgIcon->SetColorAndOpacity(FColor::Transparent);
 		return;
 	}
 	

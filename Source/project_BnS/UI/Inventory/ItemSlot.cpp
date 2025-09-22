@@ -107,7 +107,7 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 	if (data == nullptr)
 	{
 		ImgIcon->SetBrushFromTexture(nullptr);
-		ImgIcon->SetColorAndOpacity(FColor::Red);
+		ImgIcon->SetColorAndOpacity(FColor::Transparent);
 		TextCount->SetVisibility(ESlateVisibility::Hidden);
 		ImgNewBadge->SetVisibility(ESlateVisibility::Hidden);
 		SetGrayscale(false);
@@ -115,7 +115,7 @@ void UItemSlot::SetInfo(const UItem* data, bool isHighlight)
 	}
 
 	ImgIcon->SetBrushFromTexture(data->Icon);
-	ImgIcon->SetColorAndOpacity(data->Count> 0 ? FColor::White : FColor(0, 0, 0, 255));
+	ImgIcon->SetColorAndOpacity(data->Count > 0 ? FColor::White : FColor::Transparent);
 
 	if(data->IsStackAble)
 	{
