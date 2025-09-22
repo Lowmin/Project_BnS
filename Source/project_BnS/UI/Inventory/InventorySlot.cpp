@@ -50,8 +50,6 @@ void UInventorySlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPo
 	dragDropOperation->DefaultDragVisual = CreateWidget<UInventoryDragIcon>(this, DragIconClass)->SetIcon(ItemData->Icon);
 	dragDropOperation->Pivot = EDragPivot::CenterCenter;
 
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::FromInt((int64)this));
-
 	OutOperation = dragDropOperation;
 }
 

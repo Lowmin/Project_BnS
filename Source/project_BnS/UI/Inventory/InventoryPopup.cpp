@@ -128,7 +128,6 @@ USoulShieldSlot* UInventoryPopup::GetSoulShieldSlot() const
 
 void UInventoryPopup::InventorySort()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, "sort inv");
 	if (OnInventorySort.IsBound())
 	{
 		OnInventorySort.Execute();
