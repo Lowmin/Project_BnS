@@ -263,8 +263,8 @@ void AMyPlayer::LevelUp()
 
     MaxExp *= 1.5f;
 
-    Status->SetAtk(Status->GetAtk() + 10);
-    Status->SetMaxHp(Status->GetMaxHp() + 100);
+    Status->SetAtk(Status->GetPureAtk() + 10);
+    Status->SetMaxHp(Status->GetPureHp() + 100);
 
     Status->SetCurHp(Status->GetMaxHp());
     Status->SetCurMp(Status->GetMaxMp());

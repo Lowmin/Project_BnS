@@ -89,6 +89,11 @@ void AEnemy::BeginPlay()
 
 void AEnemy::OnDamaged(int32 damage)
 {
+	if (IsDead())
+	{
+		return;
+	}
+
 	Super::OnDamaged(damage);
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();

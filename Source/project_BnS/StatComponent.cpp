@@ -58,6 +58,11 @@ void UStatComponent::SetMaxHp(float hp)
 	MaxHp = hp;
 }
 
+float UStatComponent::GetPureHp() const
+{
+	return MaxHp;
+}
+
 int32 UStatComponent::GetCurMp() const
 {
 	return CurMp;
@@ -100,6 +105,11 @@ float UStatComponent::GetAtk() const
 	return Atk + ExtraAtk;
 }
 
+float UStatComponent::GetPureAtk() const
+{
+	return Atk;
+}
+
 void UStatComponent::SetAtk(float atk)
 {
 	Atk = atk;
@@ -113,6 +123,11 @@ float UStatComponent::GetDef() const
 void UStatComponent::SetDef(float def)
 {
 	Def = def;
+}
+
+float UStatComponent::GetPureDef() const
+{
+	return Def;
 }
 
 const FString& UStatComponent::GetCharacterName() const
