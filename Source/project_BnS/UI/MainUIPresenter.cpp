@@ -34,6 +34,7 @@ void AMainUIPresenter::BindUI()
 		Skill->UI_OnSetIconStep.AddDynamic(this, &AMainUIPresenter::ChangeSkillIconChain);
 		Skill->UI_OnCooldownTick.AddDynamic(this, &AMainUIPresenter::OnCooldownChange);
 		Skill->UI_OnAnimatedSetIcon.AddDynamic(this, &AMainUIPresenter::ChangeSkillIcon);
+		Skill->UI_OnSkillUsable.AddDynamic(this, &AMainUIPresenter::SetSkillUsable);
 	}
 
 	// 보스 UI 바인드 
@@ -99,7 +100,7 @@ void AMainUIPresenter::OnNicknameChange(const FString& nickname) const
 	MainUI->SetNickname(nickname);
 }
 
-void AMainUIPresenter::OnLevelChange(int level) const
+void AMainUIPresenter::OnLevelChange(int32 level) const
 {
 	if (MainUI == nullptr)
 		return;
@@ -123,7 +124,7 @@ void AMainUIPresenter::OnTargetChange(const FVector2D& center, const FVector2D& 
 	MainUI->SetTargetBox(center, size);
 }
 
-void AMainUIPresenter::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void AMainUIPresenter::ChangeSkillIcon(int32 index, UTexture2D* prevTexture, UTexture2D* texture)
 {
 	if(MainUI == nullptr)
 		return;
@@ -131,7 +132,7 @@ void AMainUIPresenter::ChangeSkillIcon(int index, UTexture2D* prevTexture, UText
 	MainUI->ChangeSkillIcon(index, prevTexture, texture);
 }
 
-void AMainUIPresenter::ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void AMainUIPresenter::ChangeSkillIconChain(int32 index, UTexture2D* prevTexture, UTexture2D* texture)
 {
 	if(MainUI == nullptr)
 		return;
@@ -139,7 +140,7 @@ void AMainUIPresenter::ChangeSkillIconChain(int index, UTexture2D* prevTexture, 
 	MainUI->ChangeSkillIconChain(index, prevTexture, texture);
 }
 
-void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)
+void AMainUIPresenter::SetSkillIcon(int32 index, UTexture2D* texture)
 {
 	if (MainUI == nullptr)
 		return;
@@ -147,12 +148,20 @@ void AMainUIPresenter::SetSkillIcon(int index, UTexture2D* texture)
 	MainUI->SetSkillIcon(index, texture);
 }
 
-void AMainUIPresenter::OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum)
+void AMainUIPresenter::OnCooldownChange(int32 index, float remain, float cooldown, bool isVisibleNum)
 {
 	if (MainUI == nullptr)
 		return;
 
 	MainUI->SetSkillCooldown(index, remain, cooldown, isVisibleNum);
+}
+
+void AMainUIPresenter::SetSkillUsable(int32 index, bool isUsable)
+{
+	if (MainUI == nullptr)
+		return;
+
+	MainUI->SetSkillUsable(index, isUsable);
 }
 
 void AMainUIPresenter::OnBossInfoChange(UStatComponent* status, int32 activateCCCount, float distance)

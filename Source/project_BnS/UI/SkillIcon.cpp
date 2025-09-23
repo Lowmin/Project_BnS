@@ -88,12 +88,22 @@ void USkillIcon::SetCooldown(float remain, float cooldown, bool isVisibleNum)
 
 	if (remainTime == 0)
 	{
-		Block->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
-		Block->SetVisibility(ESlateVisibility::Visible);
-
 		UmatInstance->SetScalarParameterValue(TEXT("Progress"), remain / cooldown);
+	}
+
+	Block->SetVisibility((bIsUsable && remainTime == 0) ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+}
+
+void USkillIcon::SetSkillUsable(bool isUsable)
+{
+	bIsUsable = isUsable;
+
+	Block->SetVisibility(bIsUsable ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+	if(!bIsUsable)
+	{
+		UmatInstance->SetScalarParameterValue(TEXT("Progress"), 1.0f);
 	}
 }

@@ -96,7 +96,7 @@ void UMainUi::SetNickname(const FString& nickname)
 	NicknameText->SetText(FText::FromString(nickname));
 }
 
-void UMainUi::SetLevel(int level)
+void UMainUi::SetLevel(int32 level)
 {
 	LevelText->SetText(FText::AsNumber(level));
 }
@@ -110,24 +110,29 @@ void UMainUi::SetTargetBox(FVector2D center, FVector2D size)
 	TargetSlot->SetSize(size);	
 }
 
-void UMainUi::ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void UMainUi::ChangeSkillIcon(int32 index, UTexture2D* prevTexture, UTexture2D* texture)
 {
 	SkillIcons[index]->ChangeSkillIcon(prevTexture, texture);
 }
 
-void UMainUi::ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture)
+void UMainUi::ChangeSkillIconChain(int32 index, UTexture2D* prevTexture, UTexture2D* texture)
 {
 	SkillIcons[index]->ChangeSkillIconChain(prevTexture, texture);
 }
 
-void UMainUi::SetSkillIcon(int index, UTexture2D* texture)
+void UMainUi::SetSkillIcon(int32 index, UTexture2D* texture)
 {
 	SkillIcons[index]->SetIcon(texture);
 }
 
-void UMainUi::SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum)
+void UMainUi::SetSkillCooldown(int32 index, float remain, float cooldown, bool isVisibleNum)
 {
 	SkillIcons[index]->SetCooldown(remain, cooldown, isVisibleNum);
+}
+
+void UMainUi::SetSkillUsable(int32 index, bool isUsable)
+{
+	SkillIcons[index]->SetSkillUsable(isUsable);
 }
 
 void UMainUi::SetBossInfo(const UStatComponent* status, int32 activateCCCount, float distance)

@@ -104,19 +104,19 @@ public:
 	void SetNickname(const FString& nickname);
 
 	UFUNCTION(BlueprintCallable)
-	void SetLevel(int level);
+	void SetLevel(int32 level);
 
 	UFUNCTION(BlueprintCallable)
 	void SetTargetBox(FVector2D center, FVector2D size);
 
 	UFUNCTION()
-	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
+	void ChangeSkillIcon(int32 index, UTexture2D* prevTexture, UTexture2D* texture);
 	
     UFUNCTION()
-    void ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture);
+    void ChangeSkillIconChain(int32 index, UTexture2D* prevTexture, UTexture2D* texture);
 
 	UFUNCTION()
-	void SetSkillIcon(int index, UTexture2D* texture);
+	void SetSkillIcon(int32 index, UTexture2D* texture);
 	/// <summary>
 	/// 스킬 쿨타임 표시 <br/>
 	/// </summary>
@@ -128,7 +128,10 @@ public:
 	/// <param name="cooldown"> 총 쿨타임 시간 </param>
 	/// <param name="isVisibleNum"> 쿨타임 숫자 노출 여부  </param>
 	UFUNCTION()
-	void SetSkillCooldown(int index, float remain, float cooldown, bool isVisibleNum);
+	void SetSkillCooldown(int32 index, float remain, float cooldown, bool isVisibleNum);
+	
+	UFUNCTION()
+	void SetSkillUsable(int32 index, bool isUsable);
 
 	// Boss Info
 	void SetBossInfo(const class UStatComponent* status, int32 activateCCCount, float distance);

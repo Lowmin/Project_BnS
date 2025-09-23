@@ -19,6 +19,7 @@ class PROJECT_BNS_API USkillIcon : public UUserWidget
 
 private:
 	float ChangeProgress = 1.0f;
+	bool bIsUsable = true;
 
 protected:
 	virtual void NativeConstruct() override;
@@ -59,4 +60,5 @@ public:
 	void ChangeSkillIconChain(UTexture2D* prevTexture, UTexture2D* texture);
 	void SetIcon(UTexture2D* texture);
 	void SetCooldown(float remain, float cooldown, bool isVisibleNum);
+	void SetSkillUsable(bool isUsable);
 };

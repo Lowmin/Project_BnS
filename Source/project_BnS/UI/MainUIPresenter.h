@@ -41,7 +41,7 @@ public:
 
 	void OnNicknameChange(const FString& nickname) const;
  	UFUNCTION()
-	void OnLevelChange(int level) const;
+	void OnLevelChange(int32 level) const;
  	UFUNCTION()
 	void OnExpChange(float current, float max) const;
 
@@ -50,9 +50,9 @@ public:
 	// Skill 
 
  	UFUNCTION()
- 	void ChangeSkillIcon(int index, UTexture2D* prevTexture, UTexture2D* texture);
+ 	void ChangeSkillIcon(int32 index, UTexture2D* prevTexture, UTexture2D* texture);
 	UFUNCTION()
- 	void ChangeSkillIconChain(int index, UTexture2D* prevTexture, UTexture2D* texture);
+ 	void ChangeSkillIconChain(int32 index, UTexture2D* prevTexture, UTexture2D* texture);
  	
 	/// <summary>
 	/// 스킬 아이콘 변경 
@@ -62,7 +62,7 @@ public:
 	/// ㄴ1 : 1번스킬</param>
 	/// <param name="texture"> 스킬 아이콘 텍스쳐 </param>
 	UFUNCTION()
-	void SetSkillIcon(int index, UTexture2D* texture);
+	void SetSkillIcon(int32 index, UTexture2D* texture);
 	/// <summary>
 	/// 스킬 쿨타임 표시
 	/// </summary>
@@ -74,7 +74,9 @@ public:
 	/// <param name="cooldown"> 총 쿨타임 시간 </param>
 	/// <param name="isVisibleNum"> 쿨타임 숫자 노출 여부 </param>
 	UFUNCTION()
-	void OnCooldownChange(int index, float remain, float cooldown, bool isVisibleNum);
+	void OnCooldownChange(int32 index, float remain, float cooldown, bool isVisibleNum);
+	UFUNCTION()
+	void SetSkillUsable(int32 index, bool isUsable);
 
 
 	// BossInfo
