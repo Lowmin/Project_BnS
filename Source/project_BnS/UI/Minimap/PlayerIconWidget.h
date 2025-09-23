@@ -18,7 +18,10 @@ class PROJECT_BNS_API UPlayerIconWidget : public UUserWidget
 
 public:
 	UFUNCTION()
-	void UpdateRotation(float PlayerTargetAngle);
+	void SetPlayerIconRotation(float PlayerTargetAngle);
+
+	UFUNCTION()
+	void SetPlayerIconPosition(const FVector2D& ScreenOffset);
 
 protected:
 	virtual void NativeConstruct() override;

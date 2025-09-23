@@ -15,10 +15,11 @@ void UMinimapWidget::NativeConstruct()
 	}
 }
 
-void UMinimapWidget::SetMapPosition(const FVector2D& MapCenterUV)
+void UMinimapWidget::SetMinimap(const FVector2D& ClampedMapCenterUV, float CurrentZoom)
 {
 	if (MinimapMaterialInst)
 	{
-		MinimapMaterialInst->SetVectorParameterValue(FName("PlayerPositionUV"), FLinearColor(MapCenterUV.X, MapCenterUV.Y, 0.f, 0.f));
+		MinimapMaterialInst->SetVectorParameterValue(FName("PlayerPositionUV"), FLinearColor(ClampedMapCenterUV.X, ClampedMapCenterUV.Y, 0.f, 0.f));
+		MinimapMaterialInst->SetScalarParameterValue(FName("Zoom"), CurrentZoom);
 	}
 }

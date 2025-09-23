@@ -139,14 +139,18 @@ void ABnsController::OnPossess(APawn* pawn)
 			UMinimapWidget* MinimapView = MainUi->GetMinimapWidget();
 			UPlayerIconWidget* PlayerIcon = MainUi->GetPlayerIconWidget();
 
-			MinimapPresenter->OnMapPositionUpdated.AddDynamic(MinimapView, &UMinimapWidget::SetMapPosition);
-			MinimapPresenter->OnPlayerRotationUpdated.AddDynamic(PlayerIcon, &UPlayerIconWidget::UpdateRotation);
+			MinimapPresenter->OnMapPositionUpdated.AddDynamic(MinimapView, &UMinimapWidget::SetMinimap);
+			MinimapPresenter->OnPlayerRotationUpdated.AddDynamic(PlayerIcon, &UPlayerIconWidget::SetPlayerIconRotation);
+			MinimapPresenter->OnPlayerIconOffsetUpdated.AddDynamic(PlayerIcon, &UPlayerIconWidget::SetPlayerIconPosition);
 
 			FVector2D MapWorldOrigin;
 			FVector2D MapWorldSize;
 			MapBoundary->GetMapBounds(MapWorldOrigin, MapWorldSize);
 
-			MinimapPresenter->Init(player, MapWorldOrigin, MapWorldSize);
+			// 미니맵 위젯 크기
+			const FVector2D MinimapScreenSize(300.0f, 300.0f);
+
+			MinimapPresenter->Init(player, MapWorldOrigin, MapWorldSize, MinimapScreenSize);
 		}
 	}
 

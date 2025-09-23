@@ -4,9 +4,14 @@
 #include "PlayerIconWidget.h"
 #include "Components/Image.h"
 
-void UPlayerIconWidget::UpdateRotation(float PlayerTargetAngle)
+void UPlayerIconWidget::SetPlayerIconRotation(float PlayerTargetAngle)
 {
 	TargetRotationAngle = PlayerTargetAngle - 90.0f;
+}
+
+void UPlayerIconWidget::SetPlayerIconPosition(const FVector2D& ScreenOffset)
+{
+	SetRenderTranslation(ScreenOffset * 1.f);
 }
 
 void UPlayerIconWidget::NativeConstruct()

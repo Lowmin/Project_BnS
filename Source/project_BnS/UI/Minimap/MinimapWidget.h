@@ -21,7 +21,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION()
-	void SetMapPosition(const FVector2D& MapCenterUV);
+	void SetMinimap(const FVector2D& ClampedMapCenterUV, float CurrentZoom);
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
