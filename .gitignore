@@ -102,3 +102,5 @@ Plugins/**/Intermediate/*
 
 # Rider
 .idea
+
+/Content/mountainTemple/*
