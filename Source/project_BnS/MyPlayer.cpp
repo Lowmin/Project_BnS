@@ -20,7 +20,7 @@
 
 #include "Inventory/InventoryComponent.h"
 #include "Inventory/InteractableInterface.h"
-// #include "UI/LootPopupWidget.h"
+#include "Inventory/LootPopupWidget.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -318,30 +318,26 @@ UInventoryComponent* AMyPlayer::GetInventoryComponent()
     return InventoryComponent;
 }
 
-void AMyPlayer::ShowLootPopup(const TArray<FDropItemInfo>& Items)
+void AMyPlayer::ShowLootPopup(const TArray<FDropItemInfo>& Items, ALootBox* LootBox)
 {
-    //if (!LootPopupWidgetClass) return;
+    if (!LootPopupWidgetClass) return;
 
-    //// 위젯 생성
-    //ULootPopupWidget* LootWidget = CreateWidget<ULootPopupWidget>(GetWorld(), LootPopupWidgetClass);
-    //if (LootWidget)
-    //{
-    //    // 위젯에 아이템 정보를 전달하여 슬롯들을 채웁니다.
-    //    LootWidget->PopulateItems(Items);
+    ULootPopupWidget* LootWidget = CreateWidget<ULootPopupWidget>(GetWorld(), LootPopupWidgetClass);
+    if (LootWidget)
+    {
+        LootWidget->PopulateItems(Items, LootBox);
 
-    //    // 뷰포트에 추가
-    //    LootWidget->AddToViewport();
+        LootWidget->AddToViewport();
 
-    //    // 마우스 커서를 보이게 하고, 게임 입력을 막고 UI에만 입력이 가도록 설정
-    //    APlayerController* PC = GetController<APlayerController>();
-    //    if (PC)
-    //    {
-    //        PC->SetShowMouseCursor(true);
-    //        FInputModeUIOnly InputMode;
-    //        InputMode.SetWidgetToFocus(LootWidget->TakeWidget());
-    //        PC->SetInputMode(InputMode);
-    //    }
-    //}
+        APlayerController* PC = GetController<APlayerController>();
+        if (PC)
+        {
+            PC->SetShowMouseCursor(true);
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(LootWidget->TakeWidget());
+            PC->SetInputMode(InputMode);
+        }
+    }
 }
 
 void AMyPlayer::Interact()

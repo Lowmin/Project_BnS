@@ -161,9 +161,12 @@ private:
     UPROPERTY()
     TArray<AActor*> OverlappingInteractables;
 
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<class UUserWidget> LootPopupWidgetClass;
+
 public:
     UInventoryComponent* GetInventoryComponent();
-    void ShowLootPopup(const TArray<FDropItemInfo>& Items);
+    void ShowLootPopup(const TArray<FDropItemInfo>& Items, class ALootBox* LootBox);
 
     UPROPERTY(BlueprintAssignable)
     FOnInteractableChanged OnInteractableChanged;

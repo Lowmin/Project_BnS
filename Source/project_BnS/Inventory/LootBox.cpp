@@ -32,7 +32,7 @@ void ALootBox::OnInteract_Implementation(AActor* Interactor)
 	AMyPlayer* Player = Cast<AMyPlayer>(Interactor);
 	if (Player)
 	{
-		Player->ShowLootPopup(ContainedItems);
+		Player->ShowLootPopup(ContainedItems, this);
 
 		SetActorEnableCollision(false);
 	}

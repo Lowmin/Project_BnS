@@ -15,6 +15,7 @@
  */
 
 class USphereComponent;
+class ALootBox;
 
 UCLASS()
 class PROJECT_BNS_API AEnemy : public ACharacterBase, public ITargetAble
@@ -43,6 +44,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Animation")
 	TMap<ECrowdControlType, UAnimMontage*> CCMontages;
+
+	UPROPERTY(EditAnywhere, Category = "Loot")
+	TSubclassOf<ALootBox> LootBoxClass;
 
 	UFUNCTION()
 	virtual void CCApplied();

@@ -40,4 +40,7 @@ struct PROJECT_BNS_API FEnemyData : public FTableRowBase
 	// 몬스터 별 행동을 담는 비헤이비어 트리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBehaviorTree> BehaviorTree;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName LootTableRowName;
 };

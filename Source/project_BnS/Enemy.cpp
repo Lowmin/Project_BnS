@@ -11,6 +11,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayer.h"
+#include "Inventory/LootBox.h"
+#include "Inventory/ItemLootData.h"
 
 #include "Components/CapsuleComponent.h"
 
@@ -135,10 +137,28 @@ void AEnemy::Die()
 	{
 		if (EnemyDataHandle.DataTable)
 		{
-			const FEnemyData* Data = EnemyDataHandle.DataTable->FindRow<FEnemyData>(EnemyDataHandle.RowName, TEXT(""));
-			if (Data && Data->D_ExpValue > 0)
+			const FEnemyData* EnemyData = EnemyDataHandle.DataTable->FindRow<FEnemyData>(EnemyDataHandle.RowName, TEXT(""));
+			UDataTable* LootTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/DT_LootTable.DT_LootTable"));
+
+			if (EnemyData && LootTable && !EnemyData->LootTableRowName.IsNone())
 			{
-				Player->AddExp(Data->D_ExpValue);
+				const FLootTableRow* LootRow = LootTable->FindRow<FLootTableRow>(EnemyData->LootTableRowName, TEXT(""));
+				if (LootRow)
+				{
+					if (LootBoxClass)
+					{
+						ALootBox* Box = GetWorld()->SpawnActor<ALootBox>(LootBoxClass, GetActorLocation(), GetActorRotation());
+						if (Box)
+						{
+							Box->ContainedItems = LootRow->DropItems;
+						}
+					}
+
+					if (EnemyData->D_ExpValue > 0)
+					{
+						Player->AddExp(EnemyData->D_ExpValue);
+					}
+				}
 			}
 		}
 	}
