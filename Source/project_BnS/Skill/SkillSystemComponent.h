@@ -13,6 +13,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUISetIconStep, int32, Index, U
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUICooldownTick, int32, Index, float, Remain, float, Total, bool, isVisibleNum);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUIAnimatedSetIcon, int32, Index, UTexture2D*, PrevIcon, UTexture2D*, NewIcon);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUISkillUsable, int32, Index, bool, bIsUsable);
+
 class UDataTable;
 class USkillSlotController;
 class ASkillBase;
@@ -94,6 +96,8 @@ public:
 	FOnUICooldownTick  UI_OnCooldownTick;
 	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
 	FOnUIAnimatedSetIcon UI_OnAnimatedSetIcon;
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+	FOnUISkillUsable UI_OnSkillUsable;
 
 	UFUNCTION(BlueprintPure, Category = "Skill Debug")
 	int32 GetCurrentSkillID(ESkillSlot Slot) const;
@@ -159,6 +163,9 @@ private:
 	UPROPERTY(Transient)
 	int32 GlobalLockPriority = 0;
 
+	UPROPERTY(Transient)
+	TMap<ESkillSlot, bool> LastSkillUsable;
+
 
 	// ==== 노티파이용 ==== 
 	UPROPERTY(Transient)
@@ -183,6 +190,7 @@ private:
 	ECrowdControlType LastCheckedCCType = ECrowdControlType::None;
 	bool bLastTargetValid = false;
 	int32 LastCheckedStackCount = 0;
+	int32 LastCheckedMP = 0;
 
 	TWeakObjectPtr<UCrowdControlComponent> CheckCC;
 	TWeakObjectPtr<class ABossEnemy> LastCheckedBoss;

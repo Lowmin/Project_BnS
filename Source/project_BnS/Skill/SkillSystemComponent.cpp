@@ -54,85 +54,34 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	ATargetingSystem* OwnerAsTargetingSystem = Cast<ATargetingSystem>(GetOwner());
-	if (!OwnerAsTargetingSystem) return;
+	if (!OwnerAsTargetingSystem || !SlotPanel) return;
 
+	// 1. 현재 상태
 	AActor* CurrentTarget = OwnerAsTargetingSystem->GetTarget();
 	const bool bIsTargetValidNow = IsValid(CurrentTarget);
-
-	bool bNeedsUpdate = false;
-	if (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get())
-	{
-		bNeedsUpdate = true;
-	}
-
-	UCrowdControlComponent* TargetCC = nullptr;
 	ECrowdControlType CurrentCCType = ECrowdControlType::None;
 	int32 CurrentStackCount = 0;
+	int32 CurrentMP = 0;
 
 	if (bIsTargetValidNow)
 	{
-		TargetCC = CurrentTarget->FindComponentByClass<UCrowdControlComponent>();
-		if (TargetCC)
+		if (const UCrowdControlComponent* TargetCC = CurrentTarget->FindComponentByClass<UCrowdControlComponent>())
 		{
 			CurrentCCType = TargetCC->GetCrowdControlType();
 			CurrentStackCount = TargetCC->GetCurrentStack();
-			if (CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount)
-			{
-				bNeedsUpdate = true;
-			}
-		}
-	}
-	else
-	{
-		if (LastCheckedCCType != ECrowdControlType::None || LastCheckedStackCount != 0)
-		{
-			bNeedsUpdate = true;
 		}
 	}
 
-
-	if (bNeedsUpdate)
+	if (CachedStat.IsValid())
 	{
-		// 1. 일반 CC 델리게이트 관리
-		if (TargetCC != CheckCC.Get())
-		{
-			if (CheckCC.IsValid())
-			{
-				CheckCC->OnAppliedCrowdControl.RemoveDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
-				CheckCC->OnRemovedCrowdControl.RemoveDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
-			}
+		CurrentMP = CachedStat->GetCurMp();
+	}
 
-			if (TargetCC)
-			{
-				TargetCC->OnAppliedCrowdControl.AddDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
-				TargetCC->OnRemovedCrowdControl.AddDynamic(this, &USkillSystemComponent::OnTargetCCStateChange);
-			}
+	// 2. 타겟, CC 상태
+	const bool bNeedsFullUpdate = (bIsTargetValidNow != bLastTargetValid || CurrentTarget != LastCheckedTarget.Get() || CurrentCCType != LastCheckedCCType || CurrentStackCount != LastCheckedStackCount);
 
-			CheckCC = TargetCC;
-		}
-
-		// 2. 보스 면역 델리게이트 관리
-		ABossEnemy* CurrentBoss = Cast<ABossEnemy>(CurrentTarget);
-		if (CurrentBoss != LastCheckedBoss.Get())
-		{
-			if (LastCheckedBoss.IsValid())
-			{
-				LastCheckedBoss->OnImmuneStateBegan.RemoveDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
-				LastCheckedBoss->OnImmuneStateEnded.RemoveDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
-			}
-
-			// 새로운 타겟이 보스일 때 델리게이트 연결
-			if (CurrentBoss)
-			{
-				CurrentBoss->OnImmuneStateBegan.AddDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
-				CurrentBoss->OnImmuneStateEnded.AddDynamic(this, &USkillSystemComponent::OnTargetImmuneStateChanged);
-			}
-
-			LastCheckedBoss = CurrentBoss;
-		}
-
-
-		// 3. UI 업데이트 및 상태 캐시
+	if (bNeedsFullUpdate)
+	{
 		UpdateAllSkillDisplays(CurrentTarget);
 
 		LastCheckedTarget = CurrentTarget;
@@ -140,6 +89,28 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		LastCheckedCCType = CurrentCCType;
 		LastCheckedStackCount = CurrentStackCount;
 	}
+	else
+	{
+		// 3. 스킬 사용 가능/불가능 여부
+		for (const auto& Pair : BaseSkillConfig)
+		{
+			ESkillSlot Slot = Pair.Key;
+			const int32 CurrentSkillID = SlotPanel->GetCurrentSkillID(Slot);
+			if (CurrentSkillID <= 0) continue;
+
+			const FSkillDataRow* Row = FindRowByID(CurrentSkillID);
+			const bool bIsCurrentlyUsable = (Row && CanUseSkill(*Row, CurrentTarget, false));
+
+			bool& bLastUsability = LastSkillUsable.FindOrAdd(Slot, true);
+			if (bLastUsability != bIsCurrentlyUsable)
+			{
+				UI_OnSkillUsable.Broadcast(SlotToIndex(Slot), bIsCurrentlyUsable);
+				bLastUsability = bIsCurrentlyUsable;
+			}
+		}
+	}
+
+	LastCheckedMP = CurrentMP;
 }
 
 // ========== 외부 API ==========
@@ -343,9 +314,15 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 		if (!Target) return false;
 		if (ABossEnemy* BossTarget = Cast<ABossEnemy>(Target))
 		{
-			if (!BossTarget->GetCCImmune())
+			if (UCrowdControlComponent* TargetCC = BossTarget->GetCrowdControlComponent())
 			{
-				return true;
+				if (TargetCC->IsEffect())
+				{
+					if (Row.NeedTargetCC.Num() == 0 || Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType()))
+					{
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -510,6 +487,17 @@ void USkillSystemComponent::UpdateDisplayForSlot(ESkillSlot Slot, AActor* Target
 
 	const int32 PrevID = SlotPanel->GetCurrentSkillID(Slot);
 	const int32 NextID = ResolveSkillToExecute(Slot, Target);
+
+	const int32 CheckSkillID = (NextID > 0) ? NextID : GetBaseID(Slot);
+	const FSkillDataRow* Row = FindRowByID(CheckSkillID);
+	const bool IsCurrentUsable = (Row && CanUseSkill(*Row, Target, false));
+
+	bool& bLastUsable = LastSkillUsable.FindOrAdd(Slot, true);
+	if (bLastUsable != IsCurrentUsable)
+	{
+		UI_OnSkillUsable.Broadcast(SlotToIndex(Slot), IsCurrentUsable);
+		bLastUsable = IsCurrentUsable;
+	}
 
 	if (PrevID == NextID)
 	{
