@@ -19,6 +19,8 @@
 #include "UI/LevelUpWidget.h"
 
 #include "Inventory/InventoryComponent.h"
+#include "Inventory/InteractableInterface.h"
+// #include "UI/LootPopupWidget.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -45,6 +47,14 @@ AMyPlayer::AMyPlayer()
     BossSensor->SetupAttachment(RootComponent);
 
     InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+
+    InteractionRange = CreateDefaultSubobject<USphereComponent>(TEXT("InteractionRange"));
+    InteractionRange->SetupAttachment(RootComponent);
+    InteractionRange->SetSphereRadius(250.f);
+    InteractionRange->SetCollisionProfileName(TEXT("InteractionSensor"));
+
+    InteractionRange->OnComponentBeginOverlap.AddDynamic(this, &AMyPlayer::OnInteractionRangeOverlapBegin);
+    InteractionRange->OnComponentEndOverlap.AddDynamic(this, &AMyPlayer::OnInteractionRangeOverlapEnd);
 }
 
 void AMyPlayer::BeginPlay()
@@ -105,6 +115,8 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
         EnhancedPlayerInputComponent->BindAction(IA_Slot_Four, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 4);	// 4 -> Slot4
         EnhancedPlayerInputComponent->BindAction(IA_Slot_Q, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 5);	// Q -> Slot5
         EnhancedPlayerInputComponent->BindAction(IA_Slot_E, ETriggerEvent::Started, this, &AMyPlayer::HandleSkillInput, 6);	// E -> Slot6
+   
+        EnhancedPlayerInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &AMyPlayer::Interact);
     }
 }
 
@@ -304,4 +316,83 @@ float AMyPlayer::GetMaxExp() const
 UInventoryComponent* AMyPlayer::GetInventoryComponent()
 {
     return InventoryComponent;
+}
+
+void AMyPlayer::ShowLootPopup(const TArray<FDropItemInfo>& Items)
+{
+    //if (!LootPopupWidgetClass) return;
+
+    //// 위젯 생성
+    //ULootPopupWidget* LootWidget = CreateWidget<ULootPopupWidget>(GetWorld(), LootPopupWidgetClass);
+    //if (LootWidget)
+    //{
+    //    // 위젯에 아이템 정보를 전달하여 슬롯들을 채웁니다.
+    //    LootWidget->PopulateItems(Items);
+
+    //    // 뷰포트에 추가
+    //    LootWidget->AddToViewport();
+
+    //    // 마우스 커서를 보이게 하고, 게임 입력을 막고 UI에만 입력이 가도록 설정
+    //    APlayerController* PC = GetController<APlayerController>();
+    //    if (PC)
+    //    {
+    //        PC->SetShowMouseCursor(true);
+    //        FInputModeUIOnly InputMode;
+    //        InputMode.SetWidgetToFocus(LootWidget->TakeWidget());
+    //        PC->SetInputMode(InputMode);
+    //    }
+    //}
+}
+
+void AMyPlayer::Interact()
+{
+    if (OverlappingInteractables.Num() == 0) return;
+
+    AActor* ClosestActor = nullptr;
+    float MinDistanceSq = -1.f;
+
+    const FVector MyLocation = GetActorLocation();
+
+    for (AActor* Interactable : OverlappingInteractables)
+    {
+        if (Interactable)
+        {
+            float DistanceSq = FVector::DistSquared(MyLocation, Interactable->GetActorLocation());
+            if (MinDistanceSq < 0 || DistanceSq < MinDistanceSq)
+            {
+                MinDistanceSq = DistanceSq;
+                ClosestActor = Interactable;
+            }
+        }
+    }
+
+    if (ClosestActor)
+    {
+        IInteractableInterface::Execute_OnInteract(ClosestActor, this);
+    }
+}
+
+void AMyPlayer::OnInteractionRangeOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UInteractableInterface::StaticClass()))
+    {
+        if (OverlappingInteractables.Num() == 0)
+        {
+            OnInteractableChanged.Broadcast(true);
+        }
+        OverlappingInteractables.Add(OtherActor);
+    }
+}
+
+void AMyPlayer::OnInteractionRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UInteractableInterface::StaticClass()))
+    {
+        OverlappingInteractables.Remove(OtherActor);
+
+        if (OverlappingInteractables.Num() == 0)
+        {
+            OnInteractableChanged.Broadcast(false);
+        }
+    }
 }

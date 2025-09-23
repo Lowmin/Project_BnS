@@ -8,11 +8,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Inventory/ItemLootData.h"
 #include "MyPlayer.generated.h"
 
 class UParticleSystem;
 class USoundBase;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractableChanged, bool, bIsInteractable);
 DECLARE_DELEGATE_TwoParams(FDele_Single_FF, float, float);
 DECLARE_DELEGATE_RetVal(bool, FIsUIVisible);
 DECLARE_DELEGATE(FOnMovementInput);
@@ -75,6 +77,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category = Input)
     class UInputAction* IA_Slot_E;              // E
+
+    UPROPERTY(EditAnywhere, Category = Input)
+    class UInputAction* IA_Interact;
 
 protected:
     virtual void BeginPlay() override;
@@ -147,7 +152,28 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TObjectPtr<class UInventoryComponent> InventoryComponent;
 
+    UPROPERTY()
+    TWeakObjectPtr<AActor> CurrentInteractable;
+
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<USphereComponent> InteractionRange;
+
+    UPROPERTY()
+    TArray<AActor*> OverlappingInteractables;
+
 public:
     UInventoryComponent* GetInventoryComponent();
+    void ShowLootPopup(const TArray<FDropItemInfo>& Items);
 
+    UPROPERTY(BlueprintAssignable)
+    FOnInteractableChanged OnInteractableChanged;
+
+protected:
+        void Interact();
+
+        UFUNCTION()
+        void OnInteractionRangeOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+        UFUNCTION()
+        void OnInteractionRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };
