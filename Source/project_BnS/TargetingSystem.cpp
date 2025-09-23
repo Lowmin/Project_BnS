@@ -119,6 +119,11 @@ void ATargetingSystem::RemoveCurrentTarget()
 	{
 		OnTargetBoxChange.Execute(FVector2D::ZeroVector, FVector2D(100.0f, 100.0f));
 	}
+
+	if (OnTargetChanged.IsBound())
+	{
+		OnTargetChanged.Broadcast(Cast<ACharacterBase>(Target));
+	}
 }
 
 void ATargetingSystem::SetCurTarget()
@@ -147,11 +152,16 @@ void ATargetingSystem::SetCurTarget()
 			if (!IsTargetBlocked(targetPos))
 			{
 				distance = distSqrt;
-				const ACharacterBase* characterBase = Cast<ACharacterBase>(targetAble);
+				ACharacterBase* characterBase = Cast<ACharacterBase>(targetAble);
 				if (characterBase != nullptr)
 				{
 					Target = targetAble;
 					ITargetAble::Execute_OnTargeted(Target, true);
+
+					if (OnTargetChanged.IsBound())
+					{
+						OnTargetChanged.Broadcast(characterBase);
+					}
 				}
 			}
 		}

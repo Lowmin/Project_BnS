@@ -8,6 +8,7 @@
 #include "TargetingSystem.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FDele_Single_TargetBox, const FVector2D&, const FVector2D&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Single_TargetChanged, class ACharacterBase*, Target);
 
 
 UCLASS()
@@ -60,6 +61,7 @@ private:
 
 public:
 	FDele_Single_TargetBox OnTargetBoxChange;
+	FDele_Single_TargetChanged OnTargetChanged;
 
 	/// <summary>
 	/// 현재 조준한 타겟 존재 여부 
