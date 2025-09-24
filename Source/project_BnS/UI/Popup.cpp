@@ -16,6 +16,19 @@ void UPopup::NativeOnInitialized()
 void UPopup::ClosePopup()
 {
     SetVisiblePopup(false);
+
+    if (OnClosePopup.IsBound())
+    {
+        OnClosePopup.Execute(this);
+    }
+}
+
+
+void UPopup::SetPopupDesireInfo(FVector2D position, FVector2D size, bool isSetContentSize)
+{
+    PopupPosition = position;
+    PopupSize = size;
+    bIsSetContentSize = isSetContentSize;
 }
 
 void UPopup::SetVisiblePopup(bool isVisible)
@@ -28,4 +41,19 @@ void UPopup::SetVisiblePopup(bool isVisible)
     {
         SetVisibility(ESlateVisibility::Hidden);
     }
+}
+
+FVector2D UPopup::GetPopupPosition() const
+{
+    return PopupPosition;
+}
+
+FVector2D UPopup::GetPopupSize() const
+{
+    return PopupSize;
+}
+
+bool UPopup::IsSetContentSize() const
+{
+    return bIsSetContentSize;
 }

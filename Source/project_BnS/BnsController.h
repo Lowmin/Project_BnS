@@ -30,6 +30,9 @@ private:
 	TObjectPtr<class UMainUi> MainUi = nullptr;
 
 	UPROPERTY()
+	TSubclassOf<class UPopupManager> PopupManagerClass = nullptr;
+
+	UPROPERTY()
 	TSubclassOf<class UUserWidget> InventoryClass = nullptr;
 
 	UPROPERTY()

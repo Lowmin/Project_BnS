@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Blueprint/UserWidget.h"
 #include "PopupManager.generated.h"
 
 class UPopup;
@@ -19,18 +19,23 @@ enum class EPopupType : uint8
 };
 
 UCLASS()
-class PROJECT_BNS_API UPopupManager : public UObject
+class PROJECT_BNS_API UPopupManager : public UUserWidget
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UCanvasPanel> Root = nullptr;
+
 public:
 	void Initialize(APlayerController* InController);
-	UPopup* RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> PopupClass);
+	UPopup* RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> PopupClass, FVector2D Position, FVector2D Size, bool bIsSetContentSize);
 	void TogglePopup(EPopupType PopupType);
 	bool IsPopupVisible();
 	void ClosePopup();
 
 private:
+	void OnPopupClosed(UPopup* popup);
 	void SetInputMode();
 
 private:

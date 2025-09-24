@@ -31,6 +31,12 @@ ABnsController::ABnsController()
 		MainUiClass = res.Class;
 	}
 
+	static ConstructorHelpers::FClassFinder<UPopupManager> popupManagerClass(TEXT("/Game/UI/WBP_PopupManager.WBP_PopupManager_C"));
+	if (popupManagerClass.Succeeded())
+	{
+		PopupManagerClass = popupManagerClass.Class;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> iaInventory(TEXT("/Game/Input/IA_Inventory.IA_Inventory"));
 	if (iaInventory.Succeeded())
 	{
@@ -109,15 +115,20 @@ void ABnsController::OnPossess(APawn* pawn)
 	UIPresenter->OnNicknameChange(player->GetCharacterName());
 	UIPresenter->OnBattleChange(false);
 
-	PopupManager = NewObject<UPopupManager>(this, TEXT("PopupManager"));
-	PopupManager->Initialize(this);
+	if (PopupManagerClass != nullptr)
+	{
+		PopupManager = CreateWidget<UPopupManager>(this, PopupManagerClass);
+		PopupManager->AddToViewport();
+		PopupManager->Initialize(this);
+	}
+	// PopupManager = NewObject<UPopupManager>(this, TEXT("PopupManager"));
 
 	MyPlayer->OnMovementInput.BindUObject(this, &ABnsController::OnMovementInputReceived);
 	MyPlayer->IsUIVisibleDelegate.BindUObject(this, &ABnsController::IsPopupVisible);
 
 	if (InventoryPopupClass && IA_Inventory)
 	{
-		UInventoryPopup* InventoryPopup = Cast<UInventoryPopup>(PopupManager->RegisterPopup(EPopupType::Inventory, InventoryPopupClass));
+		UInventoryPopup* InventoryPopup = Cast<UInventoryPopup>(PopupManager->RegisterPopup(EPopupType::Inventory, InventoryPopupClass, FVector2D(700.0f, 150.0f), FVector2D(958.0f, 782.0f), true));
 
 		if (InventoryPopup)
 		{
@@ -157,12 +168,12 @@ void ABnsController::OnPossess(APawn* pawn)
 	// 월드맵 팝업 등록
 	if (WorldMapPopupClass)
 	{
-		PopupManager->RegisterPopup(EPopupType::WorldMap, WorldMapPopupClass);
+		PopupManager->RegisterPopup(EPopupType::WorldMap, WorldMapPopupClass, FVector2D::ZeroVector, FVector2D::ZeroVector, false);
 	}
 
 	if (CharacterInfoPopupClass)
 	{
-		PopupManager->RegisterPopup(EPopupType::CharacterInfo, CharacterInfoPopupClass);
+		PopupManager->RegisterPopup(EPopupType::CharacterInfo, CharacterInfoPopupClass, FVector2D(944.0f, 92.0f), FVector2D(500.0f, 800.0f), false);
 	}
 }
 

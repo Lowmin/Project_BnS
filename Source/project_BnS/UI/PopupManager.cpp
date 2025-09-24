@@ -5,21 +5,31 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
 #include "Popup.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 
 void UPopupManager::Initialize(APlayerController* InController)
 {
 	MyController = InController;
 }
 
-UPopup* UPopupManager::RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> PopupClass)
+UPopup* UPopupManager::RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> PopupClass, FVector2D Position, FVector2D Size, bool bIsSetContentSize)
 {
 	if (!MyController.IsValid() || !PopupClass || PopupType == EPopupType::None || RegisteredPopup.Contains(PopupType)) return nullptr;
 
 	UPopup* NewPopup = CreateWidget<UPopup>(MyController.Get(), PopupClass, FName(*UEnum::GetValueAsString(PopupType)));
 	if (NewPopup)
 	{
-		NewPopup->AddToViewport();
+		NewPopup->SetPopupDesireInfo(Position, Size, bIsSetContentSize);
+
+		// NewPopup->AddToViewport();
+		auto slot = Root->AddChildToCanvas(NewPopup);
+		slot->SetPosition(NewPopup->GetPopupPosition());
+		slot->SetSize(NewPopup->GetPopupSize());
+		slot->SetAutoSize(NewPopup->IsSetContentSize());
+		
 		NewPopup->SetVisibility(ESlateVisibility::Hidden);
+		NewPopup->OnClosePopup.BindUObject(this, &UPopupManager::OnPopupClosed);
 		RegisteredPopup.Add(PopupType, NewPopup);
 		return NewPopup;
 	}
@@ -41,7 +51,11 @@ void UPopupManager::TogglePopup(EPopupType PopupType)
 	{
 		VisiblePopupStack.AddUnique(PopupToToggle);
 		PopupToToggle->RemoveFromParent();
-		PopupToToggle->AddToViewport(++CurrentTopZOrder);
+		//PopupToToggle->AddToViewport(++CurrentTopZOrder);
+		auto slot = Root->AddChildToCanvas(PopupToToggle);
+		slot->SetPosition(PopupToToggle->GetPopupPosition());
+		slot->SetSize(PopupToToggle->GetPopupSize());
+		slot->SetAutoSize(PopupToToggle->IsSetContentSize());
 	}
 	else
 	{
@@ -71,6 +85,16 @@ void UPopupManager::ClosePopup()
 
 	VisiblePopupStack.Empty();
 	SetInputMode();
+}
+
+void UPopupManager::OnPopupClosed(UPopup* popup)
+{
+	if (!VisiblePopupStack.Contains(popup))
+		return;
+
+	VisiblePopupStack.Remove(popup);
+	SetInputMode();
+
 }
 
 void UPopupManager::SetInputMode()
