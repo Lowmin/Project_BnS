@@ -14,6 +14,9 @@ class PROJECT_BNS_API UItemInfo : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	UItemInfo(const FObjectInitializer& ObjectInitializer);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> TextItemName = nullptr;
@@ -26,6 +29,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> TextDescript= nullptr;
 
+	UPROPERTY()
+	TObjectPtr<UTexture2D> TextureJewelSlot = nullptr;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UHorizontalBox> JewelRoot = nullptr;
 	UPROPERTY(meta=(BindWidget))

@@ -144,7 +144,7 @@ void UInventoryComponent::ParsingWeaponData()
 
 void UInventoryComponent::ParsingJewelData()
 {
-	if (!EquipDataTable)
+	if (!JewelDataTable)
 		return;
 
 	// Load the UDataTable
@@ -428,6 +428,17 @@ void UInventoryComponent::UseUsableItem(int32 inventoryIdx, UUsableItem* usableI
 		return;
 
 	BuffComponent->AddBuff(SelfTarget.Get(), usableItem->BuffID);
+	--usableItem->Count;
+
+	if (usableItem->Count <= 0)
+	{
+		RemoveItem(inventoryIdx);
+	}
+
+	if (OnItemSlotChanged.IsBound())
+	{
+		OnItemSlotChanged.Execute(inventoryIdx, ItemList[inventoryIdx], HighlightCategory);
+	}
 }
 
 bool UInventoryComponent::IsEquipAbleSlot(int32 equipIdx) const

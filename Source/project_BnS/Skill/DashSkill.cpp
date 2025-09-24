@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
+#include "../TargetAble.h"
+
 // Sets default values
 ADashSkill::ADashSkill()
 {
@@ -77,7 +79,13 @@ void ADashSkill::ExecuteSkill_Implementation()
 	FVector TargetDirection = (Target->GetActorLocation() - Character->GetActorLocation());
 	TargetDirection.Normalize();
 
-	TargetLocation = Target->GetActorLocation() - (TargetDirection * DashData->StopDistance);
+	float targetSize = 0;
+	if (Target->GetClass()->ImplementsInterface(UTargetAble::StaticClass()))
+	{
+		targetSize = ITargetAble::Execute_GetTargetBoxSize(Target).X;
+	}
+
+	TargetLocation = Target->GetActorLocation() - (TargetDirection * DashData->StopDistance) - (TargetDirection * targetSize);
 
 	bIsDash = true;
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_Flying); // 공중에서도 사용 가능

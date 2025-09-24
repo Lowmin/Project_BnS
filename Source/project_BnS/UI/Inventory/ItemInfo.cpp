@@ -10,6 +10,15 @@
 #include "project_BnS/Inventory/JewelItem.h"
 #include "project_BnS/Inventory/WeaponItem.h"
 
+UItemInfo::UItemInfo(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	static ConstructorHelpers::FObjectFinder<UTexture2D> textureJewelSlot(TEXT("/Game/Image/UI/Inventory/JewelSlotBG.JewelSlotBG"));
+	if (textureJewelSlot.Succeeded())
+	{
+		TextureJewelSlot = textureJewelSlot.Object;
+	}
+}
+
 void UItemInfo::ShowInfo(const UItem* data, const FString& diffText)
 {
 	if (data == nullptr)
@@ -88,7 +97,7 @@ void UItemInfo::SetJewelTexture(UImage* image, UJewelItem* jewelData)
 {
 	if(jewelData == nullptr)
 	{
-		image->SetBrushFromTexture(nullptr);
+		image->SetBrushFromTexture(TextureJewelSlot);
 		return;
 	}
 	
