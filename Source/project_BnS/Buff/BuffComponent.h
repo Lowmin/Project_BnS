@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "BuffData.h"
 #include "BuffComponent.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, const FBuffData&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECT_BNS_API UBuffComponent : public UActorComponent
@@ -56,6 +59,8 @@ private:
 
 public:
 	const TArray<class UBuff*> GetBuffList() const;
+	FBuffSetupDele OnBuffStart;
+	FBuffSetupDele OnBuffFinish;
 
 	/// <summary>
 	/// 버프 추가 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "../CrowdControlType.h"
+#include "project_BnS/Buff/BuffData.h"
 
 #include "MainUIPresenter.generated.h"
 
@@ -44,6 +45,12 @@ public:
 	void OnLevelChange(int32 level) const;
  	UFUNCTION()
 	void OnExpChange(float current, float max) const;
+
+ 	UFUNCTION()
+ 	void OnBuffStart(const FBuffData& data);
+
+ 	UFUNCTION()
+ 	void OnBuffFinish(const FBuffData& data);
 
 	void OnTargetChange(const FVector2D& center, const FVector2D& size) const;
 

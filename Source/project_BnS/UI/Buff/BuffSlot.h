@@ -25,9 +25,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UHorizontalBox> Root = nullptr;
 
-	TArray<class UBuffIcon> BuffIcons;
+	TArray<TObjectPtr<class UBuffIcon>> BuffIcons;
 
 public:
 	void AddBuff(const struct FBuffData& data);
-	void RemoveBuff(const struct FBuddData& data);
+	void RemoveBuff(const struct FBuffData& data);
 };

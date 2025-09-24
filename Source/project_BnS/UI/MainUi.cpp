@@ -13,6 +13,7 @@
 #include "BossInfo.h"
 #include "../StatComponent.h"
 #include "HoverProgressBar.h"
+#include "Buff/BuffSlot.h"
 
 void UMainUi::NativeConstruct()
 {
@@ -174,4 +175,14 @@ UMinimapWidget* UMainUi::GetMinimapWidget() const
 UPlayerIconWidget* UMainUi::GetPlayerIconWidget() const
 {
 	return PlayerIconView;
+}
+
+void UMainUi::BuffStart(const FBuffData& data)
+{
+	BuffSlot->AddBuff(data);
+}
+
+void UMainUi::BuffFinish(const FBuffData& data)
+{
+	BuffSlot->RemoveBuff(data);
 }

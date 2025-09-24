@@ -99,15 +99,19 @@ void UBuffComponent::UpdateBuffDuration(float deltaTime)
 
 		if (bRemove)
 		{
-			//µğ¹ö±×
+			//ë””ë²„ê·¸
 			if (GEngine && target)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Buff ID: %d removed from %s"), buff->GetBuffData().Idx, *target->GetName()));
 			}
-			// ¹öÇÁ Á¾·á µ¨¸®°ÔÀÌÆ®
+			// ë²„í”„ ì¢…ë£Œ ë¸ë¦¬ê²Œì´íŠ¸
 			buff->OnBuffFinish.Broadcast(buff->GetBuffData());
+			if(OnBuffFinish.IsBound())
+			{
+				OnBuffFinish.Broadcast(buff->GetBuffData());
+			}
 
-			// Æ½ ¸®½ºÆ®¿¡ ÀÖ´Â ¹öÇÁ Á¦°Å
+			// í‹± ë¦¬ìŠ¤íŠ¸ì— ìˆëŠ” ë²„í”„ ì œê±°
 			IBuffTick* buffTick = Cast<IBuffTick>(buff);
 			if (buffTick)
 			{
@@ -142,6 +146,11 @@ void UBuffComponent::AddBuff(ACharacterBase* target, int32 buffIdx)
 	if (existingBuff)
 	{
 		existingBuff->RefreshDuration();
+		if(OnBuffStart.IsBound())
+		{
+			OnBuffStart.Broadcast(existingBuff->GetBuffData());
+		}
+		
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("Buff ID: %d Refreshed."), buffIdx));
 	}
 	else
@@ -156,6 +165,10 @@ void UBuffComponent::AddBuff(ACharacterBase* target, int32 buffIdx)
 		BuffList.Add(newBuff);
 
 		newBuff->OnBuffStart.Broadcast(newBuff->GetBuffData());
+		if(OnBuffStart.IsBound())
+		{
+			OnBuffStart.Broadcast(newBuff->GetBuffData());
+		}
 
 		IBuffTick* buffTick = Cast<IBuffTick>(newBuff);
 		if (buffTick)

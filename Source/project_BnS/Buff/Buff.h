@@ -9,7 +9,6 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, const FBuffData&);
 
-
 /**
  * 
  */
@@ -29,9 +28,9 @@ public:
 	const FBuffData& GetBuffData() const;
 	ACharacterBase* GetTarget() const;
 
-	// ³²Àº ½Ã°£ È®ÀÎ (³¡³ª¸é true)
+	// ë‚¨ì€ ì‹œê°„ í™•ì¸ (ëë‚˜ë©´ true)
 	bool CheckTickDuration(float deltaTime);
-	// UI Ç¥½Ã; ³²Àº ½Ã°£
+	// UI í‘œì‹œ; ë‚¨ì€ ì‹œê°„
 	float GetRemainTime() const;
 	void RefreshDuration();
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "../CrowdControlType.h"
+#include "project_BnS/Buff/BuffData.h"
 #include "MainUi.generated.h"
 
 
@@ -78,6 +79,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<class UPlayerIconWidget> PlayerIconView;
 
+	// buff
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UBuffSlot> BuffSlot = nullptr;
+
 public:
 	virtual void NativeConstruct() override;
 	
@@ -143,4 +148,9 @@ public:
 	// Minimap
 	UMinimapWidget* GetMinimapWidget() const;
 	UPlayerIconWidget* GetPlayerIconWidget() const;
+
+	// BUff
+	void BuffStart(const FBuffData& data);
+	void BuffFinish(const FBuffData& data);
+	
 };

@@ -8,6 +8,7 @@
 #include "../StatComponent.h"
 #include "../Skill/SkillSystemComponent.h"
 #include "../BossSensorComponent.h"
+#include "project_BnS/Buff/BuffComponent.h"
 
 void AMainUIPresenter::SetMainUI(UMainUi* ui)
 {
@@ -58,6 +59,13 @@ void AMainUIPresenter::BindUI()
 	}
 	MyPlayer->OnStaminaChange.BindUObject(this, &AMainUIPresenter::OnStaminaChange);
 	MyPlayer->OnExpChange.BindUObject(this, &AMainUIPresenter::OnExpChange);
+
+	// Buff Bind
+	if(UBuffComponent* BuffComponent = MyPlayer->GetBuffComponent())
+	{
+		BuffComponent->OnBuffStart.AddUObject(this, &AMainUIPresenter::OnBuffStart);
+		BuffComponent->OnBuffFinish.AddUObject(this, &AMainUIPresenter::OnBuffFinish);
+	}
 }
 
 void AMainUIPresenter::OnHpChange(float current, float max) const
@@ -114,6 +122,22 @@ void AMainUIPresenter::OnExpChange(float current, float max) const
 		return;
 
 	MainUI->SetExp(current, max);
+}
+
+void AMainUIPresenter::OnBuffStart(const FBuffData& data)
+{
+	if(MainUI == nullptr)
+		return;
+
+	MainUI->BuffStart(data);
+}
+
+void AMainUIPresenter::OnBuffFinish(const FBuffData& data)
+{
+	if(MainUI == nullptr)
+		return;
+
+	MainUI->BuffFinish(data);
 }
 
 void AMainUIPresenter::OnTargetChange(const FVector2D& center, const FVector2D& size) const

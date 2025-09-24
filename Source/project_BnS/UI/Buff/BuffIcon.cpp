@@ -7,18 +7,34 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
+UBuffIcon::UBuffIcon(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	static ConstructorHelpers::FObjectFinder<UMaterial> mat(TEXT("/Game/UI/umatProgressRadial.umatProgressRadial"));
+	if(mat.Succeeded())
+	{
+		UmatBase = mat.Object;
+	}
+}
+
+void UBuffIcon::NativeConstruct()
+{
+	Super::NativeConstruct();
+	
+	UmatInstance = UMaterialInstanceDynamic::Create(UmatBase, this);
+	Block->SetBrushFromMaterial(UmatInstance);
+}
+
 void UBuffIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, "Tick");
-
 	Remain -= InDeltaTime;
 
 	if (Remain < 0)
 	{
+		SetRemain(0, Duration);
 		return;
 	}
 
-
+	SetRemain(Remain, Duration);
 }
 
 void UBuffIcon::SetRemain(float remain, float duration)
@@ -48,10 +64,14 @@ void UBuffIcon::SetBuff(const FBuffData& data)
 {
 	Icon->GetDynamicMaterial()->SetTextureParameterValue(TEXT("Texture"), data.Icon);
 
-
+	BuffID = data.Idx;
 	Duration = data.Duration;
 	Remain = Duration;
 
 	SetRemain(Remain, Duration);
-		
+}
+
+int32 UBuffIcon::GetBuffID() const
+{
+	return BuffID;
 }
