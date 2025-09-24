@@ -1,7 +1,7 @@
 ﻿Raw,ID,ItemName,Category,Rarity,IsStackAble,Icon,Description,Price,DetailCategory,MaxHp,Atk,Def,JewelTexture
-19000001,19000001,홍옥,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000001.icon19000001,,99,Jewel,0,10,0,/Game/Image/Icon/icon19000001.icon19000001
-19000002,19000002,황옥,Equip,Epic,FALSE,/Game/Image/Icon/icon19000002.icon19000002,,99,Jewel,30,,40,/Game/Image/Icon/icon19000002.icon19000002
-19000003,19000003,청옥,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000003.icon19000003,,99,Jewel,0,3,10,/Game/Image/Icon/icon19000003.icon19000003
-19000004,19000004,자수정,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000004.icon19000004,,99,Jewel,100,0,0,/Game/Image/Icon/icon19000004.icon19000004
-19000005,19000005,녹주석,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000005.icon19000005,,99,Jewel,50,5,0,/Game/Image/Icon/icon19000005.icon19000005
-19000006,19000006,금강석,Equip,Epic,FALSE,/Game/Image/Icon/icon19000006.icon19000006,,99,Jewel,0,19,0,/Game/Image/Icon/icon19000006.icon19000006
+19000001,19000001,홍옥,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000001.icon19000001,,99,Jewel,0,10,0,/Game/Image/Item/Jewel/icon19000001.icon19000001
+19000002,19000002,황옥,Equip,Epic,FALSE,/Game/Image/Icon/icon19000002.icon19000002,,99,Jewel,30,,40,/Game/Image/Item/Jewel/icon19000002.icon19000002
+19000003,19000003,청옥,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000003.icon19000003,,99,Jewel,0,3,10,/Game/Image/Item/Jewel/icon19000003.icon19000003
+19000004,19000004,자수정,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000004.icon19000004,,99,Jewel,100,0,0,/Game/Image/Item/Jewel/icon19000004.icon19000004
+19000005,19000005,녹주석,Equip,UnCommon,FALSE,/Game/Image/Icon/icon19000005.icon19000005,,99,Jewel,50,5,0,/Game/Image/Item/Jewel/icon19000005.icon19000005
+19000006,19000006,금강석,Equip,Epic,FALSE,/Game/Image/Icon/icon19000006.icon19000006,,99,Jewel,0,19,0,/Game/Image/Item/Jewel/icon19000006.icon19000006
