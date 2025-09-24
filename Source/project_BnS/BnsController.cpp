@@ -55,7 +55,7 @@ ABnsController::ABnsController()
 		IA_CloseAllPopups = iaCloseAll.Object;
 	}
 
-	static ConstructorHelpers::FClassFinder<UWorldMapPopup> worldmap(TEXT("/Game/UI/WBP_WorldMapPopup.WBP_WorldMapPopup_C"));
+	static ConstructorHelpers::FClassFinder<UWorldMapPopup> worldmap(TEXT("/Game/UI/Minimap/WBP_WorldMapPopup.WBP_WorldMapPopup_C"));
 	if (worldmap.Succeeded())
 	{
 		WorldMapPopupClass = worldmap.Class;
@@ -168,7 +168,18 @@ void ABnsController::OnPossess(APawn* pawn)
 	// 월드맵 팝업 등록
 	if (WorldMapPopupClass)
 	{
-		PopupManager->RegisterPopup(EPopupType::WorldMap, WorldMapPopupClass, FVector2D::ZeroVector, FVector2D::ZeroVector, false);
+		UWorldMapPopup* WorldMapPopup = Cast<UWorldMapPopup>(PopupManager->RegisterPopup(EPopupType::WorldMap, WorldMapPopupClass, FVector2D(460.0f, 90.0f), FVector2D(1000.0f, 900.0f), true));
+		if (WorldMapPopup)
+		{
+			AMinimapBounds* MapBoundary = Cast<AMinimapBounds>(UGameplayStatics::GetActorOfClass(GetWorld(), AMinimapBounds::StaticClass()));
+
+			UTexture2D* WorldMapTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Minimap/Minimap.Minimap"));
+
+			if (MapBoundary && WorldMapTexture)
+			{
+				WorldMapPopup->SetWorldMap(MapBoundary, player, WorldMapTexture);
+			}
+		}
 	}
 
 	if (CharacterInfoPopupClass)

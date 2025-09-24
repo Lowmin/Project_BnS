@@ -6,12 +6,66 @@
 #include "Popup.h"
 #include "WorldMapPopup.generated.h"
 
-/**
- * 
- */
+class UImage;
+class UOverlay;
+class UMaterialInterface;
+class UMaterialInstanceDynamic;
+class AMinimapBounds;
+class AMyPlayer;
+
 UCLASS()
 class PROJECT_BNS_API UWorldMapPopup : public UPopup
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetWorldMap(AMinimapBounds* InBounds, AMyPlayer* InPlayer, UTexture2D* InWorldMapTex);
+
+	virtual void NativeConstruct() override;
+	//
+	virtual void SetVisiblePopup(bool isVisible) override;
+
+protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> MapImage = nullptr;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UOverlay> MarkerLayer = nullptr;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> PlayerIcon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Map")
+	TObjectPtr<UMaterialInterface> MapMaterial = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Map", meta = (ClampMin = "1.0", UIMin = "1.0", UIMax = "8.0"))
+	float Zoom = 1.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float MinZoom = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float MaxZoom = 6.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Map")
+	bool IsFlipV = true;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> MapMID = nullptr;
+	UPROPERTY()
+	TWeakObjectPtr<AMinimapBounds> Bounds;
+	UPROPERTY()
+	TWeakObjectPtr<AMyPlayer> MyPlayer;
+	UPROPERTY()
+	TObjectPtr<UTexture2D> WorldMapTex = nullptr;
+
+	FVector2D MapWorldOrigin;
+	FVector2D MapWorldSize;
+
+	FTimerHandle UpdateTimer;
+
+protected:
+	FVector2D WorldToUV(const FVector& World) const;
+	void SetMapAndMarkers();
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeo, const FPointerEvent& InMouseEvent) override;
+	void ApplyMapParametersToMaterial();
 };
