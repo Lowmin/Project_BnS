@@ -7,7 +7,7 @@
 #include "BuffData.h"
 #include "Buff.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, FBuffData);
+DECLARE_MULTICAST_DELEGATE_OneParam(FBuffSetupDele, const FBuffData&);
 
 
 /**
