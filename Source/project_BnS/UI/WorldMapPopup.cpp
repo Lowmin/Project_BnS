@@ -2,6 +2,7 @@
 
 #include "WorldMapPopup.h"
 #include "Components/Image.h"
+#include "Components/Overlay.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -17,7 +18,13 @@ void UWorldMapPopup::SetWorldMap(AMinimapBounds* InBounds, AMyPlayer* InPlayer, 
 
 	if (Bounds.IsValid())
 	{
-		Bounds->GetMapBounds(MapWorldOrigin, MapWorldSize);
+		BoundsTransform = Bounds->GetActorTransform();
+
+		if (const UBoxComponent* Box = Bounds->FindComponentByClass<UBoxComponent>())
+		{
+			const FVector Extent = Box->GetScaledBoxExtent();
+			BoundsHalf = FVector2D(Extent.X, Extent.Y);
+		}
 	}
 }
 
@@ -27,85 +34,48 @@ void UWorldMapPopup::NativeConstruct()
 
 	if (MapImage && MapMaterial)
 	{
-		MapMID = UMaterialInstanceDynamic::Create(MapMaterial, this);
-		MapImage->SetBrushFromMaterial(MapMID);
+		MapMaterialInst = UMaterialInstanceDynamic::Create(MapMaterial, this);
+		MapImage->SetBrushFromMaterial(MapMaterialInst);
 
-		if (MapMID && WorldMapTex)
+		if (MapMaterialInst && WorldMapTex)
 		{
-			MapMID->SetTextureParameterValue(FName("Texture"), WorldMapTex);
-		}
-		ApplyMapParametersToMaterial();
-	}
-}
-
-void UWorldMapPopup::SetVisiblePopup(bool isVisible)
-{
-	Super::SetVisiblePopup(isVisible);
-
-	if (isVisible)
-	{
-		SetMapAndMarkers();
-
-		if (GetWorld())
-		{
-			GetWorld()->GetTimerManager().SetTimer(UpdateTimer, this, &UWorldMapPopup::SetMapAndMarkers, 0.1f, true);
+			MapMaterialInst->SetTextureParameterValue(FName("Texture"), WorldMapTex);
 		}
 	}
-	else
+
+	if (GetWorld())
 	{
-		if (GetWorld())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(UpdateTimer);
-		}
+		GetWorld()->GetTimerManager().SetTimer(UpdateTimer, this, &UWorldMapPopup::UpdatePlayerMarker, 0.1f, true);
 	}
 }
 
 FVector2D UWorldMapPopup::WorldToUV(const FVector& World) const
 {
-	if (MapWorldSize.X <= KINDA_SMALL_NUMBER || MapWorldSize.Y <= KINDA_SMALL_NUMBER)
+	if (!Bounds.IsValid() || BoundsHalf.X <= KINDA_SMALL_NUMBER || BoundsHalf.Y <= KINDA_SMALL_NUMBER)
 	{
 		return FVector2D(0.5f, 0.5f);
 	}
 
-	const float RelativeX = World.X - MapWorldOrigin.X;
-	const float RelativeY = World.Y - MapWorldOrigin.Y;
+	const FVector Local = BoundsTransform.InverseTransformPosition(World);
 
-	float U = 1.0f - (RelativeX / MapWorldSize.X);
-	float V = 1.0f - (RelativeY / MapWorldSize.Y);
+	float U = (Local.X / (BoundsHalf.X * 2.f)) + 0.5f;
+	float V = (Local.Y / (BoundsHalf.Y * 2.f)) + 0.5f;
+	if (IsFlipV) V = 1.f - V;
 
-	U = FMath::Clamp(U, 0.0f, 1.0f);
-	V = FMath::Clamp(V, 0.0f, 1.0f);
-
+	U = FMath::Clamp(U, 0.f, 1.f);
+	V = FMath::Clamp(V, 0.f, 1.f);
 	return FVector2D(U, V);
 }
 
-void UWorldMapPopup::SetMapAndMarkers()
+void UWorldMapPopup::UpdatePlayerMarker()
 {
-	if (!MyPlayer.IsValid() || !PlayerIcon) return;
+	if (!PlayerIcon || !MyPlayer.IsValid() || !MapImage) return;
 
-	const float yaw = MyPlayer->GetActorRotation().Yaw - 90.f;
-	PlayerIcon->SetRenderTransformAngle(yaw);
+	const FVector2D PlayerUV = WorldToUV(MyPlayer->GetActorLocation());
+	const FVector2D MapWidgetSize = MapImage->GetCachedGeometry().GetLocalSize();
+	const FVector2D IconAbsolutePosition = PlayerUV * MapWidgetSize;
 
-	ApplyMapParametersToMaterial();
-}
-
-FReply UWorldMapPopup::NativeOnMouseWheel(const FGeometry& InGeo, const FPointerEvent& InMouseEvent)
-{
-	const float delta = InMouseEvent.GetWheelDelta();
-	Zoom = FMath::Clamp(Zoom + delta * 0.25f, MinZoom, MaxZoom);
-
-	ApplyMapParametersToMaterial();
-
-	return FReply::Handled();
-}
-
-void UWorldMapPopup::ApplyMapParametersToMaterial()
-{
-	if (MapMID && MyPlayer.IsValid())
-	{
-		MapMID->SetScalarParameterValue(FName("Zoom"), Zoom);
-
-		const FVector2D PlayerUV = WorldToUV(MyPlayer->GetActorLocation());
-		MapMID->SetVectorParameterValue(FName("PlayerPositionUV"), FLinearColor(PlayerUV.X, PlayerUV.Y, 0.f));
-	}
+	FWidgetTransform Transform = PlayerIcon->GetRenderTransform();
+	Transform.Translation = IconAbsolutePosition + IconPositionOffset;
+	PlayerIcon->SetRenderTransform(Transform);
 }

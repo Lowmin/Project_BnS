@@ -172,7 +172,7 @@ void ABnsController::OnPossess(APawn* pawn)
 		{
 			AMinimapBounds* MapBoundary = Cast<AMinimapBounds>(UGameplayStatics::GetActorOfClass(GetWorld(), AMinimapBounds::StaticClass()));
 
-			UTexture2D* WorldMapTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Minimap/Minimap.Minimap"));
+			UTexture2D* WorldMapTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Minimap/WorldMap.WorldMap"));
 
 			if (MapBoundary && WorldMapTexture)
 			{

@@ -23,34 +23,27 @@ public:
 	void SetWorldMap(AMinimapBounds* InBounds, AMyPlayer* InPlayer, UTexture2D* InWorldMapTex);
 
 	virtual void NativeConstruct() override;
-	//
-	virtual void SetVisiblePopup(bool isVisible) override;
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> MapImage = nullptr;
+	TObjectPtr<UImage>   MapImage = nullptr;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UOverlay> MarkerLayer = nullptr;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UImage> PlayerIcon = nullptr;
+	TObjectPtr<UImage>   PlayerIcon = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Map")
 	TObjectPtr<UMaterialInterface> MapMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Map", meta = (ClampMin = "1.0", UIMin = "1.0", UIMax = "8.0"))
-	float Zoom = 1.5f;
-
-	UPROPERTY(EditAnywhere, Category = "Map")
-	float MinZoom = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Map")
-	float MaxZoom = 6.0f;
-
 	UPROPERTY(EditAnywhere, Category = "Map")
 	bool IsFlipV = true;
 
+	UPROPERTY(EditAnywhere, Category = "Map")
+	FVector2D IconPositionOffset = FVector2D::ZeroVector;
+
+private:
 	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> MapMID = nullptr;
+	TObjectPtr<UMaterialInstanceDynamic> MapMaterialInst = nullptr;
 	UPROPERTY()
 	TWeakObjectPtr<AMinimapBounds> Bounds;
 	UPROPERTY()
@@ -58,14 +51,12 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UTexture2D> WorldMapTex = nullptr;
 
-	FVector2D MapWorldOrigin;
-	FVector2D MapWorldSize;
+	FTransform BoundsTransform;
+	FVector2D  BoundsHalf;
 
 	FTimerHandle UpdateTimer;
 
-protected:
 	FVector2D WorldToUV(const FVector& World) const;
-	void SetMapAndMarkers();
-	virtual FReply NativeOnMouseWheel(const FGeometry& InGeo, const FPointerEvent& InMouseEvent) override;
-	void ApplyMapParametersToMaterial();
+
+	void UpdatePlayerMarker();
 };
