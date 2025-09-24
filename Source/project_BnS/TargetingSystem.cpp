@@ -47,7 +47,7 @@ void ATargetingSystem::Tick(float DeltaTime)
 	ValidateTarget();
 
 	// 타겟 선정 
-	if (Target == nullptr && TargetAbles.Num() > 0)
+	if (TargetAbles.Num() > 0)
 	{
 		SetCurTarget();
 	}
@@ -132,6 +132,7 @@ void ATargetingSystem::SetCurTarget()
 	FVector forward = GetActorForwardVector();
 
 	float distance = std::numeric_limits<float>::max();
+	int32 TargetScore = 0;
 
 	for (AActor* targetAble : TargetAbles)
 	{
@@ -144,23 +145,30 @@ void ATargetingSystem::SetCurTarget()
 
 		float dot = FVector::DotProduct(forward, dir);
 		float distSqrt = FVector::DistSquared(pos, targetPos);
+		int32 score = (dot * 1000000) + (1000000 - distSqrt);
 
 		// 45도 이내, 가장 짧은 거리 타겟 설정 
-		if (dot > 0.5f && distSqrt < distance)
+		if (score > 500000 && score > TargetScore)//(dot > 0.5f && distSqrt < distance)
 		{
 			// 대상이 가려져있지 않은경우 등록 
 			if (!IsTargetBlocked(targetPos))
 			{
-				distance = distSqrt;
 				ACharacterBase* characterBase = Cast<ACharacterBase>(targetAble);
 				if (characterBase != nullptr)
 				{
+					bool bIsChangeTarget = Target != targetAble;
+					distance = distSqrt;
+					TargetScore = score;
+
 					Target = targetAble;
 					ITargetAble::Execute_OnTargeted(Target, true);
 
-					if (OnTargetChanged.IsBound())
+					if(bIsChangeTarget)
 					{
-						OnTargetChanged.Broadcast(characterBase);
+						if (OnTargetChanged.IsBound())
+						{
+							OnTargetChanged.Broadcast(characterBase);
+						}
 					}
 				}
 			}
