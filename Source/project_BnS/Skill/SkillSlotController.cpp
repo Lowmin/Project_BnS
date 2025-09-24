@@ -122,6 +122,7 @@ void USkillSlotController::PlayCooldownShow(ESkillSlot SkillSlot, int32 SkillID,
 
 void USkillSlotController::StopCooldownShow(ESkillSlot SkillSlot)
 {
+	OnCooldownCompleted.Broadcast(SkillSlot);
 	if (UWorld* World = GetWorldSafe())
 	{
 		if (FTimerHandle* Handle = ShowTickTimer.Find(SkillSlot))

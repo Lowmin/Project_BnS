@@ -16,6 +16,7 @@ class UWorld;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSlotIconChanged, ESkillSlot, SkillSlot, UTexture2D*, NewIcon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSlotPairChanged, ESkillSlot, SkillSlot, UTexture2D*, CurIcon, UTexture2D*, NextIcon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSlotCooldownTick, ESkillSlot, SkillSlot, float, Remain, float, Total, ECooldownUIType, Type);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCooldownCompleted, ESkillSlot, SkillSlot);
 
 UCLASS()
 class PROJECT_BNS_API USkillSlotController : public UObject
@@ -55,6 +56,8 @@ public:
 	FOnSlotPairChanged OnSlotPairChanged;
 	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
 	FOnSlotCooldownTick  OnSlotCooldownTick;
+	UPROPERTY(BlueprintAssignable, Category = "Skill UI")
+	FOnCooldownCompleted OnCooldownCompleted;
 
 private:
 	const FSkillDataRow* FindRowByID(int32 SkillID) const;

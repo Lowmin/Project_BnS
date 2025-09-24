@@ -102,6 +102,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Skill Debug")
 	int32 GetCurrentSkillID(ESkillSlot Slot) const;
 
+	UFUNCTION()
+	void OnTargetUpdated(ACharacterBase* NewTarget);
 
 	// Enemy 보조
 	UFUNCTION(BlueprintCallable, Category = "Skill Enemy")
@@ -143,6 +145,8 @@ private:
 	void HandleSlotPairChanged(ESkillSlot Slot, UTexture2D* CurIcon, UTexture2D* NextIcon);
 	UFUNCTION()
 	void HandleSlotCooldownTick(ESkillSlot Slot, float Remain, float Total, ECooldownUIType Type);
+	UFUNCTION()
+	void HandleCooldownCompleted(ESkillSlot Slot);
 
 	// ==== 타겟 상태변화 ====
 	UFUNCTION()

@@ -34,6 +34,7 @@ void USkillSystemComponent::BeginPlay()
 		SlotPanel->OnSlotIconChanged.AddDynamic(this, &USkillSystemComponent::HandleSlotIconChanged);
 		SlotPanel->OnSlotPairChanged.AddDynamic(this, &USkillSystemComponent::HandleSlotPairChanged);
 		SlotPanel->OnSlotCooldownTick.AddDynamic(this, &USkillSystemComponent::HandleSlotCooldownTick);
+		SlotPanel->OnCooldownCompleted.AddDynamic(this, &USkillSystemComponent::HandleCooldownCompleted);
 
 		// 에디터(MyPlayer)에서 세팅(BaseSkillConfig); 1타 슬롯에 장착
 		for (const auto& BaseAttack : BaseSkillConfig)
@@ -107,6 +108,7 @@ void USkillSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 				UI_OnSkillUsable.Broadcast(SlotToIndex(Slot), bIsCurrentlyUsable);
 				bLastUsability = bIsCurrentlyUsable;
 			}
+			RefreshCooldownViewForSlot(Slot, CurrentSkillID);
 		}
 	}
 
@@ -296,6 +298,7 @@ bool USkillSystemComponent::CheckActivationConditions(const FSkillDataRow& Row, 
 		if (Row.NeedTargetCC.Num() > 0)
 		{
 			if (!Target) return false;
+			if (!IsValid(Target)) return false;
 
 			if (const UCrowdControlComponent* TargetCC = Target->FindComponentByClass<UCrowdControlComponent>())
 			{
@@ -417,6 +420,10 @@ bool USkillSystemComponent::CanUseSkill(const FSkillDataRow& Row, AActor* Target
 		if (!Row.NeedTargetCC.Contains(TargetCC->GetCrowdControlType())) return false;
 	}
 
+	if (Row.MaxRange > 0.f && !IsValid(Target))
+	{
+		return false;
+	}
 	// 스킬 사용 유효 사거리
 	if (Row.MaxRange > 0.f && Target)
 	{
@@ -613,6 +620,10 @@ int32 USkillSystemComponent::GetCurrentSkillID(ESkillSlot Slot) const
 	return SlotPanel ? SlotPanel->GetCurrentSkillID(Slot) : -1;
 }
 
+void USkillSystemComponent::OnTargetUpdated(ACharacterBase* NewTarget)
+{
+}
+
 int32 USkillSystemComponent::SlotToIndex(ESkillSlot Slot)
 {
 	switch (Slot)
@@ -668,6 +679,27 @@ void USkillSystemComponent::HandleSlotCooldownTick(ESkillSlot Slot, float Remain
 	}
 
 	UI_OnCooldownTick.Broadcast(SlotToIndex(Slot), Remain, Total, isVisibleNum);
+}
+
+void USkillSystemComponent::HandleCooldownCompleted(ESkillSlot Slot)
+{
+	AActor* CurrentTarget = nullptr;
+	if (ATargetingSystem* OwnerAsTargetingSystem = Cast<ATargetingSystem>(GetOwner()))
+	{
+		CurrentTarget = OwnerAsTargetingSystem->GetTarget();
+	}
+
+	const int32 SkillID = SlotPanel ? SlotPanel->GetCurrentSkillID(Slot) : -1;
+
+	bool bIsUsableNow = false;
+	if (SkillID > 0)
+	{
+		const FSkillDataRow* Row = FindRowByID(SkillID);
+		bIsUsableNow = Row && CanUseSkill(*Row, CurrentTarget, false);
+	}
+
+	UI_OnSkillUsable.Broadcast(SlotToIndex(Slot), bIsUsableNow);
+	LastSkillUsable.FindOrAdd(Slot) = bIsUsableNow;
 }
 
 void USkillSystemComponent::OnTargetCCStateChange()
