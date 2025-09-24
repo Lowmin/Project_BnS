@@ -221,7 +221,7 @@ int32 UInventoryComponent::FindItemSlotIndex(int32 itemId) const
 			continue;
 		}
 
-		if (ItemList[i]->Id == itemId)
+		if (ItemList[i]->Id == itemId && ItemList[i]->IsStackAble)
 			return i;
 	}
 
@@ -356,7 +356,11 @@ void UInventoryComponent::AddItem(int32 id, int32 count)
 	if (idx < 0)
 		return;
 
-	UItem* item = CreateItem(id);
+	UItem* item = ItemList[idx];
+	if(item == nullptr)
+	{
+		item = CreateItem(id);
+	}
 	if (item == nullptr)
 		return;
 
