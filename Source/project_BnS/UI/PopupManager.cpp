@@ -22,8 +22,7 @@ UPopup* UPopupManager::RegisterPopup(EPopupType PopupType, TSubclassOf<UPopup> P
 	{
 		NewPopup->SetPopupDesireInfo(Position, Size, bIsSetContentSize);
 
-		// NewPopup->AddToViewport();
-		auto slot = Root->AddChildToCanvas(NewPopup);
+		UCanvasPanelSlot* slot = Root->AddChildToCanvas(NewPopup);
 		slot->SetPosition(NewPopup->GetPopupPosition());
 		slot->SetSize(NewPopup->GetPopupSize());
 		slot->SetAutoSize(NewPopup->IsSetContentSize());
@@ -51,8 +50,7 @@ void UPopupManager::TogglePopup(EPopupType PopupType)
 	{
 		VisiblePopupStack.AddUnique(PopupToToggle);
 		PopupToToggle->RemoveFromParent();
-		//PopupToToggle->AddToViewport(++CurrentTopZOrder);
-		auto slot = Root->AddChildToCanvas(PopupToToggle);
+		UCanvasPanelSlot* slot = Root->AddChildToCanvas(PopupToToggle);
 		slot->SetPosition(PopupToToggle->GetPopupPosition());
 		slot->SetSize(PopupToToggle->GetPopupSize());
 		slot->SetAutoSize(PopupToToggle->IsSetContentSize());

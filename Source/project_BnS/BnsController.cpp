@@ -121,7 +121,6 @@ void ABnsController::OnPossess(APawn* pawn)
 		PopupManager->AddToViewport();
 		PopupManager->Initialize(this);
 	}
-	// PopupManager = NewObject<UPopupManager>(this, TEXT("PopupManager"));
 
 	MyPlayer->OnMovementInput.BindUObject(this, &ABnsController::OnMovementInputReceived);
 	MyPlayer->IsUIVisibleDelegate.BindUObject(this, &ABnsController::IsPopupVisible);
