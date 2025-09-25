@@ -64,7 +64,7 @@ void ABossEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GEngine && CrowdControl)
+	/*if (GEngine && CrowdControl)
 	{
 		FString StateString = UEnum::GetValueAsString(CrowdControl->GetCrowdControlType());
 
@@ -78,5 +78,5 @@ void ABossEnemy::Tick(float DeltaTime)
 		);
 
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, DebugString);
-	}
+	}*/
 }

@@ -17,6 +17,9 @@ Content/ParagonAurora
 Content/ParagonGrux
 Content/ParagonZinx
 Content/A_Surface_Footstep
+Content/Essential_Foosteps_SK
+Content/FantasyRPGBGMV1
+Content/Game_Item
 
 # Precompiled Headers
 *.gch
@@ -104,3 +107,4 @@ Plugins/**/Intermediate/*
 .idea
 
 /Content/mountainTemple/*
+Content/LV_Bns.umap

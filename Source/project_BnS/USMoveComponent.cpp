@@ -113,11 +113,11 @@ void USMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 	TickMeshTilt(DeltaTime);
 
-	if (GEngine)
+	/*if (GEngine)
 	{
 		FString StateString = UEnum::GetValueAsString(CurrentMoveState);
 		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("MoveState: %s"), *StateString));
-	}
+	}*/
 
 	UsedStamina(DeltaTime);
 }

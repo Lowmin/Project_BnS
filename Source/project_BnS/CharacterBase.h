@@ -9,6 +9,7 @@
 
 enum class ECrowdControlType : uint8;
 class USkillSystemComponent;
+class USoundBase;
 
 UCLASS()
 class PROJECT_BNS_API ACharacterBase : public ACharacter
@@ -36,6 +37,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
 	TObjectPtr<class UStatComponent> Status = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
+	TObjectPtr<class USoundBase> HitSound = nullptr;
 
 public:
 	UStatComponent* GetStatusComponent() const;

@@ -12,6 +12,10 @@
 
 #include "Buff/BuffComponent.h"
 
+#include "Sound/SoundBase.h"
+
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
@@ -56,6 +60,11 @@ bool ACharacterBase::IsDead() const
 void ACharacterBase::OnDamaged(int32 damage)
 {
 	Status->SetCurHp(Status->GetCurHp() - damage);
+
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+	}
 }
 
 void ACharacterBase::Die()
