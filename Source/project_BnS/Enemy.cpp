@@ -78,6 +78,7 @@ void AEnemy::BeginPlay()
 			HitReactMontage = Data->HitReactMontage;
 
 			Cast<UNameplate>(Nameplate->GetWidget())->SetNameplate(Data->D_EnemyName);
+			Status->SetCharacterName(Data->D_EnemyName);
 			Status->SetMaxHp(Data->D_MaxHP);
 			Status->SetCurHp(Data->D_MaxHP);
 			Status->SetLevel(Data->D_Level);
