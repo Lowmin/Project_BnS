@@ -131,7 +131,6 @@ void ATargetingSystem::SetCurTarget()
 	FVector pos = GetActorLocation();
 	FVector forward = GetActorForwardVector();
 
-	float distance = std::numeric_limits<float>::max();
 	int32 TargetScore = 0;
 
 	for (AActor* targetAble : TargetAbles)
@@ -147,8 +146,8 @@ void ATargetingSystem::SetCurTarget()
 		float distSqrt = FVector::DistSquared(pos, targetPos);
 		int32 score = (dot * 1000000) + (1000000 - distSqrt);
 
-		// 45도 이내, 가장 짧은 거리 타겟 설정 
-		if (score > 500000 && score > TargetScore)//(dot > 0.5f && distSqrt < distance)
+		// 45도 이내 타겟 설정 
+		if (score > 500000 && score > TargetScore)
 		{
 			// 대상이 가려져있지 않은경우 등록 
 			if (!IsTargetBlocked(targetPos))
@@ -157,7 +156,6 @@ void ATargetingSystem::SetCurTarget()
 				if (characterBase != nullptr)
 				{
 					bool bIsChangeTarget = Target != targetAble;
-					distance = distSqrt;
 					TargetScore = score;
 
 					Target = targetAble;
